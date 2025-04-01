@@ -1,9 +1,9 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todos los profesores
 const getTeachers = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM teachers');
+    const [rows] = await sequelize.query('SELECT * FROM teachers');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los profesores' });
@@ -14,7 +14,7 @@ const getTeachers = async (req, res) => {
 const getTeacherById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query('SELECT * FROM teachers WHERE idteacher = ?', [id]);
+    const [rows] = await sequelize.query('SELECT * FROM teachers WHERE idteacher = ?', [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Profesor no encontrado' });
     }
@@ -28,7 +28,7 @@ const getTeacherById = async (req, res) => {
 const createTeacher = async (req, res) => {
   try {
     const { name, phone, email, status } = req.body;
-    const [result] = await db.query('INSERT INTO teachers (name, phone, email, status) VALUES (?, ?, ?, ?)', [name, phone, email, status]);
+    const [result] = await sequelize.query('INSERT INTO teachers (name, phone, email, status) VALUES (?, ?, ?, ?)', [name, phone, email, status]);
     res.status(201).json({ id: result.insertId, name, phone, email, status });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear el profesor' });
@@ -40,7 +40,7 @@ const updateTeacher = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, phone, email, status } = req.body;
-    const [result] = await db.query('UPDATE teachers SET name = ?, phone = ?, email = ?, status = ? WHERE idteacher = ?', [name, phone, email, status, id]);
+    const [result] = await sequelize.query('UPDATE teachers SET name = ?, phone = ?, email = ?, status = ? WHERE idteacher = ?', [name, phone, email, status, id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Profesor no encontrado' });
     }
@@ -54,7 +54,7 @@ const updateTeacher = async (req, res) => {
 const deleteTeacher = async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM teachers WHERE idteacher = ?', [id]);
+    const [result] = await sequelize.query('DELETE FROM teachers WHERE idteacher = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Profesor no encontrado' });
     }

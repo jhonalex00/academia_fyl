@@ -1,9 +1,9 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todos los contactos
 const getContacts = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM contacts');
+    const [rows] = await sequelize.query('SELECT * FROM contacts');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los contactos' });
@@ -14,7 +14,7 @@ const getContacts = async (req, res) => {
 const getContactById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query('SELECT * FROM contacts WHERE idcontact = ?', [id]);
+    const [rows] = await sequelize.query('SELECT * FROM contacts WHERE idcontact = ?', [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Contacto no encontrado' });
     }
@@ -28,7 +28,7 @@ const getContactById = async (req, res) => {
 const createContact = async (req, res) => {
   try {
     const { phone, name } = req.body;
-    const [result] = await db.query('INSERT INTO contacts (phone, name) VALUES (?, ?)', [phone, name]);
+    const [result] = await sequelize.query('INSERT INTO contacts (phone, name) VALUES (?, ?)', [phone, name]);
     res.status(201).json({ id: result.insertId, phone, name });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear el contacto' });
@@ -40,7 +40,7 @@ const updateContact = async (req, res) => {
   try {
     const { id } = req.params;
     const { phone, name } = req.body;
-    const [result] = await db.query('UPDATE contacts SET phone = ?, name = ? WHERE idcontact = ?', [phone, name, id]);
+    const [result] = await sequelize.query('UPDATE contacts SET phone = ?, name = ? WHERE idcontact = ?', [phone, name, id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Contacto no encontrado' });
     }
@@ -54,7 +54,7 @@ const updateContact = async (req, res) => {
 const deleteContact = async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM contacts WHERE idcontact = ?', [id]);
+    const [result] = await sequelize.query('DELETE FROM contacts WHERE idcontact = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Contacto no encontrado' });
     }

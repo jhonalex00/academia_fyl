@@ -1,9 +1,9 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todas las asignaturas
 const getSubjects = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM subjects');
+    const [rows] = await sequelize.query('SELECT * FROM subjects');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener las asignaturas' });
@@ -14,7 +14,7 @@ const getSubjects = async (req, res) => {
 const getSubjectById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query('SELECT * FROM subjects WHERE idsubject = ?', [id]);
+    const [rows] = await sequelize.query('SELECT * FROM subjects WHERE idsubject = ?', [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
@@ -28,7 +28,7 @@ const getSubjectById = async (req, res) => {
 const createSubject = async (req, res) => {
   try {
     const { year, cycle } = req.body;
-    const [result] = await db.query('INSERT INTO subjects (year, cycle) VALUES (?, ?)', [year, cycle]);
+    const [result] = await sequelize.query('INSERT INTO subjects (year, cycle) VALUES (?, ?)', [year, cycle]);
     res.status(201).json({ id: result.insertId, year, cycle });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear la asignatura' });
@@ -40,7 +40,7 @@ const updateSubject = async (req, res) => {
   try {
     const { id } = req.params;
     const { year, cycle } = req.body;
-    const [result] = await db.query('UPDATE subjects SET year = ?, cycle = ? WHERE idsubject = ?', [year, cycle, id]);
+    const [result] = await sequelize.query('UPDATE subjects SET year = ?, cycle = ? WHERE idsubject = ?', [year, cycle, id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
@@ -54,7 +54,7 @@ const updateSubject = async (req, res) => {
 const deleteSubject = async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM subjects WHERE idsubject = ?', [id]);
+    const [result] = await sequelize.query('DELETE FROM subjects WHERE idsubject = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Asignatura no encontrada' });
     }

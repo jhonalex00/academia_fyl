@@ -1,11 +1,12 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todas las academias
 const getAcademies = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM academies');
+    const [rows] = await sequelize.query('SELECT * FROM academies');
     res.status(200).json(rows);
   } catch (error) {
+    console.error('Error al obtener las academias:', error); // Agregar log
     res.status(500).json({ error: 'Error al obtener las academias' });
   }
 };
@@ -14,7 +15,10 @@ const getAcademies = async (req, res) => {
 const getAcademyById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query('SELECT * FROM academies WHERE idacademy = ?', [id]);
+    const [rows] = await sequelize.query(
+      'SELECT * FROM academies WHERE idacademy = ?',
+      { replacements: [id], type: sequelize.QueryTypes.SELECT }
+    );    
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Academia no encontrada' });
     }
@@ -28,7 +32,7 @@ const getAcademyById = async (req, res) => {
 const createAcademy = async (req, res) => {
   try {
     const { name, adress, phone } = req.body;
-    const [result] = await db.query('INSERT INTO academies (name, adress, phone) VALUES (?, ?, ?)', [name, adress, phone]);
+    const [result] = await sequelize.query('INSERT INTO academies (name, adress, phone) VALUES (?, ?, ?)', [name, adress, phone]);
     res.status(201).json({ id: result.insertId, name, adress, phone });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear la academia' });
@@ -40,7 +44,7 @@ const updateAcademy = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, adress, phone } = req.body;
-    const [result] = await db.query('UPDATE academies SET name = ?, adress = ?, phone = ? WHERE idacademy = ?', [name, adress, phone, id]);
+    const [result] = await sequelize.query('UPDATE academies SET name = ?, adress = ?, phone = ? WHERE idacademy = ?', [name, adress, phone, id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Academia no encontrada' });
     }
@@ -54,7 +58,7 @@ const updateAcademy = async (req, res) => {
 const deleteAcademy = async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM academies WHERE idacademy = ?', [id]);
+    const [result] = await sequelize.query('DELETE FROM academies WHERE idacademy = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Academia no encontrada' });
     }

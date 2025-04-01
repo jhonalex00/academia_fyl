@@ -1,9 +1,9 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todos los horarios
 const getSchedules = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM schedules');
+    const [rows] = await sequelize.query('SELECT * FROM schedules');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los horarios' });
@@ -14,7 +14,7 @@ const getSchedules = async (req, res) => {
 const getScheduleById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query('SELECT * FROM schedules WHERE idschedule = ?', [id]);
+    const [rows] = await sequelize.query('SELECT * FROM schedules WHERE idschedule = ?', [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Horario no encontrado' });
     }
@@ -28,7 +28,7 @@ const getScheduleById = async (req, res) => {
 const createSchedule = async (req, res) => {
   try {
     const { date, weekDay, startHour, finishHour } = req.body;
-    const [result] = await db.query('INSERT INTO schedules (date, weekDay, startHour, finishHour) VALUES (?, ?, ?, ?)', [date, weekDay, startHour, finishHour]);
+    const [result] = await sequelize.query('INSERT INTO schedules (date, weekDay, startHour, finishHour) VALUES (?, ?, ?, ?)', [date, weekDay, startHour, finishHour]);
     res.status(201).json({ id: result.insertId, date, weekDay, startHour, finishHour });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear el horario' });
@@ -40,7 +40,7 @@ const updateSchedule = async (req, res) => {
   try {
     const { id } = req.params;
     const { date, weekDay, startHour, finishHour } = req.body;
-    const [result] = await db.query('UPDATE schedules SET date = ?, weekDay = ?, startHour = ?, finishHour = ? WHERE idschedule = ?', [date, weekDay, startHour, finishHour, id]);
+    const [result] = await sequelize.query('UPDATE schedules SET date = ?, weekDay = ?, startHour = ?, finishHour = ? WHERE idschedule = ?', [date, weekDay, startHour, finishHour, id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Horario no encontrado' });
     }
@@ -54,7 +54,7 @@ const updateSchedule = async (req, res) => {
 const deleteSchedule = async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM schedules WHERE idschedule = ?', [id]);
+    const [result] = await sequelize.query('DELETE FROM schedules WHERE idschedule = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Horario no encontrado' });
     }

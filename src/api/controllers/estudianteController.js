@@ -1,9 +1,9 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todos los estudiantes
 const getStudents = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM students');
+    const [rows] = await sequelize.query('SELECT * FROM students');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los estudiantes' });
@@ -14,7 +14,7 @@ const getStudents = async (req, res) => {
 const getStudentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query('SELECT * FROM students WHERE idstudent = ?', [id]);
+    const [rows] = await sequelize.query('SELECT * FROM students WHERE idstudent = ?', [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Estudiante no encontrado' });
     }
@@ -28,7 +28,7 @@ const getStudentById = async (req, res) => {
 const createStudent = async (req, res) => {
   try {
     const { name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment } = req.body;
-    const [result] = await db.query(
+    const [result] = await sequelize.query(
       'INSERT INTO students (name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment]
     );
@@ -43,7 +43,7 @@ const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment } = req.body;
-    const [result] = await db.query(
+    const [result] = await sequelize.query(
       'UPDATE students SET name = ?, surname = ?, dni = ?, birthDate = ?, status = ?, phone = ?, email = ?, divorced = ?, knowUs = ?, repeat = ?, yearRepeat = ?, disorder = ?, allergy = ?, mobilityProblem = ?, bullying = ?, observation = ?, idacademy = ?, idenrolment = ? WHERE idstudent = ?',
       [name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment, id]
     );
@@ -60,7 +60,7 @@ const updateStudent = async (req, res) => {
 const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM students WHERE idstudent = ?', [id]);
+    const [result] = await sequelize.query('DELETE FROM students WHERE idstudent = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Estudiante no encontrado' });
     }

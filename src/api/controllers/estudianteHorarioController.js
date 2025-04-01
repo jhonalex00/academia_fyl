@@ -1,9 +1,9 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todos los horarios de estudiantes
 const getStudentSchedules = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM students_schedules');
+    const [rows] = await sequelize.query('SELECT * FROM students_schedules');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los horarios de estudiantes' });
@@ -14,7 +14,7 @@ const getStudentSchedules = async (req, res) => {
 const createStudentSchedule = async (req, res) => {
   try {
     const { idstudent, idschedule, status } = req.body;
-    const [result] = await db.query('INSERT INTO students_schedules (idstudent, idschedule, status) VALUES (?, ?, ?)', [idstudent, idschedule, status]);
+    const [result] = await sequelize.query('INSERT INTO students_schedules (idstudent, idschedule, status) VALUES (?, ?, ?)', [idstudent, idschedule, status]);
     res.status(201).json({ idstudent, idschedule, status });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear la relación estudiante-horario' });
@@ -25,7 +25,7 @@ const createStudentSchedule = async (req, res) => {
 const deleteStudentSchedule = async (req, res) => {
   try {
     const { idstudent, idschedule } = req.params;
-    const [result] = await db.query('DELETE FROM students_schedules WHERE idstudent = ? AND idschedule = ?', [idstudent, idschedule]);
+    const [result] = await sequelize.query('DELETE FROM students_schedules WHERE idstudent = ? AND idschedule = ?', [idstudent, idschedule]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Relación estudiante-horario no encontrada' });
     }

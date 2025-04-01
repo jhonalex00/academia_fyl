@@ -1,9 +1,9 @@
-const db = require('../../db/config');
+const { sequelize } = require('../../db/config');
 
 // Obtener todas las inscripciones
 const getEnrolments = async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM enrolment');
+    const [rows] = await sequelize.query('SELECT * FROM enrolment');
     res.status(200).json(rows);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener las inscripciones' });
@@ -14,7 +14,7 @@ const getEnrolments = async (req, res) => {
 const getEnrolmentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query('SELECT * FROM enrolment WHERE idenrolment = ?', [id]);
+    const [rows] = await sequelize.query('SELECT * FROM enrolment WHERE idenrolment = ?', [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Inscripción no encontrada' });
     }
@@ -28,7 +28,7 @@ const getEnrolmentById = async (req, res) => {
 const createEnrolment = async (req, res) => {
   try {
     const { enrolmentDate, year, school, mode, type, siblings, sibblingName, alone, confiscateMobile, classesApproach, pictures, socialMedia } = req.body;
-    const [result] = await db.query(
+    const [result] = await sequelize.query(
       'INSERT INTO enrolment (enrolmentDate, year, school, mode, type, siblings, sibblingName, alone, confiscateMobile, classesApproach, pictures, socialMedia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [enrolmentDate, year, school, mode, type, siblings, sibblingName, alone, confiscateMobile, classesApproach, pictures, socialMedia]
     );
@@ -43,7 +43,7 @@ const updateEnrolment = async (req, res) => {
   try {
     const { id } = req.params;
     const { enrolmentDate, year, school, mode, type, siblings, sibblingName, alone, confiscateMobile, classesApproach, pictures, socialMedia } = req.body;
-    const [result] = await db.query(
+    const [result] = await sequelize.query(
       'UPDATE enrolment SET enrolmentDate = ?, year = ?, school = ?, mode = ?, type = ?, siblings = ?, sibblingName = ?, alone = ?, confiscateMobile = ?, classesApproach = ?, pictures = ?, socialMedia = ? WHERE idenrolment = ?',
       [enrolmentDate, year, school, mode, type, siblings, sibblingName, alone, confiscateMobile, classesApproach, pictures, socialMedia, id]
     );
@@ -60,7 +60,7 @@ const updateEnrolment = async (req, res) => {
 const deleteEnrolment = async (req, res) => {
   try {
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM enrolment WHERE idenrolment = ?', [id]);
+    const [result] = await sequelize.query('DELETE FROM enrolment WHERE idenrolment = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Inscripción no encontrada' });
     }
