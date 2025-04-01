@@ -12,7 +12,7 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 // Puerto para el servidor
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001
 
 // Preparar la aplicación Next.js
 app.prepare()
