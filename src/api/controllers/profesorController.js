@@ -1,141 +1,73 @@
-const { Profesor, Mensaje } = require('../../models/index');
+const db = require('../../db/config');
 
 // Obtener todos los profesores
-const getProfesores = async (req, res) => {
+const getTeachers = async (req, res) => {
   try {
-    const profesores = await Profesor.findAll({
-      include: [{ model: Mensaje }]
-    });
-    
-    res.status(200).json({ 
-      success: true, 
-      data: profesores 
-    });
+    const [rows] = await db.query('SELECT * FROM teachers');
+    res.status(200).json(rows);
   } catch (error) {
-    console.error('Error al obtener profesores:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener profesores', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener los profesores' });
   }
 };
 
 // Obtener un profesor por ID
-const getProfesorById = async (req, res) => {
-  const { id } = req.params;
-  
+const getTeacherById = async (req, res) => {
   try {
-    const profesor = await Profesor.findByPk(id, {
-      include: [{ model: Mensaje }]
-    });
-    
-    if (!profesor) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Profesor no encontrado' 
-      });
+    const { id } = req.params;
+    const [rows] = await db.query('SELECT * FROM teachers WHERE idteacher = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Profesor no encontrado' });
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      data: profesor 
-    });
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.error('Error al obtener profesor:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener profesor', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener el profesor' });
   }
 };
 
 // Crear un nuevo profesor
-const createProfesor = async (req, res) => {
+const createTeacher = async (req, res) => {
   try {
-    const nuevoProfesor = await Profesor.create(req.body);
-    
-    res.status(201).json({ 
-      success: true, 
-      data: nuevoProfesor,
-      message: 'Profesor creado exitosamente' 
-    });
+    const { name, phone, email, status } = req.body;
+    const [result] = await db.query('INSERT INTO teachers (name, phone, email, status) VALUES (?, ?, ?, ?)', [name, phone, email, status]);
+    res.status(201).json({ id: result.insertId, name, phone, email, status });
   } catch (error) {
-    console.error('Error al crear profesor:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al crear profesor', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al crear el profesor' });
   }
 };
 
-// Actualizar un profesor
-const updateProfesor = async (req, res) => {
-  const { id } = req.params;
-  
+// Actualizar un profesor existente
+const updateTeacher = async (req, res) => {
   try {
-    const profesor = await Profesor.findByPk(id);
-    
-    if (!profesor) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Profesor no encontrado' 
-      });
+    const { id } = req.params;
+    const { name, phone, email, status } = req.body;
+    const [result] = await db.query('UPDATE teachers SET name = ?, phone = ?, email = ?, status = ? WHERE idteacher = ?', [name, phone, email, status, id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Profesor no encontrado' });
     }
-    
-    await profesor.update(req.body);
-    
-    res.status(200).json({ 
-      success: true, 
-      data: profesor,
-      message: 'Profesor actualizado exitosamente' 
-    });
+    res.status(200).json({ id, name, phone, email, status });
   } catch (error) {
-    console.error('Error al actualizar profesor:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al actualizar profesor', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al actualizar el profesor' });
   }
 };
 
 // Eliminar un profesor
-const deleteProfesor = async (req, res) => {
-  const { id } = req.params;
-  
+const deleteTeacher = async (req, res) => {
   try {
-    const profesor = await Profesor.findByPk(id);
-    
-    if (!profesor) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Profesor no encontrado' 
-      });
+    const { id } = req.params;
+    const [result] = await db.query('DELETE FROM teachers WHERE idteacher = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Profesor no encontrado' });
     }
-    
-    await profesor.destroy();
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'Profesor eliminado exitosamente' 
-    });
+    res.status(200).json({ message: 'Profesor eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar profesor:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al eliminar profesor', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al eliminar el profesor' });
   }
 };
 
 module.exports = {
-  getProfesores,
-  getProfesorById,
-  createProfesor,
-  updateProfesor,
-  deleteProfesor
+  getTeachers,
+  getTeacherById,
+  createTeacher,
+  updateTeacher,
+  deleteTeacher,
 };

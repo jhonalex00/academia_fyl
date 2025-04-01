@@ -1,141 +1,73 @@
-const { Asignatura, HorarioEstudiante } = require('../../models/index');
+const db = require('../../db/config');
 
 // Obtener todas las asignaturas
-const getAsignaturas = async (req, res) => {
+const getSubjects = async (req, res) => {
   try {
-    const asignaturas = await Asignatura.findAll({
-      include: [{ model: HorarioEstudiante }]
-    });
-    
-    res.status(200).json({ 
-      success: true, 
-      data: asignaturas 
-    });
+    const [rows] = await db.query('SELECT * FROM subjects');
+    res.status(200).json(rows);
   } catch (error) {
-    console.error('Error al obtener asignaturas:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener asignaturas', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener las asignaturas' });
   }
 };
 
 // Obtener una asignatura por ID
-const getAsignaturaById = async (req, res) => {
-  const { id } = req.params;
-  
+const getSubjectById = async (req, res) => {
   try {
-    const asignatura = await Asignatura.findByPk(id, {
-      include: [{ model: HorarioEstudiante }]
-    });
-    
-    if (!asignatura) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Asignatura no encontrada' 
-      });
+    const { id } = req.params;
+    const [rows] = await db.query('SELECT * FROM subjects WHERE idsubject = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      data: asignatura 
-    });
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.error('Error al obtener asignatura:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener asignatura', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener la asignatura' });
   }
 };
 
 // Crear una nueva asignatura
-const createAsignatura = async (req, res) => {
+const createSubject = async (req, res) => {
   try {
-    const nuevaAsignatura = await Asignatura.create(req.body);
-    
-    res.status(201).json({ 
-      success: true, 
-      data: nuevaAsignatura,
-      message: 'Asignatura creada exitosamente' 
-    });
+    const { year, cycle } = req.body;
+    const [result] = await db.query('INSERT INTO subjects (year, cycle) VALUES (?, ?)', [year, cycle]);
+    res.status(201).json({ id: result.insertId, year, cycle });
   } catch (error) {
-    console.error('Error al crear asignatura:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al crear asignatura', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al crear la asignatura' });
   }
 };
 
-// Actualizar una asignatura
-const updateAsignatura = async (req, res) => {
-  const { id } = req.params;
-  
+// Actualizar una asignatura existente
+const updateSubject = async (req, res) => {
   try {
-    const asignatura = await Asignatura.findByPk(id);
-    
-    if (!asignatura) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Asignatura no encontrada' 
-      });
+    const { id } = req.params;
+    const { year, cycle } = req.body;
+    const [result] = await db.query('UPDATE subjects SET year = ?, cycle = ? WHERE idsubject = ?', [year, cycle, id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
-    
-    await asignatura.update(req.body);
-    
-    res.status(200).json({ 
-      success: true, 
-      data: asignatura,
-      message: 'Asignatura actualizada exitosamente' 
-    });
+    res.status(200).json({ id, year, cycle });
   } catch (error) {
-    console.error('Error al actualizar asignatura:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al actualizar asignatura', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al actualizar la asignatura' });
   }
 };
 
 // Eliminar una asignatura
-const deleteAsignatura = async (req, res) => {
-  const { id } = req.params;
-  
+const deleteSubject = async (req, res) => {
   try {
-    const asignatura = await Asignatura.findByPk(id);
-    
-    if (!asignatura) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Asignatura no encontrada' 
-      });
+    const { id } = req.params;
+    const [result] = await db.query('DELETE FROM subjects WHERE idsubject = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
-    
-    await asignatura.destroy();
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'Asignatura eliminada exitosamente' 
-    });
+    res.status(200).json({ message: 'Asignatura eliminada correctamente' });
   } catch (error) {
-    console.error('Error al eliminar asignatura:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al eliminar asignatura', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al eliminar la asignatura' });
   }
 };
 
 module.exports = {
-  getAsignaturas,
-  getAsignaturaById,
-  createAsignatura,
-  updateAsignatura,
-  deleteAsignatura
+  getSubjects,
+  getSubjectById,
+  createSubject,
+  updateSubject,
+  deleteSubject,
 };

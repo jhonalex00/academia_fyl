@@ -1,135 +1,73 @@
-const { Academia } = require('../models/index');
+const db = require('../../db/config');
 
 // Obtener todas las academias
-const getAcademias = async (req, res) => {
+const getAcademies = async (req, res) => {
   try {
-    const academias = await Academia.findAll();
-    res.status(200).json({ 
-      success: true, 
-      data: academias 
-    });
+    const [rows] = await db.query('SELECT * FROM academies');
+    res.status(200).json(rows);
   } catch (error) {
-    console.error('Error al obtener academias:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener academias', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener las academias' });
   }
 };
 
 // Obtener una academia por ID
-const getAcademiaById = async (req, res) => {
-  const { id } = req.params;
-  
+const getAcademyById = async (req, res) => {
   try {
-    const academia = await Academia.findByPk(id);
-    
-    if (!academia) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Academia no encontrada' 
-      });
+    const { id } = req.params;
+    const [rows] = await db.query('SELECT * FROM academies WHERE idacademy = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Academia no encontrada' });
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      data: academia 
-    });
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.error('Error al obtener academia:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener academia', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener la academia' });
   }
 };
 
 // Crear una nueva academia
-const createAcademia = async (req, res) => {
+const createAcademy = async (req, res) => {
   try {
-    const nuevaAcademia = await Academia.create(req.body);
-    res.status(201).json({ 
-      success: true, 
-      data: nuevaAcademia,
-      message: 'Academia creada exitosamente' 
-    });
+    const { name, adress, phone } = req.body;
+    const [result] = await db.query('INSERT INTO academies (name, adress, phone) VALUES (?, ?, ?)', [name, adress, phone]);
+    res.status(201).json({ id: result.insertId, name, adress, phone });
   } catch (error) {
-    console.error('Error al crear academia:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al crear academia', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al crear la academia' });
   }
 };
 
-// Actualizar una academia
-const updateAcademia = async (req, res) => {
-  const { id } = req.params;
-  
+// Actualizar una academia existente
+const updateAcademy = async (req, res) => {
   try {
-    const academia = await Academia.findByPk(id);
-    
-    if (!academia) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Academia no encontrada' 
-      });
+    const { id } = req.params;
+    const { name, adress, phone } = req.body;
+    const [result] = await db.query('UPDATE academies SET name = ?, adress = ?, phone = ? WHERE idacademy = ?', [name, adress, phone, id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Academia no encontrada' });
     }
-    
-    await academia.update(req.body);
-    
-    res.status(200).json({ 
-      success: true, 
-      data: academia,
-      message: 'Academia actualizada exitosamente' 
-    });
+    res.status(200).json({ id, name, adress, phone });
   } catch (error) {
-    console.error('Error al actualizar academia:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al actualizar academia', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al actualizar la academia' });
   }
 };
 
 // Eliminar una academia
-const deleteAcademia = async (req, res) => {
-  const { id } = req.params;
-  
+const deleteAcademy = async (req, res) => {
   try {
-    const academia = await Academia.findByPk(id);
-    
-    if (!academia) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Academia no encontrada' 
-      });
+    const { id } = req.params;
+    const [result] = await db.query('DELETE FROM academies WHERE idacademy = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Academia no encontrada' });
     }
-    
-    await academia.destroy();
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'Academia eliminada exitosamente' 
-    });
+    res.status(200).json({ message: 'Academia eliminada correctamente' });
   } catch (error) {
-    console.error('Error al eliminar academia:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al eliminar academia', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al eliminar la academia' });
   }
 };
 
 module.exports = {
-  getAcademias,
-  getAcademiaById,
-  createAcademia,
-  updateAcademia,
-  deleteAcademia
+  getAcademies,
+  getAcademyById,
+  createAcademy,
+  updateAcademy,
+  deleteAcademy,
 };

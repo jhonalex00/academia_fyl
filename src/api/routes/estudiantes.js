@@ -1,28 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getEstudiantes, 
-  getEstudianteById, 
-  createEstudiante, 
-  updateEstudiante, 
-  deleteEstudiante 
-} = require('../controllers/estudianteController');
-const authMiddleware = require('../../middleware/auth');
+const { getStudents, getStudentById, createStudent, updateStudent, deleteStudent } = require('../controllers/estudianteController');
 
-// Rutas para estudiantes
-// GET /api/estudiantes - Obtener todos los estudiantes
-router.get('/', authMiddleware, getEstudiantes);
+// Obtener todos los estudiantes
+router.get('/', getStudents);
 
-// GET /api/estudiantes/:id - Obtener un estudiante por ID
-router.get('/:id', authMiddleware, getEstudianteById);
+// Obtener un estudiante por ID
+router.get('/:id', getStudentById);
 
-// POST /api/estudiantes - Crear un nuevo estudiante
-router.post('/', authMiddleware, createEstudiante);
+// Crear un nuevo estudiante
+router.post('/', createStudent);
 
-// PUT /api/estudiantes/:id - Actualizar un estudiante
-router.put('/:id', authMiddleware, updateEstudiante);
+// Actualizar un estudiante existente
+router.put('/:id', updateStudent);
 
-// DELETE /api/estudiantes/:id - Eliminar un estudiante
-router.delete('/:id', authMiddleware, deleteEstudiante);
+// Eliminar un estudiante
+router.delete('/:id', deleteStudent);
 
 module.exports = router;

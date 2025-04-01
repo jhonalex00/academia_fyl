@@ -1,28 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getHorarios, 
-  getHorarioById, 
-  createHorario, 
-  updateHorario, 
-  deleteHorario 
-} = require('../controllers/horarioController');
-const authMiddleware = require('../../middleware/auth');
+const { getSchedules, getScheduleById, createSchedule, updateSchedule, deleteSchedule } = require('../controllers/horarioController');
 
-// Rutas para horarios
-// GET /api/horarios - Obtener todos los horarios
-router.get('/', authMiddleware, getHorarios);
+// Obtener todos los horarios
+router.get('/', getSchedules);
 
-// GET /api/horarios/:id - Obtener un horario por ID
-router.get('/:id', authMiddleware, getHorarioById);
+// Obtener un horario por ID
+router.get('/:id', getScheduleById);
 
-// POST /api/horarios - Crear un nuevo horario
-router.post('/', authMiddleware, createHorario);
+// Crear un nuevo horario
+router.post('/', createSchedule);
 
-// PUT /api/horarios/:id - Actualizar un horario
-router.put('/:id', authMiddleware, updateHorario);
+// Actualizar un horario existente
+router.put('/:id', updateSchedule);
 
-// DELETE /api/horarios/:id - Eliminar un horario
-router.delete('/:id', authMiddleware, deleteHorario);
+// Eliminar un horario
+router.delete('/:id', deleteSchedule);
 
 module.exports = router;

@@ -1,153 +1,79 @@
-const { Estudiante, Contacto, HorarioEstudiante, Horario, Asignatura } = require('../../models/index');
+const db = require('../../db/config');
 
 // Obtener todos los estudiantes
-const getEstudiantes = async (req, res) => {
+const getStudents = async (req, res) => {
   try {
-    const estudiantes = await Estudiante.findAll({
-      include: [
-        { model: Contacto },
-        { 
-          model: HorarioEstudiante,
-          include: [Horario, Asignatura]
-        }
-      ]
-    });
-    
-    res.status(200).json({ 
-      success: true, 
-      data: estudiantes 
-    });
+    const [rows] = await db.query('SELECT * FROM students');
+    res.status(200).json(rows);
   } catch (error) {
-    console.error('Error al obtener estudiantes:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener estudiantes', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener los estudiantes' });
   }
 };
 
 // Obtener un estudiante por ID
-const getEstudianteById = async (req, res) => {
-  const { id } = req.params;
-  
+const getStudentById = async (req, res) => {
   try {
-    const estudiante = await Estudiante.findByPk(id, {
-      include: [
-        { model: Contacto },
-        { 
-          model: HorarioEstudiante,
-          include: [Horario, Asignatura]
-        }
-      ]
-    });
-    
-    if (!estudiante) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Estudiante no encontrado' 
-      });
+    const { id } = req.params;
+    const [rows] = await db.query('SELECT * FROM students WHERE idstudent = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Estudiante no encontrado' });
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      data: estudiante 
-    });
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.error('Error al obtener estudiante:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener estudiante', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener el estudiante' });
   }
 };
 
 // Crear un nuevo estudiante
-const createEstudiante = async (req, res) => {
+const createStudent = async (req, res) => {
   try {
-    const nuevoEstudiante = await Estudiante.create(req.body);
-    
-    res.status(201).json({ 
-      success: true, 
-      data: nuevoEstudiante,
-      message: 'Estudiante creado exitosamente' 
-    });
+    const { name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment } = req.body;
+    const [result] = await db.query(
+      'INSERT INTO students (name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment]
+    );
+    res.status(201).json({ id: result.insertId, name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment });
   } catch (error) {
-    console.error('Error al crear estudiante:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al crear estudiante', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al crear el estudiante' });
   }
 };
 
-// Actualizar un estudiante
-const updateEstudiante = async (req, res) => {
-  const { id } = req.params;
-  
+// Actualizar un estudiante existente
+const updateStudent = async (req, res) => {
   try {
-    const estudiante = await Estudiante.findByPk(id);
-    
-    if (!estudiante) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Estudiante no encontrado' 
-      });
+    const { id } = req.params;
+    const { name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment } = req.body;
+    const [result] = await db.query(
+      'UPDATE students SET name = ?, surname = ?, dni = ?, birthDate = ?, status = ?, phone = ?, email = ?, divorced = ?, knowUs = ?, repeat = ?, yearRepeat = ?, disorder = ?, allergy = ?, mobilityProblem = ?, bullying = ?, observation = ?, idacademy = ?, idenrolment = ? WHERE idstudent = ?',
+      [name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment, id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Estudiante no encontrado' });
     }
-    
-    await estudiante.update(req.body);
-    
-    res.status(200).json({ 
-      success: true, 
-      data: estudiante,
-      message: 'Estudiante actualizado exitosamente' 
-    });
+    res.status(200).json({ id, name, surname, dni, birthDate, status, phone, email, divorced, knowUs, repeat, yearRepeat, disorder, allergy, mobilityProblem, bullying, observation, idacademy, idenrolment });
   } catch (error) {
-    console.error('Error al actualizar estudiante:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al actualizar estudiante', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al actualizar el estudiante' });
   }
 };
 
 // Eliminar un estudiante
-const deleteEstudiante = async (req, res) => {
-  const { id } = req.params;
-  
+const deleteStudent = async (req, res) => {
   try {
-    const estudiante = await Estudiante.findByPk(id);
-    
-    if (!estudiante) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Estudiante no encontrado' 
-      });
+    const { id } = req.params;
+    const [result] = await db.query('DELETE FROM students WHERE idstudent = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Estudiante no encontrado' });
     }
-    
-    await estudiante.destroy();
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'Estudiante eliminado exitosamente' 
-    });
+    res.status(200).json({ message: 'Estudiante eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar estudiante:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al eliminar estudiante', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al eliminar el estudiante' });
   }
 };
 
 module.exports = {
-  getEstudiantes,
-  getEstudianteById,
-  createEstudiante,
-  updateEstudiante,
-  deleteEstudiante
+  getStudents,
+  getStudentById,
+  createStudent,
+  updateStudent,
+  deleteStudent,
 };

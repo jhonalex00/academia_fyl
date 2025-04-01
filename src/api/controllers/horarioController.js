@@ -1,141 +1,73 @@
-const { Horario, HorarioEstudiante } = require('../../models/index');
+const db = require('../../db/config');
 
 // Obtener todos los horarios
-const getHorarios = async (req, res) => {
+const getSchedules = async (req, res) => {
   try {
-    const horarios = await Horario.findAll({
-      include: [{ model: HorarioEstudiante }]
-    });
-    
-    res.status(200).json({ 
-      success: true, 
-      data: horarios 
-    });
+    const [rows] = await db.query('SELECT * FROM schedules');
+    res.status(200).json(rows);
   } catch (error) {
-    console.error('Error al obtener horarios:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener horarios', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener los horarios' });
   }
 };
 
 // Obtener un horario por ID
-const getHorarioById = async (req, res) => {
-  const { id } = req.params;
-  
+const getScheduleById = async (req, res) => {
   try {
-    const horario = await Horario.findByPk(id, {
-      include: [{ model: HorarioEstudiante }]
-    });
-    
-    if (!horario) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Horario no encontrado' 
-      });
+    const { id } = req.params;
+    const [rows] = await db.query('SELECT * FROM schedules WHERE idschedule = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Horario no encontrado' });
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      data: horario 
-    });
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.error('Error al obtener horario:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener horario', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al obtener el horario' });
   }
 };
 
 // Crear un nuevo horario
-const createHorario = async (req, res) => {
+const createSchedule = async (req, res) => {
   try {
-    const nuevoHorario = await Horario.create(req.body);
-    
-    res.status(201).json({ 
-      success: true, 
-      data: nuevoHorario,
-      message: 'Horario creado exitosamente' 
-    });
+    const { date, weekDay, startHour, finishHour } = req.body;
+    const [result] = await db.query('INSERT INTO schedules (date, weekDay, startHour, finishHour) VALUES (?, ?, ?, ?)', [date, weekDay, startHour, finishHour]);
+    res.status(201).json({ id: result.insertId, date, weekDay, startHour, finishHour });
   } catch (error) {
-    console.error('Error al crear horario:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al crear horario', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al crear el horario' });
   }
 };
 
-// Actualizar un horario
-const updateHorario = async (req, res) => {
-  const { id } = req.params;
-  
+// Actualizar un horario existente
+const updateSchedule = async (req, res) => {
   try {
-    const horario = await Horario.findByPk(id);
-    
-    if (!horario) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Horario no encontrado' 
-      });
+    const { id } = req.params;
+    const { date, weekDay, startHour, finishHour } = req.body;
+    const [result] = await db.query('UPDATE schedules SET date = ?, weekDay = ?, startHour = ?, finishHour = ? WHERE idschedule = ?', [date, weekDay, startHour, finishHour, id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Horario no encontrado' });
     }
-    
-    await horario.update(req.body);
-    
-    res.status(200).json({ 
-      success: true, 
-      data: horario,
-      message: 'Horario actualizado exitosamente' 
-    });
+    res.status(200).json({ id, date, weekDay, startHour, finishHour });
   } catch (error) {
-    console.error('Error al actualizar horario:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al actualizar horario', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al actualizar el horario' });
   }
 };
 
 // Eliminar un horario
-const deleteHorario = async (req, res) => {
-  const { id } = req.params;
-  
+const deleteSchedule = async (req, res) => {
   try {
-    const horario = await Horario.findByPk(id);
-    
-    if (!horario) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Horario no encontrado' 
-      });
+    const { id } = req.params;
+    const [result] = await db.query('DELETE FROM schedules WHERE idschedule = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Horario no encontrado' });
     }
-    
-    await horario.destroy();
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'Horario eliminado exitosamente' 
-    });
+    res.status(200).json({ message: 'Horario eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar horario:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al eliminar horario', 
-      error: error.message 
-    });
+    res.status(500).json({ error: 'Error al eliminar el horario' });
   }
 };
 
 module.exports = {
-  getHorarios,
-  getHorarioById,
-  createHorario,
-  updateHorario,
-  deleteHorario
+  getSchedules,
+  getScheduleById,
+  createSchedule,
+  updateSchedule,
+  deleteSchedule,
 };

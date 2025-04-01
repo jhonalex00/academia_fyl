@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { testConnection } = require('./src/db/config');
 const apiRoutes = require('./src/api/routes');
+const academiasRoutes = require('./src/api/routes/academias');
 
 // Determinar si estamos en desarrollo o producción
 const dev = process.env.NODE_ENV !== 'production';
@@ -28,6 +29,8 @@ app.prepare()
     
     // Rutas de la API
     server.use('/api', apiRoutes);
+    // Registrar rutas específicas
+    server.use('/api/academias', academiasRoutes);
     
     // Next.js manejará todas las demás rutas
     server.all('*', (req, res) => {

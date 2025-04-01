@@ -1,28 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getProfesores, 
-  getProfesorById, 
-  createProfesor, 
-  updateProfesor, 
-  deleteProfesor 
-} = require('../controllers/profesorController');
-const authMiddleware = require('../../middleware/auth');
+const { getTeachers, getTeacherById, createTeacher, updateTeacher, deleteTeacher } = require('../controllers/profesorController');
 
-// Rutas para profesores
-// GET /api/profesores - Obtener todos los profesores
-router.get('/', authMiddleware, getProfesores);
+// Obtener todos los profesores
+router.get('/', getTeachers);
 
-// GET /api/profesores/:id - Obtener un profesor por ID
-router.get('/:id', authMiddleware, getProfesorById);
+// Obtener un profesor por ID
+router.get('/:id', getTeacherById);
 
-// POST /api/profesores - Crear un nuevo profesor
-router.post('/', authMiddleware, createProfesor);
+// Crear un nuevo profesor
+router.post('/', createTeacher);
 
-// PUT /api/profesores/:id - Actualizar un profesor
-router.put('/:id', authMiddleware, updateProfesor);
+// Actualizar un profesor existente
+router.put('/:id', updateTeacher);
 
-// DELETE /api/profesores/:id - Eliminar un profesor
-router.delete('/:id', authMiddleware, deleteProfesor);
+// Eliminar un profesor
+router.delete('/:id', deleteTeacher);
 
 module.exports = router;

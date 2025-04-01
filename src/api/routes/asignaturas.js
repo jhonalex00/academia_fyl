@@ -1,28 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getAsignaturas, 
-  getAsignaturaById, 
-  createAsignatura, 
-  updateAsignatura, 
-  deleteAsignatura 
-} = require('../controllers/asignaturaController');
-const authMiddleware = require('../../middleware/auth');
+const { getSubjects, getSubjectById, createSubject, updateSubject, deleteSubject } = require('../controllers/asignaturaController');
 
-// Rutas para asignaturas
-// GET /api/asignaturas - Obtener todas las asignaturas
-router.get('/', authMiddleware, getAsignaturas);
+// Obtener todas las asignaturas
+router.get('/', getSubjects);
 
-// GET /api/asignaturas/:id - Obtener una asignatura por ID
-router.get('/:id', authMiddleware, getAsignaturaById);
+// Obtener una asignatura por ID
+router.get('/:id', getSubjectById);
 
-// POST /api/asignaturas - Crear una nueva asignatura
-router.post('/', authMiddleware, createAsignatura);
+// Crear una nueva asignatura
+router.post('/', createSubject);
 
-// PUT /api/asignaturas/:id - Actualizar una asignatura
-router.put('/:id', authMiddleware, updateAsignatura);
+// Actualizar una asignatura existente
+router.put('/:id', updateSubject);
 
-// DELETE /api/asignaturas/:id - Eliminar una asignatura
-router.delete('/:id', authMiddleware, deleteAsignatura);
+// Eliminar una asignatura
+router.delete('/:id', deleteSubject);
 
 module.exports = router;
