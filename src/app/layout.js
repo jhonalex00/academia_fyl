@@ -4,6 +4,7 @@ import { IoCalendarNumber } from "react-icons/io5";
 import { GiTeacher } from "react-icons/gi";
 import { PiStudentFill } from "react-icons/pi";
 import { FaSchoolFlag } from "react-icons/fa6";
+import { IoMdSettings } from "react-icons/io";
 
 const Navigation = () => {
   return (
@@ -13,6 +14,7 @@ const Navigation = () => {
         <li><IoCalendarNumber size={100} /></li>
         <li><GiTeacher size={100} /></li>
         <li><PiStudentFill size={100} /></li>
+        <li><IoMdSettings size={100} /></li>
 
         <li><Link href="/pages/dashboard">Dashboard</Link></li>
         <li><Link href="/pages/alumnos">Alumnos</Link></li>
