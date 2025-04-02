@@ -17,6 +17,7 @@ const Navigation = () => {
         <li><IoMdSettings size={100} /></li>
 
         <li><Link href="/pages/dashboard">Dashboard</Link></li>
+        <li><Link href="/pages/academias">Academias</Link></li>
         <li><Link href="/pages/alumnos">Alumnos</Link></li>
         <li><Link href="/pages/contactos">Contactos</Link></li>
         <li><Link href="/pages/profesores">Profesores</Link></li>
