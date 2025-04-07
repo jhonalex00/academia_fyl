@@ -3,6 +3,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --sidebar-bg: #f9fafb;
+  --sidebar-text: #374151;
+  --sidebar-hover: #e5e7eb;
+  --sidebar-active: #4f46e5;
+  --sidebar-width: 250px;
 }
 
 @theme inline {
@@ -16,6 +23,10 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --sidebar-bg: #111827;
+    --sidebar-text: #d1d5db;
+    --sidebar-hover: #1f2937;
+    --sidebar-active: #6366f1;
   }
 }
 
@@ -23,32 +34,81 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-/* Añadimos estilos para el panel de navegación */
+/* Estilos mejorados para el panel de navegación */
 .navigation {
-  width: 200px;
-  background-color: #f4f4f4;
-  padding: 20px;
+  width: var(--sidebar-width);
+  background-color: var(--sidebar-bg);
   height: 100vh;
   position: fixed;
   top: 0;
   left: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease;
+  overflow-y: auto;
+  z-index: 10;
 }
 
-.navigation ul {
-  list-style: none;
-  padding: 0;
+.nav-header {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid var(--sidebar-hover);
 }
 
-.navigation li {
-  margin-bottom: 10px;
-}
-
-.navigation a {
-  text-decoration: none;
-  color: #333;
+.nav-title {
+  font-size: 1.25rem;
   font-weight: bold;
+  color: var(--sidebar-active);
+  margin: 0;
+  text-align: center;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.nav-links li {
+  margin-bottom: 0.5rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  border-radius: 0.375rem;
+  margin: 0 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--sidebar-hover);
+  color: var(--sidebar-active);
+}
+
+.nav-item:active, .nav-item.active {
+  background-color: var(--sidebar-active);
+  color: white;
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+  margin-right: 0.75rem;
+  min-width: 1.25rem;
+}
+
+.nav-footer {
+  padding: 1rem 0;
+  border-top: 1px solid var(--sidebar-hover);
+  margin-top: auto;
 }
 
 .layout {
@@ -56,7 +116,35 @@ body {
 }
 
 main {
-  margin-left: 220px;
-  padding: 20px;
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
   width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  transition: margin-left 0.3s ease;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .navigation {
+    width: 60px;
+  }
+  
+  .nav-title, .nav-item span {
+    display: none;
+  }
+  
+  .nav-icon {
+    margin-right: 0;
+    font-size: 1.5rem;
+  }
+  
+  .nav-item {
+    justify-content: center;
+    padding: 0.75rem;
+  }
+  
+  main {
+    margin-left: 60px;
+  }
 }
