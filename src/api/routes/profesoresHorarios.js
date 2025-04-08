@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getTeacherSchedules, createTeacherSchedule, deleteTeacherSchedule } = require('../controllers/profesorHorarioController');
+const { getTeacherSchedules, getTeacherSchedulesByDate, createTeacherSchedule, deleteTeacherSchedule } = require('../controllers/profesorHorarioController');
 
 // Obtener todos los horarios de profesores
 router.get('/', getTeacherSchedules);

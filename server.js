@@ -29,8 +29,7 @@ app.prepare()
     
     // Rutas de la API
     server.use('/api', apiRoutes);
-    // Registrar rutas específicas
-    server.use('/api/academias', academiasRoutes);
+    // No es necesario registrar academias específicamente, ya está incluido en apiRoutes
     
     // Next.js manejará todas las demás rutas
     server.all('*', (req, res) => {

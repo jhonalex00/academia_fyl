@@ -1,0 +1,358 @@
+/* Estilos para la página de horarios */
+
+.container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  padding: 24px;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.sidebar h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+}
+
+.search {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.search:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.profesorList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.profesorList li {
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.profesorList li:hover {
+  background-color: #f3f4f6;
+}
+
+.profesorList .selected {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 500;
+}
+
+.profesorList .selected:hover {
+  background-color: #2563eb;
+}
+
+.main {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.periodNavigator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navButton {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.navButton:hover {
+  background-color: #f3f4f6;
+}
+
+.todayButton {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.todayButton:hover {
+  background-color: #2563eb;
+}
+
+.currentPeriod {
+  font-weight: 500;
+  padding: 8px 16px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+}
+
+.newClassButton {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.newClassButton:hover {
+  background-color: #2563eb;
+}
+
+.calendarContainer {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 24px;
+  flex-grow: 1;
+}
+
+/* Estilos específicos para FullCalendar */
+:global(.fc) {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  height: 100%;
+}
+
+:global(.fc-header-toolbar) {
+  padding: 16px;
+}
+
+:global(.fc-theme-standard th) {
+  background-color: #f3f4f6;
+  padding: 12px;
+}
+
+:global(.fc-day-today) {
+  background-color: #f0f9ff !important;
+}
+
+:global(.fc-event) {
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+:global(.fc-event-main) {
+  padding: 4px;
+}
+
+:global(.fc-timegrid-event-harness) {
+  margin: 0 2px;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: #ffffff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.closeButton:hover {
+  color: #111827;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.formControl {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.formControl:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelButton {
+  background-color: #f3f4f6;
+  color: #374151;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: #e5e7eb;
+}
+
+.saveButton {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.saveButton:hover {
+  background-color: #2563eb;
+}
+
+.errorMessage {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .periodNavigator {
+    justify-content: space-between;
+  }
+}

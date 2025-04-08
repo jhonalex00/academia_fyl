@@ -10,13 +10,55 @@ const getTeacherSchedules = async (req, res) => {
   }
 };
 
+// Obtener los horarios de un profesor específico por fecha
+const getTeacherSchedulesByDate = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fecha } = req.query;
+    
+    // Si no se proporciona fecha, usamos la fecha actual
+    let startDate = fecha ? new Date(fecha) : new Date();
+    
+    // Calcular el inicio de la semana (lunes)
+    const dayOfWeek = startDate.getDay(); // 0 para domingo, 1 para lunes, etc.
+    const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startDate = new Date(startDate.setDate(diff));
+    
+    // Calcular el fin de la semana (domingo)
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+    
+    // Formatear fechas para SQL
+    const startDateFormatted = startDate.toISOString().split('T')[0];
+    const endDateFormatted = endDate.toISOString().split('T')[0];
+    
+    // Consulta SQL para obtener los horarios del profesor con información de la academia
+    const [rows] = await sequelize.query(`
+      SELECT s.*, ts.idacademies
+      FROM schedules s
+      INNER JOIN teachers_schedules ts ON s.idschedule = ts.idschedule
+      WHERE ts.idteacher = ?
+      AND (s.date BETWEEN ? AND ? OR s.date IS NULL)
+    `, [id, startDateFormatted, endDateFormatted]);
+    
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener los horarios del profesor' });
+  }
+};
+
 // Crear una nueva relación profesor-horario
 const createTeacherSchedule = async (req, res) => {
   try {
-    const { idteacher, idschedule } = req.body;
-    const [result] = await sequelize.query('INSERT INTO teachers_schedules (idteacher, idschedule) VALUES (?, ?)', [idteacher, idschedule]);
-    res.status(201).json({ idteacher, idschedule });
+    const { idteacher, idschedule, idacademies } = req.body;
+    const [result] = await sequelize.query(
+      'INSERT INTO teachers_schedules (idteacher, idschedule, idacademies) VALUES (?, ?, ?)', 
+      [idteacher, idschedule, idacademies]
+    );
+    res.status(201).json({ idteacher, idschedule, idacademies });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error al crear la relación profesor-horario' });
   }
 };
@@ -37,6 +79,7 @@ const deleteTeacherSchedule = async (req, res) => {
 
 module.exports = {
   getTeacherSchedules,
+  getTeacherSchedulesByDate,
   createTeacherSchedule,
   deleteTeacherSchedule,
 };
