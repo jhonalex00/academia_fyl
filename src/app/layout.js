@@ -58,6 +58,12 @@ const Navigation = () => {
             <span>Contactos</span>
           </Link>
         </li>
+        <li>
+          <Link href="/pages/horarios" className={`nav-item ${isActive('/pages/horarios') ? 'active' : ''}`}>
+            <IoCalendarNumber className="nav-icon" />
+            <span>Horarios</span>
+          </Link>
+        </li>
       </ul>
       <div className="nav-footer">
         <Link href="/configuracion" className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}>
