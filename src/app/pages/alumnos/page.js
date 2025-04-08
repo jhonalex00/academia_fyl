@@ -1,10 +1,16 @@
+'use client';
+
 import React from 'react';
+import { Button } from "@heroui/react";
 
 const AlumnosPage = () => {
+  const handleClick = () => {
+    alert('¡Botón clickeado en la página de Alumnos!');
+  };
+
   return (
     <div>
-      <h1>Alumnos</h1>
-      <p>Gestión de alumnos.</p>
+      <Button size="md" onClick={handleClick}>Añadir</Button>
     </div>
   );
 };
