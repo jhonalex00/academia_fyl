@@ -176,37 +176,37 @@
 }
 
 /* Estilos específicos para FullCalendar */
-:global(.fc) {
+.calendarContainer :global(.fc) {
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   height: 100%;
 }
 
-:global(.fc-header-toolbar) {
+.calendarContainer :global(.fc-header-toolbar) {
   padding: 16px;
 }
 
-:global(.fc-theme-standard th) {
+.calendarContainer :global(.fc-theme-standard th) {
   background-color: #f3f4f6;
   padding: 12px;
 }
 
-:global(.fc-day-today) {
+.calendarContainer :global(.fc-day-today) {
   background-color: #f0f9ff !important;
 }
 
-:global(.fc-event) {
+.calendarContainer :global(.fc-event) {
   border-radius: 4px;
   padding: 4px;
   cursor: pointer;
   border: none;
 }
 
-:global(.fc-event-main) {
+.calendarContainer :global(.fc-event-main) {
   padding: 4px;
 }
 
-:global(.fc-timegrid-event-harness) {
+.calendarContainer :global(.fc-timegrid-event-harness) {
   margin: 0 2px;
 }
 
