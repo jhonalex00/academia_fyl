@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Button } from "@heroui/react";
 
 const AlumnosPage = () => {
   const handleClick = () => {
@@ -9,9 +10,7 @@ const AlumnosPage = () => {
 
   return (
     <div>
-      <h1>Alumnos</h1>
-      <p>Gestión de alumnos.</p>
-      <button onClick={handleClick}>Haz clic aquí</button>
+      <Button size="md" onClick={handleClick}>Añadir</Button>
     </div>
   );
 };
