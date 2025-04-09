@@ -137,9 +137,9 @@ const AcademiasPage = () => {
       <AñadirAcademia onAcademiaAdded={handleAcademiaAdded} />
       <div className="container mx-auto px-4">
         {/* Contenedor de encabezados con borde inferior */}
-        <div className="border-b-2 border-gray-800 pb-4 bg-gray-200">
-          <div className="grid grid-cols-4 gap-4 mt-8">
-            <h1 className="text-lg font-bold">Academia</h1>
+        <div className="border-b-2 border-gray-800 bg-gray-200">
+          <div className="grid grid-cols-4 gap-8 mt-8 px-6 py-2">
+            <h1 className="text-lg font-bold pl-2">Academia</h1>
             <h1 className="text-lg font-bold">Dirección</h1>
             <h1 className="text-lg font-bold">Teléfono</h1>
             <h1 className="text-lg font-bold">Nº Alumnos</h1>
@@ -151,9 +151,9 @@ const AcademiasPage = () => {
           {academias.map((academia, index) => (
             <div 
               key={index} 
-              className="grid grid-cols-4 gap-4 py-2 hover:bg-gray-100 rounded-lg"
+              className="grid grid-cols-4 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg"
             >
-              <span className="truncate">{academia.nombre}</span>
+              <span className="truncate pl-2">{academia.nombre}</span>
               <span className="truncate">{academia.direccion}</span>
               <span className="truncate">{academia.telefono}</span>
               <span className="truncate">{academia.numAlumnos}</span>
