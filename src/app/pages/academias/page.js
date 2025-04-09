@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { Button, Dialog } from "@headlessui/react";
 
-export function AñadirAcademia() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
+export function AñadirAcademia({ onAcademiaAdded }) { // OnAcademiaAdded es para actualizar la lista cuando añadamos una nueva academia
+  const [isOpen, setIsOpen] = useState(false); // IsOpen controla si el modal está abierto. Empieza en false, osea que el modal está cerrado
+                                              // SetIsOpne es la función que se usa para cambiar de estado el modal
+  const [formData, setFormData] = useState({ // FormData es un objeto para almacenar los campos
+                                            // y SetFormData se usa para actualizar los campos
     nombre: '',
     direccion: '',
     telefono: '',
@@ -13,7 +15,7 @@ export function AñadirAcademia() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAcademiaAdded(formData);
+    onAcademiaAdded(formData); // FormData almacena los datos del modal
     setIsOpen(false);
     setFormData({
       nombre: '',
@@ -122,7 +124,6 @@ export function AñadirAcademia() {
   );
 }
 
-// ...resto del código existente...
 
 const AcademiasPage = () => {
   const [academias, setAcademias] = useState([]);
@@ -134,27 +135,31 @@ const AcademiasPage = () => {
   return (
     <>
       <AñadirAcademia onAcademiaAdded={handleAcademiaAdded} />
-      <div style={{ display: 'flex', gap: '18%', marginTop: "3%", marginLeft: "3%" }}>
-        <h1>Academia</h1>
-        <h1>Dirección</h1>
-        <h1>Teléfono</h1>
-        <h1>Nº Alumnos</h1>
-      </div>
-      
-      {/* Lista de academias */}
-      <div className="mt-4 mx-4">
-        {academias.map((academia, index) => (
-          <div 
-            key={index} 
-            className="grid grid-cols-4 gap-[18%] py-2 px-3 hover:bg-gray-100 rounded-lg"
-            style={{ marginLeft: "3%" }}
-          >
-            <span>{academia.nombre}</span>
-            <span>{academia.direccion}</span>
-            <span>{academia.telefono}</span>
-            <span>{academia.numAlumnos}</span>
+      <div className="container mx-auto px-4">
+        {/* Contenedor de encabezados con borde inferior */}
+        <div className="border-b-2 border-gray-800 bg-gray-200">
+          <div className="grid grid-cols-4 gap-8 mt-8 px-6 py-2">
+            <h1 className="text-lg font-bold pl-2">Academia</h1>
+            <h1 className="text-lg font-bold">Dirección</h1>
+            <h1 className="text-lg font-bold">Teléfono</h1>
+            <h1 className="text-lg font-bold">Nº Alumnos</h1>
           </div>
-        ))}
+        </div>
+        
+        {/* Lista de academias con margen superior */}
+        <div className="space-y-2 mt-4">
+          {academias.map((academia, index) => (
+            <div 
+              key={index} 
+              className="grid grid-cols-4 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg"
+            >
+              <span className="truncate pl-2">{academia.nombre}</span>
+              <span className="truncate">{academia.direccion}</span>
+              <span className="truncate">{academia.telefono}</span>
+              <span className="truncate">{academia.numAlumnos}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
