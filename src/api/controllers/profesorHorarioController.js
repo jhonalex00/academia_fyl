@@ -11,15 +11,13 @@ const getTeacherSchedules = async (req, res) => {
 };
 
 // Obtener los horarios de un profesor específico por fecha
-const getTeacherSchedulesByDate = async (req, res) => {
-  try {
+const getTeacherSchedulesByDate = async (req, res) => {  try {
     const { id } = req.params;
     const { fecha } = req.query;
     
     // Si no se proporciona fecha, usamos la fecha actual
     let startDate = fecha ? new Date(fecha) : new Date();
-    
-    // Calcular el inicio de la semana (lunes)
+      // Calcular el inicio de la semana (lunes)
     const dayOfWeek = startDate.getDay(); // 0 para domingo, 1 para lunes, etc.
     const diff = startDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
     startDate = new Date(startDate.setDate(diff));
@@ -32,17 +30,23 @@ const getTeacherSchedulesByDate = async (req, res) => {
     const startDateFormatted = startDate.toISOString().split('T')[0];
     const endDateFormatted = endDate.toISOString().split('T')[0];
     
-    // Consulta SQL para obtener los horarios del profesor con información de la academia
-    const [rows] = await sequelize.query(`
+    // Consulta SQL simplificada sin condiciones complejas
+    const query = `
       SELECT s.*, ts.idacademies
       FROM schedules s
       INNER JOIN teachers_schedules ts ON s.idschedule = ts.idschedule
       WHERE ts.idteacher = ?
-      AND (s.date BETWEEN ? AND ? OR s.date IS NULL)
-    `, [id, startDateFormatted, endDateFormatted]);
+    `;
     
-    res.status(200).json(rows);
-  } catch (error) {
+    // Nota: Con type: sequelize.QueryTypes.SELECT, sequelize ya devuelve las filas directamente
+    const rows = await sequelize.query(query, {
+      replacements: [id],
+      type: sequelize.QueryTypes.SELECT
+    });
+    
+    // Enviamos un array vacío si no hay resultados en lugar de undefined
+    res.status(200).json(rows || []);
+  } catch (error){
     console.error(error);
     res.status(500).json({ error: 'Error al obtener los horarios del profesor' });
   }
