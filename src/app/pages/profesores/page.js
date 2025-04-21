@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
-
+import { Button, Dialog } from "@headlessui/react";
 
 const ProfesoresPage = () => {
-  // Estado inicial con localStorage: si hay datos guardados, los usa; si no, usa 3 profesores vacíos
   const [profesores, setProfesores] = useState(() => {
     const datosGuardados = localStorage.getItem('profesores');
     return datosGuardados
@@ -16,42 +15,102 @@ const ProfesoresPage = () => {
         ];
   });
 
-  const [editandoId, setEditandoId] = useState(null); // ID del profesor que se está editando
-  const [busqueda, setBusqueda] = useState(''); // Texto del input de búsqueda
+  const [editandoId, setEditandoId] = useState(null);
+  const [busqueda, setBusqueda] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+    asignaturas: ['']
+  });
 
-  // Cada vez que cambia la lista de profesores, se guarda en localStorage
   useEffect(() => {
     localStorage.setItem('profesores', JSON.stringify(profesores));
   }, [profesores]);
 
-  // Función para actualizar cualquier campo de un profesor
   const actualizarCampo = (id, campo, valor) => {
     setProfesores((prev) =>
       prev.map((prof) => (prof.id === id ? { ...prof, [campo]: valor } : prof))
     );
   };
 
-  const guardarCambios = () => {
-    setEditandoId(null); // Salir del modo edición
+  const actualizarAsignatura = (id, index, valor) => {
+    setProfesores((prev) =>
+      prev.map((prof) => {
+        if (prof.id === id) {
+          const nuevasAsignaturas = [...prof.asignaturas];
+          nuevasAsignaturas[index] = valor;
+          return { ...prof, asignaturas: nuevasAsignaturas };
+        }
+        return prof;
+      })
+    );
   };
 
-  // Elimina un profesor y cierra la edición si se estaba editando ese campo
+  const agregarAsignatura = (id) => {
+    setProfesores((prev) =>
+      prev.map((prof) =>
+        prof.id === id
+          ? { ...prof, asignaturas: [...prof.asignaturas, ''] }
+          : prof
+      )
+    );
+  };
+
+  const eliminarAsignatura = (id, index) => {
+    setProfesores((prev) =>
+      prev.map((prof) => {
+        if (prof.id === id) {
+          const nuevasAsignaturas = prof.asignaturas.filter((_, i) => i !== index);
+          return { ...prof, asignaturas: nuevasAsignaturas };
+        }
+        return prof;
+      })
+    );
+  };
+
+  const guardarCambios = () => {
+    setEditandoId(null);
+  };
+
   const eliminarProfesor = (id) => {
     setProfesores(profesores.filter((p) => p.id !== id));
     if (editandoId === id) setEditandoId(null);
   };
 
-  // Filtro de profesores basado en la búsqueda por nombre
   const profesoresFiltrados = profesores.filter((prof) =>
     prof.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const nuevoProfesor = {
+      id: profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1,
+      ...formData,
+    };
+    setProfesores([...profesores, nuevoProfesor]);
+    setIsOpen(false);
+    setFormData({
+      nombre: '',
+      email: '',
+      telefono: '',
+      asignaturas: [''],
+    });
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-2">Gestión de Profesores</h1>
       <p className="text-gray-600 mb-6">Administra los contactos de los profesores</p>
 
-      {/* Input de búsqueda y botón para crear nuevo profesor */}
       <div className="flex items-center justify-between mb-4">
         <input
           type="text"
@@ -60,27 +119,14 @@ const ProfesoresPage = () => {
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />
-        <button
-          onClick={() => {
-            // Crea nuevo profesor con ID incremental
-            const nuevoId = profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1;
-            const nuevo = {
-              id: nuevoId,
-              nombre: '',
-              email: '',
-              telefono: '',
-              asignaturas: [''],
-            };
-            setProfesores([...profesores, nuevo]);
-            setEditandoId(nuevoId); // Inicia edición directa del nuevo
-          }}
+        <Button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          onClick={() => setIsOpen(true)}
         >
-           Nuevo Profesor
-        </button>
+          Nuevo Profesor
+        </Button>
       </div>
 
-      {/* Tabla de profesores */}
       <table className="w-full border shadow-sm rounded overflow-hidden text-sm">
         <thead className="bg-gray-100">
           <tr>
@@ -94,77 +140,22 @@ const ProfesoresPage = () => {
         <tbody>
           {profesoresFiltrados.map((profesor) => (
             <tr key={profesor.id} className="border-t hover:bg-gray-50">
-              {/* Campo nombre editable */}
-              <td className="px-4 py-2">
-                {editandoId === profesor.id ? (
-                  <input
-                    className="border px-2 py-1 w-full"
-                    value={profesor.nombre}
-                    onChange={(e) => actualizarCampo(profesor.id, 'nombre', e.target.value)}
-                  />
-                ) : (
-                  profesor.nombre
-                )}
-              </td>
-
-              {/* Campo email editable */}
-              <td className="px-4 py-2">
-                {editandoId === profesor.id ? (
-                  <input
-                    className="border px-2 py-1 w-full"
-                    value={profesor.email}
-                    onChange={(e) => actualizarCampo(profesor.id, 'email', e.target.value)}
-                  />
-                ) : (
-                  profesor.email
-                )}
-              </td>
-
-              {/* Campo teléfono editable */}
-              <td className="px-4 py-2">
-                {editandoId === profesor.id ? (
-                  <input
-                    className="border px-2 py-1 w-full"
-                    value={profesor.telefono}
-                    onChange={(e) => actualizarCampo(profesor.id, 'telefono', e.target.value)}
-                  />
-                ) : (
-                  profesor.telefono
-                )}
-              </td>
-
-              {/* Campo asignaturas editable, separadas por coma */}
-              <td className="px-4 py-2">
-                {editandoId === profesor.id ? (
-                  <input
-                    className="border px-2 py-1 w-full"
-                    value={profesor.asignaturas.join(', ')}
-                    onChange={(e) =>
-                      actualizarCampo(
-                        profesor.id,
-                        'asignaturas',
-                        e.target.value.split(',').map((a) => a.trim())
-                      )
-                    }
-                  />
-                ) : (
-                  profesor.asignaturas.join(', ')
-                )}
-              </td>
-
-              {/* Botones de acción: editar, guardar, eliminar */}
+              <td className="px-4 py-2">{profesor.nombre}</td>
+              <td className="px-4 py-2">{profesor.email}</td>
+              <td className="px-4 py-2">{profesor.telefono}</td>
+              <td className="px-4 py-2">{profesor.asignaturas.join(', ')}</td>
               <td className="px-4 py-2 flex space-x-2">
-                {/* Botón para editar */}
                 <button
                   className="text-blue-600 hover:text-blue-800"
-                  onClick={() => abrirModalEditar(profesor)}
+                  onClick={() => setEditandoId(profesor.id)}
                 >
+                  Editar
                 </button>
-                {/* Botón para eliminar */}
                 <button
                   className="text-red-600 hover:text-red-800"
                   onClick={() => eliminarProfesor(profesor.id)}
                 >
+                  Eliminar
                 </button>
               </td>
             </tr>
@@ -172,87 +163,87 @@ const ProfesoresPage = () => {
         </tbody>
       </table>
 
-      {/* Paginación (estática por ahora) */}
-      <div className="flex justify-between items-center mt-4">
-        <p className="text-sm text-gray-500">
-          Mostrando {profesoresFiltrados.length} contacto(s)
-        </p>
-        <div className="space-x-1">
-          <button className="px-2 py-1 border rounded bg-white hover:bg-gray-100">Anterior</button>
-          <button className="px-3 py-1 border rounded bg-blue-600 text-white">1</button>
-          <button className="px-2 py-1 border rounded bg-white hover:bg-gray-100">2</button>
-          <button className="px-2 py-1 border rounded bg-white hover:bg-gray-100">Siguiente</button>
-        </div>
+      <div className="mt-4 text-sm text-gray-500">
+        Mostrando {profesoresFiltrados.length} contacto(s)
       </div>
 
-      {/* Modal para agregar/editar profesor */}
-      {modalAbierto && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
-            <h2 className="text-xl font-bold mb-4">
-              {profesorTemporal.id && profesores.find((p) => p.id === profesorTemporal.id)
-                ? 'Editar Profesor'
-                : 'Nuevo Profesor'}
-            </h2>
-
-            {/* Formulario dentro del modal */}
-            <div className="space-y-4">
-              <input
-                className="border px-3 py-2 rounded w-full"
-                placeholder="Nombre"
-                value={profesorTemporal.nombre}
-                onChange={(e) => setProfesorTemporal({ ...profesorTemporal, nombre: e.target.value })}
-              />
-              <input
-                className="border px-3 py-2 rounded w-full"
-                placeholder="Email"
-                value={profesorTemporal.email}
-                onChange={(e) => setProfesorTemporal({ ...profesorTemporal, email: e.target.value })}
-              />
-              <input
-                className="border px-3 py-2 rounded w-full"
-                placeholder="Teléfono"
-                value={profesorTemporal.telefono}
-                onChange={(e) => setProfesorTemporal({ ...profesorTemporal, telefono: e.target.value })}
-              />
-              <input
-                className="border px-3 py-2 rounded w-full"
-                placeholder="Asignaturas (separadas por coma)"
-                value={profesorTemporal.asignaturas.join(', ')}
-                onChange={(e) =>
-                  setProfesorTemporal({
-                    ...profesorTemporal,
-                    asignaturas: e.target.value.split(',').map((a) => a.trim()),
-                  })
-                }
-              />
-            </div>
-
-            {/* Botones del modal */}
-            <div className="mt-6 flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                onClick={cerrarModal}
-              >
-                Cancelar
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={guardarProfesor}
-              >
-                Guardar
-              </button>
-            </div>
-
-            {/* Botón para cerrar modal en la esquina */}
-            <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-              onClick={cerrarModal}
-            >
-            </button>
-          </div>
+      {/* Modal para Añadir Profesor */}
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6">
+            <Dialog.Title className="text-lg font-medium mb-4">Nuevo Profesor</Dialog.Title>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Teléfono</label>
+                  <input
+                    type="tel"
+                    name="telefono"
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Asignaturas</label>
+                  <input
+                    type="text"
+                    name="asignaturas"
+                    value={formData.asignaturas[0]}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        asignaturas: [e.target.value]
+                      })
+                    }
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </Dialog.Panel>
         </div>
-      )}
+      </Dialog>
     </div>
   );
 };
