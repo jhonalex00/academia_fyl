@@ -3,44 +3,47 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Dialog } from "@headlessui/react";
 
+const profesorVacio = () => ({
+  id: null,
+  nombre: '',
+  email: '',
+  telefono: '',
+  asignaturas: ['']
+});
+
 const ProfesoresPage = () => {
   const [profesores, setProfesores] = useState(() => {
     const datosGuardados = localStorage.getItem('profesores');
-    return datosGuardados
-      ? JSON.parse(datosGuardados)
-      : [
-          { id: 1, nombre: '', email: '', telefono: '', asignaturas: [''] },
-          { id: 2, nombre: '', email: '', telefono: '', asignaturas: [''] },
-          { id: 3, nombre: '', email: '', telefono: '', asignaturas: [''] },
-        ];
+    return datosGuardados ? JSON.parse(datosGuardados) : [profesorVacio(), profesorVacio(), profesorVacio()];
   });
 
   const [editandoId, setEditandoId] = useState(null);
   const [busqueda, setBusqueda] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    telefono: '',
-    asignaturas: ['']
-  });
+  const [formData, setFormData] = useState(profesorVacio());
 
   useEffect(() => {
     localStorage.setItem('profesores', JSON.stringify(profesores));
   }, [profesores]);
 
-  const actualizarCampo = (id, campo, valor) => {
-    setProfesores((prev) =>
-      prev.map((prof) => (prof.id === id ? { ...prof, [campo]: valor } : prof))
-    );
+  const manejarCambio = (setter, campo, valor) => {
+    setter((prev) => ({ ...prev, [campo]: valor }));
   };
 
-  const actualizarAsignatura = (id, index, valor) => {
+  const handleChange = (e) => manejarCambio(setFormData, e.target.name, e.target.value);
+
+  const manejarAsignaturas = (id, accion, index = null, valor = '') => {
     setProfesores((prev) =>
       prev.map((prof) => {
         if (prof.id === id) {
-          const nuevasAsignaturas = [...prof.asignaturas];
-          nuevasAsignaturas[index] = valor;
+          let nuevasAsignaturas = [...prof.asignaturas];
+          if (accion === 'actualizar' && index !== null) {
+            nuevasAsignaturas[index] = valor;
+          } else if (accion === 'agregar') {
+            nuevasAsignaturas.push('');
+          } else if (accion === 'eliminar' && index !== null) {
+            nuevasAsignaturas = nuevasAsignaturas.filter((_, i) => i !== index);
+          }
           return { ...prof, asignaturas: nuevasAsignaturas };
         }
         return prof;
@@ -48,30 +51,19 @@ const ProfesoresPage = () => {
     );
   };
 
-  const agregarAsignatura = (id) => {
-    setProfesores((prev) =>
-      prev.map((prof) =>
-        prof.id === id
-          ? { ...prof, asignaturas: [...prof.asignaturas, ''] }
-          : prof
-      )
-    );
-  };
+  const actualizarAsignatura = (id, index, valor) => manejarAsignaturas(id, 'actualizar', index, valor);
+  const agregarAsignatura = (id) => manejarAsignaturas(id, 'agregar');
+  const eliminarAsignatura = (id, index) => manejarAsignaturas(id, 'eliminar', index);
 
-  const eliminarAsignatura = (id, index) => {
-    setProfesores((prev) =>
-      prev.map((prof) => {
-        if (prof.id === id) {
-          const nuevasAsignaturas = prof.asignaturas.filter((_, i) => i !== index);
-          return { ...prof, asignaturas: nuevasAsignaturas };
-        }
-        return prof;
-      })
-    );
-  };
-
-  const guardarCambios = () => {
-    setEditandoId(null);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const nuevoProfesor = {
+      id: profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1,
+      ...formData,
+    };
+    setProfesores([...profesores, nuevoProfesor]);
+    setIsOpen(false);
+    setFormData(profesorVacio());
   };
 
   const eliminarProfesor = (id) => {
@@ -82,29 +74,6 @@ const ProfesoresPage = () => {
   const profesoresFiltrados = profesores.filter((prof) =>
     prof.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const nuevoProfesor = {
-      id: profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1,
-      ...formData,
-    };
-    setProfesores([...profesores, nuevoProfesor]);
-    setIsOpen(false);
-    setFormData({
-      nombre: '',
-      email: '',
-      telefono: '',
-      asignaturas: [''],
-    });
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
   return (
     <div className="p-6">
