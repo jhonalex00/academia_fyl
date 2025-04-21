@@ -1,8 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Dialog } from "@headlessui/react";
 
-export function AñadirAcademia({ onAcademiaAdded }) { // OnAcademiaAdded es para actualizar la lista cuando añadamos una nueva academia
+export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdited }) { // OnAcademiaAdded es para actualizar la lista cuando añadamos una nueva academia
   const [isOpen, setIsOpen] = useState(false); // IsOpen controla si el modal está abierto. Empieza en false, osea que el modal está cerrado
                                               // SetIsOpne es la función que se usa para cambiar de estado el modal
   const [formData, setFormData] = useState({ // FormData es un objeto para almacenar los campos
@@ -13,9 +13,21 @@ export function AñadirAcademia({ onAcademiaAdded }) { // OnAcademiaAdded es par
     numAlumnos: ''
   });
 
+  // Actualiza el formulario cuando se va a editar una academia
+  useEffect(() => {
+    if (academiaToEdit) {
+      setFormData(academiaToEdit);
+      setIsOpen(true);
+    }
+  }, [academiaToEdit]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAcademiaAdded(formData); // FormData almacena los datos del modal
+    if (academiaToEdit) {
+      onAcademiaEdited(formData);
+    } else {
+      onAcademiaAdded(formData);
+    }
     setIsOpen(false);
     setFormData({
       nombre: '',
@@ -126,37 +138,82 @@ export function AñadirAcademia({ onAcademiaAdded }) { // OnAcademiaAdded es par
 
 
 const AcademiasPage = () => {
-  const [academias, setAcademias] = useState([]);
+  const [academias, setAcademias] = useState(() => {
+    const savedAcademias = localStorage.getItem('academias');
+    return savedAcademias ? JSON.parse(savedAcademias) : [];
+  });
+  const [academiaToEdit, setAcademiaToEdit] = useState(null);
+
+
+  // Guardar en localStorage cuando cambie el estado de academias
+  useEffect(() => {
+    localStorage.setItem('academias', JSON.stringify(academias));
+  }, [academias]);
 
   const handleAcademiaAdded = (nuevaAcademia) => {
     setAcademias([...academias, nuevaAcademia]);
   };
 
+  const handleDeleteAcademia = (index) => {
+    const nuevasAcademias = academias.filter((_, i) => i !== index);
+    setAcademias(nuevasAcademias);
+  };
+
+  const handleEditAcademia = (academia, index) => {
+    setAcademiaToEdit({ ...academia, index });
+  };
+
+  const handleAcademiaEdited = (academiaEditada) => {
+    const nuevasAcademias = academias.map((academia, index) => 
+      index === academiaToEdit.index ? academiaEditada : academia
+    );
+    setAcademias(nuevasAcademias);
+    setAcademiaToEdit(null);
+  };
+
+
   return (
     <>
-      <AñadirAcademia onAcademiaAdded={handleAcademiaAdded} />
+      <AñadirAcademia 
+      onAcademiaAdded={handleAcademiaAdded}
+      academiaToEdit={academiaToEdit}
+      onAcademiaEdited={handleAcademiaEdited}
+    />
       <div className="container mx-auto px-4">
-        {/* Contenedor de encabezados con borde inferior */}
         <div className="border-b-2 border-gray-800 bg-gray-200">
-          <div className="grid grid-cols-4 gap-8 mt-8 px-6 py-2">
+          <div className="grid grid-cols-5 gap-8 mt-8 px-6 py-2">
             <h1 className="text-lg font-bold pl-2">Academia</h1>
             <h1 className="text-lg font-bold">Dirección</h1>
             <h1 className="text-lg font-bold">Teléfono</h1>
             <h1 className="text-lg font-bold">Nº Alumnos</h1>
+            <h1 className="text-lg font-bold">Acciones</h1>
           </div>
         </div>
         
-        {/* Lista de academias con margen superior */}
         <div className="space-y-2 mt-4">
           {academias.map((academia, index) => (
             <div 
               key={index} 
-              className="grid grid-cols-4 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg"
+              className="grid grid-cols-5 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg items-center"
             >
               <span className="truncate pl-2">{academia.nombre}</span>
               <span className="truncate">{academia.direccion}</span>
               <span className="truncate">{academia.telefono}</span>
               <span className="truncate">{academia.numAlumnos}</span>
+              <div className="flex space-x-2">
+                <button 
+                className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                onClick={() => handleEditAcademia(academia, index)}
+              >
+                Editar
+              </button>
+                <button 
+                  className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                  onClick={() => handleDeleteAcademia(index)}
+                >
+                  Borrar
+                </button>
+              </div>
             </div>
           ))}
         </div>
