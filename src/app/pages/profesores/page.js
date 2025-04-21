@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 
 
 const ProfesoresPage = () => {
-  // Estado inicial: carga desde localStorage o crea 3 profesores vacíos
+  // Estado inicial con localStorage: si hay datos guardados, los usa; si no, usa 3 profesores vacíos
   const [profesores, setProfesores] = useState(() => {
     const datosGuardados = localStorage.getItem('profesores');
     return datosGuardados
@@ -16,55 +16,32 @@ const ProfesoresPage = () => {
         ];
   });
 
-  // Estados para manejar búsqueda, edición y modal
-  const [editandoId, setEditandoId] = useState(null);
-  const [busqueda, setBusqueda] = useState('');
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [profesorTemporal, setProfesorTemporal] = useState({ id: null, nombre: '', email: '', telefono: '', asignaturas: [''] });
+  const [editandoId, setEditandoId] = useState(null); // ID del profesor que se está editando
+  const [busqueda, setBusqueda] = useState(''); // Texto del input de búsqueda
 
-  // Guarda automáticamente en localStorage cuando cambia la lista
+  // Cada vez que cambia la lista de profesores, se guarda en localStorage
   useEffect(() => {
     localStorage.setItem('profesores', JSON.stringify(profesores));
   }, [profesores]);
 
-  // Abre el modal para crear un nuevo profesor
-  const abrirModalNuevo = () => {
-    const nuevoId = profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1;
-    setProfesorTemporal({ id: nuevoId, nombre: '', email: '', telefono: '', asignaturas: [''] });
-    setModalAbierto(true);
+  // Función para actualizar cualquier campo de un profesor
+  const actualizarCampo = (id, campo, valor) => {
+    setProfesores((prev) =>
+      prev.map((prof) => (prof.id === id ? { ...prof, [campo]: valor } : prof))
+    );
   };
 
-  // Abre el modal para editar un profesor existente
-  const abrirModalEditar = (profesor) => {
-    setProfesorTemporal({ ...profesor });
-    setModalAbierto(true);
+  const guardarCambios = () => {
+    setEditandoId(null); // Salir del modo edición
   };
 
-  // Cierra el modal y limpia el estado temporal
-  const cerrarModal = () => {
-    setModalAbierto(false);
-    setProfesorTemporal({ id: null, nombre: '', email: '', telefono: '', asignaturas: [''] });
-  };
-
-  // Guarda el nuevo profesor o actualiza uno existente
-  const guardarProfesor = () => {
-    setProfesores((prev) => {
-      const existe = prev.find((p) => p.id === profesorTemporal.id);
-      if (existe) {
-        return prev.map((p) => (p.id === profesorTemporal.id ? profesorTemporal : p));
-      } else {
-        return [...prev, profesorTemporal];
-      }
-    });
-    cerrarModal();
-  };
-
-  // Elimina un profesor de la lista
+  // Elimina un profesor y cierra la edición si se estaba editando ese campo
   const eliminarProfesor = (id) => {
     setProfesores(profesores.filter((p) => p.id !== id));
+    if (editandoId === id) setEditandoId(null);
   };
 
-  // Filtra los profesores por el nombre ingresado en la búsqueda
+  // Filtro de profesores basado en la búsqueda por nombre
   const profesoresFiltrados = profesores.filter((prof) =>
     prof.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
@@ -74,7 +51,7 @@ const ProfesoresPage = () => {
       <h1 className="text-2xl font-bold mb-2">Gestión de Profesores</h1>
       <p className="text-gray-600 mb-6">Administra los contactos de los profesores</p>
 
-      {/* Input de búsqueda y botón de nuevo */}
+      {/* Input de búsqueda y botón para crear nuevo profesor */}
       <div className="flex items-center justify-between mb-4">
         <input
           type="text"
@@ -84,14 +61,26 @@ const ProfesoresPage = () => {
           onChange={(e) => setBusqueda(e.target.value)}
         />
         <button
-          onClick={abrirModalNuevo}
+          onClick={() => {
+            // Crea nuevo profesor con ID incremental
+            const nuevoId = profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1;
+            const nuevo = {
+              id: nuevoId,
+              nombre: '',
+              email: '',
+              telefono: '',
+              asignaturas: [''],
+            };
+            setProfesores([...profesores, nuevo]);
+            setEditandoId(nuevoId); // Inicia edición directa del nuevo
+          }}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          Nuevo Profesor
+           Nuevo Profesor
         </button>
       </div>
 
-      {/* Tabla con los profesores filtrados */}
+      {/* Tabla de profesores */}
       <table className="w-full border shadow-sm rounded overflow-hidden text-sm">
         <thead className="bg-gray-100">
           <tr>
@@ -105,10 +94,65 @@ const ProfesoresPage = () => {
         <tbody>
           {profesoresFiltrados.map((profesor) => (
             <tr key={profesor.id} className="border-t hover:bg-gray-50">
-              <td className="px-4 py-2">{profesor.nombre}</td>
-              <td className="px-4 py-2">{profesor.email}</td>
-              <td className="px-4 py-2">{profesor.telefono}</td>
-              <td className="px-4 py-2">{profesor.asignaturas.join(', ')}</td>
+              {/* Campo nombre editable */}
+              <td className="px-4 py-2">
+                {editandoId === profesor.id ? (
+                  <input
+                    className="border px-2 py-1 w-full"
+                    value={profesor.nombre}
+                    onChange={(e) => actualizarCampo(profesor.id, 'nombre', e.target.value)}
+                  />
+                ) : (
+                  profesor.nombre
+                )}
+              </td>
+
+              {/* Campo email editable */}
+              <td className="px-4 py-2">
+                {editandoId === profesor.id ? (
+                  <input
+                    className="border px-2 py-1 w-full"
+                    value={profesor.email}
+                    onChange={(e) => actualizarCampo(profesor.id, 'email', e.target.value)}
+                  />
+                ) : (
+                  profesor.email
+                )}
+              </td>
+
+              {/* Campo teléfono editable */}
+              <td className="px-4 py-2">
+                {editandoId === profesor.id ? (
+                  <input
+                    className="border px-2 py-1 w-full"
+                    value={profesor.telefono}
+                    onChange={(e) => actualizarCampo(profesor.id, 'telefono', e.target.value)}
+                  />
+                ) : (
+                  profesor.telefono
+                )}
+              </td>
+
+              {/* Campo asignaturas editable, separadas por coma */}
+              <td className="px-4 py-2">
+                {editandoId === profesor.id ? (
+                  <input
+                    className="border px-2 py-1 w-full"
+                    value={profesor.asignaturas.join(', ')}
+                    onChange={(e) =>
+                      actualizarCampo(
+                        profesor.id,
+                        'asignaturas',
+                        e.target.value.split(',').map((a) => a.trim())
+                      )
+                    }
+                  />
+                ) : (
+                  profesor.asignaturas.join(', ')
+                )}
+              </td>
+
+              {/* Botones de acción: editar, guardar, eliminar */}
               <td className="px-4 py-2 flex space-x-2">
                 {/* Botón para editar */}
                 <button
@@ -128,7 +172,7 @@ const ProfesoresPage = () => {
         </tbody>
       </table>
 
-      {/* Paginación estática */}
+      {/* Paginación (estática por ahora) */}
       <div className="flex justify-between items-center mt-4">
         <p className="text-sm text-gray-500">
           Mostrando {profesoresFiltrados.length} contacto(s)
