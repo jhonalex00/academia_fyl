@@ -237,9 +237,12 @@ export default function HorariosPage() {
 
       if (!responseHorario.ok) {
         throw new Error('Error al crear horario');
-      }
+      }      const horarioCreado = await responseHorario.json();
 
-      const horarioCreado = await responseHorario.json();
+      // Comprobar que el horario tiene un ID válido
+      if (!horarioCreado || !horarioCreado.id) {
+        throw new Error('El servidor no devolvió un ID de horario válido');
+      }
 
       // Asociar el horario con el profesor y la academia
       const responseAsociacion = await fetch('/api/profesores/horarios', {
@@ -422,10 +425,108 @@ export default function HorariosPage() {
     });
   };
 
-  // Función auxiliar para obtener el nombre del día a partir del número
+  // Función auxiliar para obtener el nombre del día de la semana
   const obtenerNombreDia = (numeroDia) => {
     const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     return dias[numeroDia];
+  };
+
+  // Manejar el redimensionamiento de eventos (cambio de duración)
+  const manejarRedimensionamiento = async (info) => {
+    try {
+      setCargando(true);
+      
+      const evento = info.event;
+      const idschedule = evento.extendedProps.idschedule;
+      const nuevaFecha = evento.start.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const nuevaHoraInicio = `${evento.start.getHours().toString().padStart(2, '0')}:${evento.start.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevaHoraFin = `${evento.end.getHours().toString().padStart(2, '0')}:${evento.end.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevoDiaSemana = obtenerNombreDia(evento.start.getDay());
+      
+      console.log('Actualizando duración del horario:', {
+        idschedule,
+        fecha: nuevaFecha,
+        horaInicio: nuevaHoraInicio,
+        horaFin: nuevaHoraFin,
+        diaSemana: nuevoDiaSemana
+      });
+      
+      // Actualizar el horario en la base de datos
+      const responseHorario = await fetch(`/api/horarios/${idschedule}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: nuevaFecha,
+          weekDay: nuevoDiaSemana,
+          startHour: nuevaHoraInicio,
+          finishHour: nuevaHoraFin
+        }),
+      });
+
+      if (!responseHorario.ok) {
+        // Si falla, revertimos el cambio en el calendario
+        info.revert();
+        throw new Error('Error al actualizar la duración del horario');
+      }
+      
+      setError('');
+      await cargarHorarioProfesor(profesorSeleccionado);
+    } catch (error) {
+      info.revert(); // Revertir el cambio en la interfaz
+      setError('Error al cambiar la duración del horario: ' + error.message);
+      console.error('Error al cambiar la duración del horario:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // Manejar el arrastre de eventos en el calendario
+  const manejarArrastreEvento = async (info) => {
+    try {
+      setCargando(true);
+      
+      const evento = info.event;
+      const idschedule = evento.extendedProps.idschedule;
+      const nuevaFecha = evento.start.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const nuevaHoraInicio = `${evento.start.getHours().toString().padStart(2, '0')}:${evento.start.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevaHoraFin = `${evento.end.getHours().toString().padStart(2, '0')}:${evento.end.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevoDiaSemana = obtenerNombreDia(evento.start.getDay());
+      
+      console.log('Actualizando horario por drag & drop:', {
+        idschedule,
+        fecha: nuevaFecha,
+        horaInicio: nuevaHoraInicio,
+        horaFin: nuevaHoraFin,
+        diaSemana: nuevoDiaSemana
+      });
+      
+      // Actualizar el horario en la base de datos
+      const responseHorario = await fetch(`/api/horarios/${idschedule}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: nuevaFecha,
+          weekDay: nuevoDiaSemana,
+          startHour: nuevaHoraInicio,
+          finishHour: nuevaHoraFin
+        }),
+      });
+
+      if (!responseHorario.ok) {
+        // Si falla, revertimos el cambio en el calendario
+        info.revert();
+        throw new Error('Error al actualizar el horario');
+      }
+      
+      setError('');
+      await cargarHorarioProfesor(profesorSeleccionado);
+    } catch (error) {
+      info.revert(); // Revertir el cambio en la interfaz
+      setError('Error al mover el horario: ' + error.message);
+      console.error('Error al mover el horario:', error);
+    } finally {
+      setCargando(false);
+    }
   };
 
   // Filtrar profesores por búsqueda
@@ -514,8 +615,7 @@ export default function HorariosPage() {
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
               <p>Cargando horarios...</p>
             </div>
-          ) : (
-            <FullCalendar
+          ) : (            <FullCalendar
               ref={calendarRef}
               plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
               initialView="timeGridWeek"
@@ -527,7 +627,11 @@ export default function HorariosPage() {
               slotMinTime="08:00:00"
               slotMaxTime="22:00:00"
               expandRows={true}
-              slotDuration="01:00:00"
+              slotDuration="01:00:00"              editable={true}
+              droppable={true}
+              eventDrop={manejarArrastreEvento}
+              eventResize={manejarRedimensionamiento}
+              eventResizableFromStart={true}
               eventClick={(info) => abrirModalEdicion(info.event)}
               dateClick={(info) => {
                 if (profesorSeleccionado) {

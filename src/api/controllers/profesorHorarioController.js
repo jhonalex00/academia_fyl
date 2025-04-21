@@ -56,14 +56,22 @@ const getTeacherSchedulesByDate = async (req, res) => {  try {
 const createTeacherSchedule = async (req, res) => {
   try {
     const { idteacher, idschedule, idacademies } = req.body;
+    
+    console.log('Creando relación profesor-horario:', { idteacher, idschedule, idacademies });
+    
     const [result] = await sequelize.query(
       'INSERT INTO teachers_schedules (idteacher, idschedule, idacademies) VALUES (?, ?, ?)', 
-      [idteacher, idschedule, idacademies]
+      { 
+        replacements: [idteacher, idschedule, idacademies],
+        type: sequelize.QueryTypes.INSERT 
+      }
     );
+    
+    console.log('Resultado de la inserción profesor-horario:', result);
     res.status(201).json({ idteacher, idschedule, idacademies });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al crear la relación profesor-horario' });
+    console.error('Error al crear la relación profesor-horario:', error);
+    res.status(500).json({ error: 'Error al crear la relación profesor-horario: ' + error.message });
   }
 };
 
