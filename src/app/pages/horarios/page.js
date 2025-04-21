@@ -22,13 +22,14 @@ export default function HorariosPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
-  const [formularioHorario, setFormularioHorario] = useState({
+  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);  const [formularioHorario, setFormularioHorario] = useState({
     fecha: '',
     horaInicio: '',
     horaFin: '',
     diaSemana: '',
-    idacademies: ''
+    idacademies: '',
+    repetirSemanal: false,
+    semanas: 4 // Por defecto repetir por 4 semanas
   });
 
   // Función para formatear fechas
@@ -209,7 +210,6 @@ export default function HorariosPage() {
     
     return `${formatearFecha(start)} - ${formatearFecha(end)}`;
   };
-
   // Crear un nuevo horario
   const crearHorario = async () => {
     if (!profesorSeleccionado || 
@@ -222,49 +222,115 @@ export default function HorariosPage() {
       return;
     }
 
+    setCargando(true);
     try {
-      // Crear el horario
-      const responseHorario = await fetch('/api/horarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: formularioHorario.fecha,
-          weekDay: formularioHorario.diaSemana,
-          startHour: formularioHorario.horaInicio,
-          finishHour: formularioHorario.horaFin
-        }),
-      });
+      // Si está activada la repetición semanal, creamos múltiples horarios
+      if (formularioHorario.repetirSemanal && formularioHorario.semanas > 1) {
+        const fechaBase = new Date(formularioHorario.fecha);
+        const horariosCreados = [];
+        
+        // Crear horarios para cada semana
+        for (let i = 0; i < formularioHorario.semanas; i++) {
+          const fechaActual = new Date(fechaBase);
+          fechaActual.setDate(fechaActual.getDate() + (i * 7)); // Añadir 7 días por cada semana
+          
+          const fechaFormateada = fechaActual.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+          
+          console.log(`Creando horario para la semana ${i+1}:`, {
+            fecha: fechaFormateada,
+            diaSemana: formularioHorario.diaSemana,
+            horaInicio: formularioHorario.horaInicio,
+            horaFin: formularioHorario.horaFin
+          });
+          
+          // Crear el horario para esta semana
+          const responseHorario = await fetch('/api/horarios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              date: fechaFormateada,
+              weekDay: formularioHorario.diaSemana,
+              startHour: formularioHorario.horaInicio,
+              finishHour: formularioHorario.horaFin
+            }),
+          });
 
-      if (!responseHorario.ok) {
-        throw new Error('Error al crear horario');
-      }      const horarioCreado = await responseHorario.json();
+          if (!responseHorario.ok) {
+            throw new Error(`Error al crear horario para la semana ${i+1}`);
+          }
+          
+          const horarioCreado = await responseHorario.json();
+          
+          // Comprobar que el horario tiene un ID válido
+          if (!horarioCreado || !horarioCreado.id) {
+            throw new Error(`El servidor no devolvió un ID válido para el horario de la semana ${i+1}`);
+          }
+          
+          // Asociar el horario con el profesor y la academia
+          const responseAsociacion = await fetch('/api/profesores/horarios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              idteacher: profesorSeleccionado,
+              idschedule: horarioCreado.id,
+              idacademies: formularioHorario.idacademies
+            }),
+          });
+          
+          if (!responseAsociacion.ok) {
+            throw new Error(`Error al asociar el horario de la semana ${i+1} con el profesor`);
+          }
+          
+          horariosCreados.push(horarioCreado.id);
+        }
+        
+        console.log(`Se crearon ${horariosCreados.length} horarios recurrentes:`, horariosCreados);
+      } else {
+        // Crear un solo horario (comportamiento original)
+        const responseHorario = await fetch('/api/horarios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: formularioHorario.fecha,
+            weekDay: formularioHorario.diaSemana,
+            startHour: formularioHorario.horaInicio,
+            finishHour: formularioHorario.horaFin
+          }),
+        });
 
-      // Comprobar que el horario tiene un ID válido
-      if (!horarioCreado || !horarioCreado.id) {
-        throw new Error('El servidor no devolvió un ID de horario válido');
-      }
+        if (!responseHorario.ok) {
+          throw new Error('Error al crear horario');
+        }      
+        
+        const horarioCreado = await responseHorario.json();
 
-      // Asociar el horario con el profesor y la academia
-      const responseAsociacion = await fetch('/api/profesores/horarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idteacher: profesorSeleccionado,
-          idschedule: horarioCreado.id,
-          idacademies: formularioHorario.idacademies
-        }),
-      });
+        // Comprobar que el horario tiene un ID válido
+        if (!horarioCreado || !horarioCreado.id) {
+          throw new Error('El servidor no devolvió un ID de horario válido');
+        }
 
-      if (!responseAsociacion.ok) {
+        // Asociar el horario con el profesor y la academia
+        const responseAsociacion = await fetch('/api/profesores/horarios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            idteacher: profesorSeleccionado,
+            idschedule: horarioCreado.id,
+            idacademies: formularioHorario.idacademies
+          }),
+        });      if (!responseAsociacion.ok) {
         throw new Error('Error al asociar horario con profesor');
       }
-
+      }
+      
       // Recargar horarios y cerrar modal
       await cargarHorarioProfesor(profesorSeleccionado);
       cerrarModal();
     } catch (error) {
       setError('Error al crear horario: ' + error.message);
       console.error('Error al crear horario:', error);
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -409,7 +475,6 @@ export default function HorariosPage() {
     
     setModalAbierto(true);
   };
-
   // Cerrar modal
   const cerrarModal = () => {
     setModalAbierto(false);
@@ -421,7 +486,9 @@ export default function HorariosPage() {
       horaInicio: '',
       horaFin: '',
       diaSemana: '',
-      idacademies: ''
+      idacademies: '',
+      repetirSemanal: false,
+      semanas: 4
     });
   };
 
@@ -718,8 +785,7 @@ export default function HorariosPage() {
                 onChange={(e) => setFormularioHorario({...formularioHorario, horaFin: e.target.value})}
               />
             </div>
-            
-            <div className={styles.formGroup}>
+              <div className={styles.formGroup}>
               <label htmlFor="academia">Academia</label>
               <select
                 id="academia"
@@ -735,6 +801,41 @@ export default function HorariosPage() {
                 ))}
               </select>
             </div>
+            
+            {/* Opción para repetir semanalmente */}
+            {!modoEdicion && (
+              <>
+                <div className={styles.formGroup} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="checkbox"
+                    id="repetirSemanal"
+                    checked={formularioHorario.repetirSemanal}
+                    onChange={(e) => setFormularioHorario({...formularioHorario, repetirSemanal: e.target.checked})}
+                    style={{ width: 'auto' }}
+                  />
+                  <label htmlFor="repetirSemanal" style={{ margin: 0 }}>Repetir semanalmente</label>
+                </div>
+                
+                {formularioHorario.repetirSemanal && (
+                  <div className={styles.formGroup}>
+                    <label htmlFor="semanas">Repetir por</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input
+                        type="number"
+                        id="semanas"
+                        min="1"
+                        max="52"
+                        className={styles.formControl}
+                        value={formularioHorario.semanas}
+                        onChange={(e) => setFormularioHorario({...formularioHorario, semanas: parseInt(e.target.value) || 1})}
+                        style={{ width: '80px' }}
+                      />
+                      <span>semanas</span>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
             
             <div className={styles.modalActions}>
               <button onClick={cerrarModal} className={styles.cancelButton}>
