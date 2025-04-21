@@ -9,7 +9,6 @@ const AlumnosPage = () => {
 
   return (
     <div>
-      <Button size="md" onClick={handleClick}>Añadir</Button>
     </div>
   );
 };

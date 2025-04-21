@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Pencil, Trash2, Check, X } from 'lucide-react';
+
 
 const ProfesoresPage = () => {
   // Estado inicial: carga desde localStorage o crea 3 profesores vacíos
@@ -115,14 +115,12 @@ const ProfesoresPage = () => {
                   className="text-blue-600 hover:text-blue-800"
                   onClick={() => abrirModalEditar(profesor)}
                 >
-                  <Pencil size={18} />
                 </button>
                 {/* Botón para eliminar */}
                 <button
                   className="text-red-600 hover:text-red-800"
                   onClick={() => eliminarProfesor(profesor.id)}
                 >
-                  <Trash2 size={18} />
                 </button>
               </td>
             </tr>
@@ -207,7 +205,6 @@ const ProfesoresPage = () => {
               className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
               onClick={cerrarModal}
             >
-              <X size={18} />
             </button>
           </div>
         </div>
