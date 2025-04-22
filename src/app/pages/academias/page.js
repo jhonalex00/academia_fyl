@@ -138,38 +138,99 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
 
 
 const AcademiasPage = () => {
-  const [academias, setAcademias] = useState(() => {
-    const savedAcademias = localStorage.getItem('academias');
-    return savedAcademias ? JSON.parse(savedAcademias) : [];
-  });
+  const [academias, setAcademias] = useState([]);
   const [academiaToEdit, setAcademiaToEdit] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const cargarAcademias = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/academias', {
+        cache: 'no-store'
+      });
+      if (!response.ok) {
+        throw new Error('Error al cargar las academias');
+      }
+      const data = await response.json();
+      const academiasUnicas = Array.from(new Map(data.map(item => [item.idacademy, item])).values());
+      setAcademias(academiasUnicas);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Guardar en localStorage cuando cambie el estado de academias
+  const handleAcademiaAdded = async (nuevaAcademia) => {
+    try {
+      const response = await fetch('/api/academias', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: nuevaAcademia.nombre,
+          adress: nuevaAcademia.direccion,
+          phone: nuevaAcademia.telefono,
+          numStudents: nuevaAcademia.numAlumnos
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear la academia');
+      }
+
+      await cargarAcademias(); // Recargar las academias después de añadir
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+  
+  const handleDeleteAcademia = async (id) => {
+    try {
+      const response = await fetch(`/api/academias/${id}`, {
+        method: 'DELETE'
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al eliminar la academia');
+      }
+  
+      cargarAcademias(); // Recargar las academias
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+  
+  const handleAcademiaEdited = async (academiaEditada) => {
+    try {
+      const response = await fetch(`/api/academias/${academiaEditada.idacademy}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: academiaEditada.nombre,
+          adress: academiaEditada.direccion,
+          phone: academiaEditada.telefono
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al actualizar la academia');
+      }
+  
+      cargarAcademias(); // Recargar las academias
+      setAcademiaToEdit(null);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem('academias', JSON.stringify(academias));
-  }, [academias]);
-
-  const handleAcademiaAdded = (nuevaAcademia) => {
-    setAcademias([...academias, nuevaAcademia]);
-  };
-
-  const handleDeleteAcademia = (index) => {
-    const nuevasAcademias = academias.filter((_, i) => i !== index);
-    setAcademias(nuevasAcademias);
-  };
-
-  const handleEditAcademia = (academia, index) => {
-    setAcademiaToEdit({ ...academia, index });
-  };
-
-  const handleAcademiaEdited = (academiaEditada) => {
-    const nuevasAcademias = academias.map((academia, index) => 
-      index === academiaToEdit.index ? academiaEditada : academia
-    );
-    setAcademias(nuevasAcademias);
-    setAcademiaToEdit(null);
-  };
+    cargarAcademias();
+  }, []);
 
 
   return (
@@ -190,31 +251,31 @@ const AcademiasPage = () => {
         </div>
         
         <div className="space-y-2 mt-4">
-          {academias.map((academia, index) => (
-            <div 
-              key={index} 
-              className="grid grid-cols-5 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg items-center"
-            >
-              <span className="text-center">{academia.nombre}</span>
-              <span className="text-center">{academia.direccion}</span>
-              <span className="text-center">{academia.telefono}</span>
-              <span className="text-center">{academia.numAlumnos}</span>
-              <div className="flex justify-center space-x-2">
-                <button 
-                  className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                  onClick={() => handleEditAcademia(academia, index)}
-                >
-                  Editar
-                </button>
-                <button 
-                  className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                  onClick={() => handleDeleteAcademia(index)}
-                >
-                  Borrar
-                </button>
-              </div>
-            </div>
-          ))}
+        {academias.map((academia) => (
+  <div 
+    key={academia.idacademy} 
+    className="grid grid-cols-5 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg items-center"
+  >
+    <span className="text-center">{academia.name}</span>
+    <span className="text-center">{academia.adress}</span>
+    <span className="text-center">{academia.phone}</span>
+    <span className="text-center">{academia.numStudents}</span>
+    <div className="flex justify-center space-x-2">
+      <button 
+        className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+        onClick={() => handleEditAcademia(academia)}
+      >
+        Editar
+      </button>
+      <button 
+        className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+        onClick={() => handleDeleteAcademia(academia.idacademy)}
+      >
+        Borrar
+      </button>
+    </div>
+  </div>
+))}
         </div>
     </>
   );

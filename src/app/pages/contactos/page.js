@@ -5,11 +5,11 @@ import { Button, Dialog } from "@headlessui/react";
 export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdited }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellidos: '',
-    ciclo: '',
-    contacto1: '',
-    contacto2: ''
+    student_name: '',
+    student_surname: '',
+    subject_name: '',
+    contact_name: '',
+    contact_phone: ''
   });
 
   useEffect(() => {
@@ -28,11 +28,11 @@ export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdi
     }
     setIsOpen(false);
     setFormData({
-      nombre: '',
-      apellidos: '',
-      ciclo: '',
-      contacto1: '',
-      contacto2: ''
+      student_name: '',
+      student_surname: '',
+      subject_name: '',
+      contact_name: '',
+      contact_phone: ''
     });
   };
 
@@ -59,16 +59,18 @@ export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdi
         
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6">
-            <Dialog.Title className="text-lg font-medium mb-4">Nuevo Contacto</Dialog.Title>
+            <Dialog.Title className="text-lg font-medium mb-4">
+              {contactoToEdit ? 'Editar Contacto' : 'Nuevo Contacto'}
+            </Dialog.Title>
             
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre alumno</label>
+                  <label className="block text-sm font-medium text-gray-700">Nombre Alumno</label>
                   <input
                     type="text"
-                    name="nombre"
-                    value={formData.nombre}
+                    name="student_name"
+                    value={formData.student_name}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                     required
@@ -76,11 +78,11 @@ export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdi
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Apellidos alumno</label>
+                  <label className="block text-sm font-medium text-gray-700">Apellidos Alumno</label>
                   <input
                     type="text"
-                    name="apellidos"
-                    value={formData.apellidos}
+                    name="student_surname"
+                    value={formData.student_surname}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                     required
@@ -88,11 +90,11 @@ export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdi
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Ciclo</label>
+                  <label className="block text-sm font-medium text-gray-700">Asignatura</label>
                   <input
                     type="text"
-                    name="ciclo"
-                    value={formData.ciclo}
+                    name="subject_name"
+                    value={formData.subject_name}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                     required
@@ -100,25 +102,26 @@ export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdi
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Contacto 1</label>
+                  <label className="block text-sm font-medium text-gray-700">Nombre Contacto</label>
+                  <input
+                    type="text"
+                    name="contact_name"
+                    value={formData.contact_name}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Teléfono Contacto</label>
                   <input
                     type="tel"
-                    name="contacto1"
-                    value={formData.contacto1}
+                    name="contact_phone"
+                    value={formData.contact_phone}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                     required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Contacto 2</label>
-                  <input
-                    type="tel"
-                    name="contacto2"
-                    value={formData.contacto2}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                   />
                 </div>
               </div>
@@ -135,7 +138,7 @@ export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdi
                   type="submit"
                   className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
                 >
-                  Guardar
+                  {contactoToEdit ? 'Actualizar' : 'Guardar'}
                 </button>
               </div>
             </form>
@@ -147,36 +150,158 @@ export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdi
 }
 
 const ContactosPage = () => {
-  const [contactos, setContactos] = useState(() => {
-    const savedContactos = localStorage.getItem('contactos');
-    return savedContactos ? JSON.parse(savedContactos) : [];
-  });
+  const [contactos, setContactos] = useState([]);
   const [contactoToEdit, setContactoToEdit] = useState(null);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    localStorage.setItem('contactos', JSON.stringify(contactos));
-  }, [contactos]);
-
-  const handleContactoAdded = (nuevoContacto) => {
-    setContactos([...contactos, nuevoContacto]);
+  const cargarContactos = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/contacts/full-info', {
+        cache: 'no-store'
+      });
+      if (!response.ok) {
+        throw new Error('Error al cargar los contactos');
+      }
+      const data = await response.json();
+      setContactos(data);
+    } catch (error) {
+      setError(error.message);
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteContacto = (index) => {
-    const nuevosContactos = contactos.filter((_, i) => i !== index);
-    setContactos(nuevosContactos);
+  const handleContactoAdded = async (nuevoContacto) => {
+    try {
+      // Primero creamos el contacto
+      const contactResponse = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contact1: nuevoContacto.contacto1,
+          contact2: nuevoContacto.contacto2
+        })
+      });
+  
+      if (!contactResponse.ok) {
+        throw new Error('Error al crear el contacto');
+      }
+  
+      const contactData = await contactResponse.json();
+  
+      // Luego creamos el estudiante
+      const studentResponse = await fetch('/api/students', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: nuevoContacto.nombre,
+          surname: nuevoContacto.apellidos,
+          cycle: nuevoContacto.ciclo
+        })
+      });
+  
+      if (!studentResponse.ok) {
+        throw new Error('Error al crear el estudiante');
+      }
+  
+      const studentData = await studentResponse.json();
+  
+      // Finalmente, creamos la relación en la tabla intermedia
+      const relationResponse = await fetch('/api/students_contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idstudent: studentData.idstudent,
+          idcontact: contactData.idcontact
+        })
+      });
+  
+      if (!relationResponse.ok) {
+        throw new Error('Error al vincular estudiante y contacto');
+      }
+  
+      await cargarContactos();
+    } catch (error) {
+      setError(error.message);
+      console.error('Error:', error);
+    }
+  };
+
+  const handleDeleteContacto = async (id) => {
+    try {
+      // Primero eliminamos la relación en la tabla intermedia
+      const response = await fetch(`/api/students_contacts/relation/${id}`, {
+        method: 'DELETE'
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error al eliminar la relación');
+      }
+  
+      await cargarContactos();
+    } catch (error) {
+      setError(error.message);
+      console.error('Error:', error);
+    }
   };
 
   const handleEditContacto = (contacto, index) => {
     setContactoToEdit({ ...contacto, index });
   };
 
-  const handleContactoEdited = (contactoEditado) => {
-    const nuevosContactos = contactos.map((contacto, index) => 
-      index === contactoToEdit.index ? contactoEditado : contacto
-    );
-    setContactos(nuevosContactos);
-    setContactoToEdit(null);
+  const handleContactoEdited = async (contactoEditado) => {
+    try {
+      const studentResponse = await fetch(`/api/students/${contactoEditado.idstudent}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: contactoEditado.student_name,
+          surname: contactoEditado.student_surname,
+          idsubject: contactoEditado.idsubject
+        })
+      });
+  
+      if (!studentResponse.ok) {
+        throw new Error('Error al actualizar el estudiante');
+      }
+  
+      const contactResponse = await fetch(`/api/contacts/${contactoEditado.idcontact}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: contactoEditado.contact_name,
+          phone: contactoEditado.contact_phone
+        })
+      });
+  
+      if (!contactResponse.ok) {
+        throw new Error('Error al actualizar el contacto');
+      }
+  
+      await cargarContactos();
+      setContactoToEdit(null);
+    } catch (error) {
+      setError(error.message);
+      console.error('Error:', error);
+    }
   };
+
+  useEffect(() => {
+    cargarContactos();
+  }, []);
 
   return (
     <>
@@ -187,43 +312,43 @@ const ContactosPage = () => {
       />
       <div className="container mx-auto px-4">
         <div className="border-b-2 border-gray-800 bg-gray-200">
-          <div className="grid grid-cols-6 gap-8 mt-8 px-6 py-2">
-            <h1 className="text-lg font-bold text-center">Nombre alumno</h1>
-            <h1 className="text-lg font-bold text-center">Apellidos alumno</h1>
-            <h1 className="text-lg font-bold text-center">Ciclo</h1>
-            <h1 className="text-lg font-bold text-center">Contacto 1</h1>
-            <h1 className="text-lg font-bold text-center">Contacto 2</h1>
-            <h1 className="text-lg font-bold text-center">Acciones</h1>
-          </div>
+        <div className="grid grid-cols-6 gap-8 mt-8 px-6 py-2">
+          <h1 className="text-lg font-bold text-center">Nombre Alumno</h1>
+          <h1 className="text-lg font-bold text-center">Apellidos Alumno</h1>
+          <h1 className="text-lg font-bold text-center">Asignatura</h1>
+          <h1 className="text-lg font-bold text-center">Nombre Contacto</h1>
+          <h1 className="text-lg font-bold text-center">Teléfono Contacto</h1>
+          <h1 className="text-lg font-bold text-center">Acciones</h1>
+        </div>
         </div>
         
         <div className="space-y-2 mt-4">
-          {contactos.map((contacto, index) => (
-            <div 
-              key={index} 
-              className="grid grid-cols-6 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg"
-            >
-              <span className="text-center">{contacto.nombre}</span>
-              <span className="text-center">{contacto.apellidos}</span>
-              <span className="text-center">{contacto.ciclo}</span>
-              <span className="text-center">{contacto.contacto1}</span>
-              <span className="text-center">{contacto.contacto2}</span>
-              <div className="flex justify-center space-x-2">
-                <button 
-                  className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                  onClick={() => handleEditContacto(contacto, index)}
-                >
-                  Editar
-                </button>
-                <button 
-                  className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                  onClick={() => handleDeleteContacto(index)}
-                >
-                  Borrar
-                </button>
-              </div>
+        {contactos.map((contacto) => (
+          <div 
+            key={contacto.idstudent} 
+            className="grid grid-cols-6 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg"
+          >
+            <span className="text-center">{contacto.student_name}</span>
+            <span className="text-center">{contacto.student_surname}</span>
+            <span className="text-center">{contacto.subject_name}</span>
+            <span className="text-center">{contacto.contact_phone}</span>
+            <span className="text-center">{contacto.contact_name}</span>
+            <div className="flex justify-center space-x-2">
+              <button 
+                className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                onClick={() => handleEditContacto(contacto)}
+              >
+                Editar
+              </button>
+              <button 
+                className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                onClick={() => handleDeleteContacto(contacto.idstudent)}
+              >
+                Borrar
+              </button>
             </div>
-          ))}
+          </div>
+        ))}
         </div>
       </div>
     </>
