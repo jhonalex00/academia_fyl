@@ -179,14 +179,13 @@ const AcademiasPage = () => {
       academiaToEdit={academiaToEdit}
       onAcademiaEdited={handleAcademiaEdited}
     />
-      <div className="container mx-auto px-4">
-        <div className="border-b-2 border-gray-800 bg-gray-200">
+              <div className="border-b-2 border-gray-800 bg-gray-200">
           <div className="grid grid-cols-5 gap-8 mt-8 px-6 py-2">
-            <h1 className="text-lg font-bold pl-2">Academia</h1>
-            <h1 className="text-lg font-bold">Dirección</h1>
-            <h1 className="text-lg font-bold">Teléfono</h1>
-            <h1 className="text-lg font-bold">Nº Alumnos</h1>
-            <h1 className="text-lg font-bold">Acciones</h1>
+            <h1 className="text-lg font-bold text-center">Academia</h1>
+            <h1 className="text-lg font-bold text-center">Dirección</h1>
+            <h1 className="text-lg font-bold text-center">Teléfono</h1>
+            <h1 className="text-lg font-bold text-center">Nº Alumnos</h1>
+            <h1 className="text-lg font-bold text-center">Acciones</h1>
           </div>
         </div>
         
@@ -196,17 +195,17 @@ const AcademiasPage = () => {
               key={index} 
               className="grid grid-cols-5 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg items-center"
             >
-              <span className="truncate pl-2">{academia.nombre}</span>
-              <span className="truncate">{academia.direccion}</span>
-              <span className="truncate">{academia.telefono}</span>
-              <span className="truncate">{academia.numAlumnos}</span>
-              <div className="flex space-x-2">
+              <span className="text-center">{academia.nombre}</span>
+              <span className="text-center">{academia.direccion}</span>
+              <span className="text-center">{academia.telefono}</span>
+              <span className="text-center">{academia.numAlumnos}</span>
+              <div className="flex justify-center space-x-2">
                 <button 
-                className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                onClick={() => handleEditAcademia(academia, index)}
-              >
-                Editar
-              </button>
+                  className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                  onClick={() => handleEditAcademia(academia, index)}
+                >
+                  Editar
+                </button>
                 <button 
                   className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
                   onClick={() => handleDeleteAcademia(index)}
@@ -217,7 +216,6 @@ const AcademiasPage = () => {
             </div>
           ))}
         </div>
-      </div>
     </>
   );
 };

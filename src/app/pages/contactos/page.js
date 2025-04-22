@@ -1,8 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Dialog } from "@headlessui/react";
 
-export function AñadirContacto({ onContactoAdded }) {
+export function AñadirContacto({ onContactoAdded, contactoToEdit, onContactoEdited }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
@@ -12,9 +12,20 @@ export function AñadirContacto({ onContactoAdded }) {
     contacto2: ''
   });
 
+  useEffect(() => {
+    if (contactoToEdit) {
+      setFormData(contactoToEdit);
+      setIsOpen(true);
+    }
+  }, [contactoToEdit]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onContactoAdded(formData);
+    if (contactoToEdit) {
+      onContactoEdited(formData);
+    } else {
+      onContactoAdded(formData);
+    }
     setIsOpen(false);
     setFormData({
       nombre: '',
@@ -53,7 +64,7 @@ export function AñadirContacto({ onContactoAdded }) {
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                  <label className="block text-sm font-medium text-gray-700">Nombre alumno</label>
                   <input
                     type="text"
                     name="nombre"
@@ -65,7 +76,7 @@ export function AñadirContacto({ onContactoAdded }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Apellidos</label>
+                  <label className="block text-sm font-medium text-gray-700">Apellidos alumno</label>
                   <input
                     type="text"
                     name="apellidos"
@@ -136,23 +147,53 @@ export function AñadirContacto({ onContactoAdded }) {
 }
 
 const ContactosPage = () => {
-  const [contactos, setContactos] = useState([]);
+  const [contactos, setContactos] = useState(() => {
+    const savedContactos = localStorage.getItem('contactos');
+    return savedContactos ? JSON.parse(savedContactos) : [];
+  });
+  const [contactoToEdit, setContactoToEdit] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem('contactos', JSON.stringify(contactos));
+  }, [contactos]);
 
   const handleContactoAdded = (nuevoContacto) => {
     setContactos([...contactos, nuevoContacto]);
   };
 
+  const handleDeleteContacto = (index) => {
+    const nuevosContactos = contactos.filter((_, i) => i !== index);
+    setContactos(nuevosContactos);
+  };
+
+  const handleEditContacto = (contacto, index) => {
+    setContactoToEdit({ ...contacto, index });
+  };
+
+  const handleContactoEdited = (contactoEditado) => {
+    const nuevosContactos = contactos.map((contacto, index) => 
+      index === contactoToEdit.index ? contactoEditado : contacto
+    );
+    setContactos(nuevosContactos);
+    setContactoToEdit(null);
+  };
+
   return (
     <>
-      <AñadirContacto onContactoAdded={handleContactoAdded} />
+      <AñadirContacto 
+        onContactoAdded={handleContactoAdded}
+        contactoToEdit={contactoToEdit}
+        onContactoEdited={handleContactoEdited}
+      />
       <div className="container mx-auto px-4">
         <div className="border-b-2 border-gray-800 bg-gray-200">
-          <div className="grid grid-cols-5 gap-8 mt-8 px-6 py-2">
-            <h1 className="text-lg font-bold pl-2">Nombre</h1>
-            <h1 className="text-lg font-bold">Apellidos</h1>
-            <h1 className="text-lg font-bold">Ciclo</h1>
-            <h1 className="text-lg font-bold">Contacto 1</h1>
-            <h1 className="text-lg font-bold">Contacto 2</h1>
+          <div className="grid grid-cols-6 gap-8 mt-8 px-6 py-2">
+            <h1 className="text-lg font-bold text-center">Nombre alumno</h1>
+            <h1 className="text-lg font-bold text-center">Apellidos alumno</h1>
+            <h1 className="text-lg font-bold text-center">Ciclo</h1>
+            <h1 className="text-lg font-bold text-center">Contacto 1</h1>
+            <h1 className="text-lg font-bold text-center">Contacto 2</h1>
+            <h1 className="text-lg font-bold text-center">Acciones</h1>
           </div>
         </div>
         
@@ -160,13 +201,27 @@ const ContactosPage = () => {
           {contactos.map((contacto, index) => (
             <div 
               key={index} 
-              className="grid grid-cols-5 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg"
+              className="grid grid-cols-6 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg"
             >
-              <span className="truncate pl-2">{contacto.nombre}</span>
-              <span className="truncate">{contacto.apellidos}</span>
-              <span className="truncate">{contacto.ciclo}</span>
-              <span className="truncate">{contacto.contacto1}</span>
-              <span className="truncate">{contacto.contacto2}</span>
+              <span className="text-center">{contacto.nombre}</span>
+              <span className="text-center">{contacto.apellidos}</span>
+              <span className="text-center">{contacto.ciclo}</span>
+              <span className="text-center">{contacto.contacto1}</span>
+              <span className="text-center">{contacto.contacto2}</span>
+              <div className="flex justify-center space-x-2">
+                <button 
+                  className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                  onClick={() => handleEditContacto(contacto, index)}
+                >
+                  Editar
+                </button>
+                <button 
+                  className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                  onClick={() => handleDeleteContacto(index)}
+                >
+                  Borrar
+                </button>
+              </div>
             </div>
           ))}
         </div>
