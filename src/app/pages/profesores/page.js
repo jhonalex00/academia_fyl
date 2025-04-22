@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { Button, Dialog } from "@headlessui/react";
 
@@ -55,13 +54,31 @@ const ProfesoresPage = () => {
   const agregarAsignatura = (id) => manejarAsignaturas(id, 'agregar');
   const eliminarAsignatura = (id, index) => manejarAsignaturas(id, 'eliminar', index);
 
+  const handleEdit = (id) => {
+    const profesor = profesores.find((p) => p.id === id);
+    setFormData(profesor);
+    setEditandoId(id);
+    setIsOpen(true);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const nuevoProfesor = {
-      id: profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1,
-      ...formData,
-    };
-    setProfesores([...profesores, nuevoProfesor]);
+    if (editandoId) {
+      // Actualizar profesor existente
+      setProfesores((prev) =>
+        prev.map((prof) =>
+          prof.id === editandoId ? { ...prof, ...formData } : prof
+        )
+      );
+      setEditandoId(null);
+    } else {
+      // Añadir nuevo profesor
+      const nuevoProfesor = {
+        id: profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1,
+        ...formData,
+      };
+      setProfesores([...profesores, nuevoProfesor]);
+    }
     setIsOpen(false);
     setFormData(profesorVacio());
   };
@@ -116,7 +133,7 @@ const ProfesoresPage = () => {
               <td className="px-4 py-2 flex space-x-2">
                 <button
                   className="text-blue-600 hover:text-blue-800"
-                  onClick={() => setEditandoId(profesor.id)}
+                  onClick={() => handleEdit(profesor.id)}
                 >
                   Editar
                 </button>
@@ -136,12 +153,14 @@ const ProfesoresPage = () => {
         Mostrando {profesoresFiltrados.length} contacto(s)
       </div>
 
-      {/* Modal para Añadir Profesor */}
+      {/* Modal para Añadir/Editar Profesor */}
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6">
-            <Dialog.Title className="text-lg font-medium mb-4">Nuevo Profesor</Dialog.Title>
+            <Dialog.Title className="text-lg font-medium mb-4">
+              {editandoId ? 'Editar Profesor' : 'Nuevo Profesor'}
+            </Dialog.Title>
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
@@ -204,7 +223,7 @@ const ProfesoresPage = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Guardar
                 </button>
