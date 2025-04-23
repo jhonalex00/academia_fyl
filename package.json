@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "start-server": "nodemon server.js",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:all": "concurrently -n FRONTEND,BACKEND -c blue,green \"npm run dev\" \"npm run start-server\""
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.17",
@@ -48,6 +49,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "postcss": "^8.5.3",
