@@ -146,7 +146,7 @@ const AcademiasPage = () => {
   const cargarAcademias = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/academias', {
+      const response = await fetch('http://localhost:3001/api/academias', {
         cache: 'no-store'
       });
       if (!response.ok) {
@@ -164,7 +164,7 @@ const AcademiasPage = () => {
 
   const handleAcademiaAdded = async (nuevaAcademia) => {
     try {
-      const response = await fetch('/api/academias', {
+      const response = await fetch('http://localhost:3001/api/academias', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ const AcademiasPage = () => {
   
   const handleDeleteAcademia = async (id) => {
     try {
-      const response = await fetch(`/api/academias/${id}`, {
+      const response = await fetch(`http://localhost:3001/api/academias/${id}`, {
         method: 'DELETE'
       });
   
@@ -205,7 +205,7 @@ const AcademiasPage = () => {
   
   const handleAcademiaEdited = async (academiaEditada) => {
     try {
-      const response = await fetch(`/api/academias/${academiaEditada.idacademy}`, {
+      const response = await fetch(`http://localhost:3001/api/academias/${academiaEditada.idacademy}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

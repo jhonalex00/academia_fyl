@@ -43,7 +43,7 @@ export default function HorariosPage() {
   const cargarProfesores = async () => {
     try {
       setCargando(true);
-      const response = await fetch('/api/profesores');
+      const response = await fetch('http://localhost:3001/api/profesores');
       if (!response.ok) {
         throw new Error('Error al cargar profesores');
       }
@@ -60,7 +60,7 @@ export default function HorariosPage() {
   // Cargar academias desde la API
   const cargarAcademias = async () => {
     try {
-      const response = await fetch('/api/academias');
+      const response = await fetch('http://localhost:3001/api/academias');
       if (!response.ok) {
         throw new Error('Error al cargar academias');
       }
@@ -78,7 +78,7 @@ export default function HorariosPage() {
     
     try {
       setCargando(true);
-      const response = await fetch(`/api/profesores/${idProfesor}/horarios`);
+      const response = await fetch(`http://localhost:3001/api/profesores/${idProfesor}/horarios`);
       if (!response.ok) {
         throw new Error('Error al cargar horarios del profesor');
       }
@@ -244,7 +244,7 @@ export default function HorariosPage() {
           });
           
           // Crear el horario para esta semana
-          const responseHorario = await fetch('/api/horarios', {
+          const responseHorario = await fetch('http://localhost:3001/api/horarios', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -267,7 +267,7 @@ export default function HorariosPage() {
           }
           
           // Asociar el horario con el profesor y la academia
-          const responseAsociacion = await fetch('/api/profesores/horarios', {
+          const responseAsociacion = await fetch('http://localhost:3001/api/profesores/horarios', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -287,7 +287,7 @@ export default function HorariosPage() {
         console.log(`Se crearon ${horariosCreados.length} horarios recurrentes:`, horariosCreados);
       } else {
         // Crear un solo horario (comportamiento original)
-        const responseHorario = await fetch('/api/horarios', {
+        const responseHorario = await fetch('http://localhost:3001/api/horarios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -310,7 +310,7 @@ export default function HorariosPage() {
         }
 
         // Asociar el horario con el profesor y la academia
-        const responseAsociacion = await fetch('/api/profesores/horarios', {
+        const responseAsociacion = await fetch('http://localhost:3001/api/profesores/horarios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -348,7 +348,7 @@ export default function HorariosPage() {
 
     try {
       // Actualizar el horario
-      const responseHorario = await fetch(`/api/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
+      const responseHorario = await fetch(`http://localhost:3001/api/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -365,7 +365,7 @@ export default function HorariosPage() {
 
       // Actualizar la relación con la academia
       // Primero eliminar la relación actual
-      const deleteResponse = await fetch(`/api/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
+      const deleteResponse = await fetch(`http://localhost:3001/api/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
         method: 'DELETE',
       });
 
@@ -374,7 +374,7 @@ export default function HorariosPage() {
       }
 
       // Luego crear la nueva relación
-      const createResponse = await fetch('/api/profesores/horarios', {
+      const createResponse = await fetch('http://localhost:3001/api/profesores/horarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -407,7 +407,7 @@ export default function HorariosPage() {
 
     try {
       // Eliminar la relación profesor-horario
-      const deleteRelacionResponse = await fetch(`/api/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
+      const deleteRelacionResponse = await fetch(`http://localhost:3001/api/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
         method: 'DELETE',
       });
 
@@ -416,7 +416,7 @@ export default function HorariosPage() {
       }
 
       // Eliminar el horario
-      const deleteHorarioResponse = await fetch(`/api/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
+      const deleteHorarioResponse = await fetch(`http://localhost:3001/api/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
         method: 'DELETE',
       });
 
@@ -519,7 +519,7 @@ export default function HorariosPage() {
       });
       
       // Actualizar el horario en la base de datos
-      const responseHorario = await fetch(`/api/horarios/${idschedule}`, {
+      const responseHorario = await fetch(`http://localhost:3001/api/horarios/${idschedule}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -568,7 +568,7 @@ export default function HorariosPage() {
       });
       
       // Actualizar el horario en la base de datos
-      const responseHorario = await fetch(`/api/horarios/${idschedule}`, {
+      const responseHorario = await fetch(`http://localhost:3001/api/horarios/${idschedule}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
