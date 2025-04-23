@@ -1,4 +1,6 @@
 'use client';
+import { FaEdit } from "react-icons/fa";
+import { IoTrashBin } from "react-icons/io5";
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -271,18 +273,16 @@ const AcademiasPage = () => {
                 <TableCell>{academia.phone}</TableCell>
                 <TableCell>{academia.numStudents}</TableCell>
                 <TableCell>
-                  <div className="flex justify-center space-x-2">
-                    <button 
-                      className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                  <div className="flex justify-center space-x-8">
+                    <button className= "cursor-pointer"
                       onClick={() => setAcademiaToEdit(academia)}
                     >
-                      Editar
+                      <FaEdit size={20} />
                     </button>
-                    <button 
-                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                    <button className= "cursor-pointer"
                       onClick={() => handleDeleteAcademia(academia.idacademy)}
                     >
-                      Borrar
+                      <IoTrashBin size={20} />
                     </button>
                   </div>
                 </TableCell>
