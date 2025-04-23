@@ -1,5 +1,5 @@
 'use client';
-
+import { useRouter } from "next/navigation"
 import React from 'react';
 import { FaInfoCircle } from "react-icons/fa";
 import { MdContactPhone } from "react-icons/md";
@@ -43,24 +43,17 @@ import { Input } from "@/components/ui/input";
 
 
 const AlumnosPage = () => {
+  const router = useRouter()
+
+  const handleNuevoAlumno = () => {
+    router.push("/alumnos/nuevo")
+  }
+
   return (
     <div >
       <div className="flex justify-between">
         <Input className="max-w-60" type="text" placeholder="Buscar alumno" />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="default">Nuevo alumno</Button>
-          </DialogTrigger>
-
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Registrar nuevo alumno</DialogTitle>
-            </DialogHeader>
-
-            {/* Aquí podrías poner un formulario más adelante */}
-
-          </DialogContent>
-        </Dialog>
+            <Button variant="default" onClick={handleNuevoAlumno}>Nuevo alumno</Button>
       </div>
       <div className="mt-20 flex justify-center">
         <Table className="text-center">
@@ -90,8 +83,8 @@ const AlumnosPage = () => {
               <TableCell>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button className="text-blue-600 cursor-pointer">
-                      <MdContactPhone size={18} />
+                    <button className="cursor-pointer">
+                      <MdContactPhone size={20} />
                     </button>
                   </DialogTrigger>
 
@@ -108,8 +101,8 @@ const AlumnosPage = () => {
               <TableCell>
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="text-blue-600 cursor-pointer">
-                    <FaInfoCircle size={18} />
+                  <button className="cursor-pointer">
+                    <FaInfoCircle size={20} />
                   </button>
                 </DialogTrigger>
 
