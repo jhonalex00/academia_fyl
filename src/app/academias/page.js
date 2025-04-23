@@ -1,6 +1,24 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Button, Dialog } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdited }) { // OnAcademiaAdded es para actualizar la lista cuando añadamos una nueva academia
   const [isOpen, setIsOpen] = useState(false); // IsOpen controla si el modal está abierto. Empieza en false, osea que el modal está cerrado
@@ -23,6 +41,7 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('Enviando datos:', formData);
     if (academiaToEdit) {
       onAcademiaEdited(formData);
     } else {
@@ -45,94 +64,84 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
   };
 
   return (
-    <>
-      <div className="flex justify-end mr-4">
-        <Button
-          className="px-4 py-2 bg-green-400 text-black rounded-lg border-2 hover:bg-green-600"
-          onClick={() => setIsOpen(true)}
-        >
-          Añadir Academia
-        </Button>
-      </div>
-
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6">
-            <Dialog.Title className="text-lg font-medium mb-4">Nueva Academia</Dialog.Title>
+      <>
+        <div className="flex justify-end mr-4">
+          <Button onClick={() => setIsOpen(true)}>
+            Añadir Academia
+          </Button>
+        </div>
+  
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Nueva Academia</DialogTitle>
+            </DialogHeader>
             
             <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input
-                    type="text"
+              <div className="grid gap-4 py-4">
+                <div className="grid w-full items-center gap-1.5">
+                  <label htmlFor="nombre" className="text-sm font-medium">Nombre</label>
+                  <Input
+                    id="nombre"
                     name="nombre"
                     value={formData.nombre}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className="col-span-3"
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Dirección</label>
-                  <input
-                    type="text"
+                <div className="grid w-full items-center gap-1.5">
+                  <label htmlFor="direccion" className="text-sm font-medium">Dirección</label>
+                  <Input
+                    id="direccion"
                     name="direccion"
                     value={formData.direccion}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className="col-span-3"
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-                  <input
+                <div className="grid w-full items-center gap-1.5">
+                  <label htmlFor="telefono" className="text-sm font-medium">Teléfono</label>
+                  <Input
+                    id="telefono"
                     type="tel"
                     name="telefono"
                     value={formData.telefono}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className="col-span-3"
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Número de Alumnos</label>
-                  <input
+                <div className="grid w-full items-center gap-1.5">
+                  <label htmlFor="numAlumnos" className="text-sm font-medium">Número de Alumnos</label>
+                  <Input
+                    id="numAlumnos"
                     type="number"
                     name="numAlumnos"
                     value={formData.numAlumnos}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className="col-span-3"
                     required
                   />
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-                >
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsOpen(false)} type="button">
                   Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                >
+                </Button>
+                <Button type="submit">
                   Guardar
-                </button>
-              </div>
+                </Button>
+              </DialogFooter>
             </form>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
-    </>
+          </DialogContent>
+        </Dialog>
+      </>
   );
 }
 
@@ -235,48 +244,53 @@ const AcademiasPage = () => {
 
   return (
     <>
-      <AñadirAcademia 
-      onAcademiaAdded={handleAcademiaAdded}
-      academiaToEdit={academiaToEdit}
-      onAcademiaEdited={handleAcademiaEdited}
-    />
-              <div className="border-b-2 border-gray-800 bg-gray-200">
-          <div className="grid grid-cols-5 gap-8 mt-8 px-6 py-2">
-            <h1 className="text-lg font-bold text-center">Academia</h1>
-            <h1 className="text-lg font-bold text-center">Dirección</h1>
-            <h1 className="text-lg font-bold text-center">Teléfono</h1>
-            <h1 className="text-lg font-bold text-center">Nº Alumnos</h1>
-            <h1 className="text-lg font-bold text-center">Acciones</h1>
-          </div>
-        </div>
-        
-        <div className="space-y-2 mt-4">
-        {academias.map((academia) => (
-  <div 
-    key={academia.idacademy} 
-    className="grid grid-cols-5 gap-8 py-2 px-6 hover:bg-gray-100 rounded-lg items-center"
-  >
-    <span className="text-center">{academia.name}</span>
-    <span className="text-center">{academia.adress}</span>
-    <span className="text-center">{academia.phone}</span>
-    <span className="text-center">{academia.numStudents}</span>
-    <div className="flex justify-center space-x-2">
-      <button 
-        className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-        onClick={() => handleEditAcademia(academia)}
-      >
-        Editar
-      </button>
-      <button 
-        className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-        onClick={() => handleDeleteAcademia(academia.idacademy)}
-      >
-        Borrar
-      </button>
-    </div>
-  </div>
-))}
-        </div>
+      <div className="flex justify-end">
+        <AñadirAcademia 
+          onAcademiaAdded={handleAcademiaAdded}
+          academiaToEdit={academiaToEdit}
+          onAcademiaEdited={handleAcademiaEdited}
+        />
+      </div>
+      
+      <div className="mt-20 flex justify-center">
+        <Table className="text-center">
+          <TableHeader className="bg-neutral-100">
+            <TableRow>
+              <TableHead>Academia</TableHead>
+              <TableHead>Dirección</TableHead>
+              <TableHead>Teléfono</TableHead>
+              <TableHead>Nº Alumnos</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {academias.map((academia) => (
+              <TableRow key={academia.idacademy}>
+                <TableCell>{academia.name}</TableCell>
+                <TableCell>{academia.adress}</TableCell>
+                <TableCell>{academia.phone}</TableCell>
+                <TableCell>{academia.numStudents}</TableCell>
+                <TableCell>
+                  <div className="flex justify-center space-x-2">
+                    <button 
+                      className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                      onClick={() => setAcademiaToEdit(academia)}
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                      onClick={() => handleDeleteAcademia(academia.idacademy)}
+                    >
+                      Borrar
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </>
   );
 };
