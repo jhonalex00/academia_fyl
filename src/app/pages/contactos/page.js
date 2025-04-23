@@ -158,7 +158,7 @@ const ContactosPage = () => {
   const cargarContactos = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/contacts/full-info', {
+      const response = await fetch('http://localhost:3001/api/contacts/full-info', {
         cache: 'no-store'
       });
       if (!response.ok) {
@@ -177,7 +177,7 @@ const ContactosPage = () => {
   const handleContactoAdded = async (nuevoContacto) => {
     try {
       // Primero creamos el contacto
-      const contactResponse = await fetch('/api/contacts', {
+      const contactResponse = await fetch('http://localhost:3001/api/contacts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ const ContactosPage = () => {
       const contactData = await contactResponse.json();
   
       // Luego creamos el estudiante
-      const studentResponse = await fetch('/api/students', {
+      const studentResponse = await fetch('http://localhost:3001/api/students', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const ContactosPage = () => {
       const studentData = await studentResponse.json();
   
       // Finalmente, creamos la relación en la tabla intermedia
-      const relationResponse = await fetch('/api/students_contacts', {
+      const relationResponse = await fetch('http://localhost:3001/api/students_contacts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ const ContactosPage = () => {
   const handleDeleteContacto = async (id) => {
     try {
       // Primero eliminamos la relación en la tabla intermedia
-      const response = await fetch(`/api/students_contacts/relation/${id}`, {
+      const response = await fetch(`http://localhost:3001/api/students_contacts/relation/${id}`, {
         method: 'DELETE'
       });
   
@@ -260,7 +260,7 @@ const ContactosPage = () => {
 
   const handleContactoEdited = async (contactoEditado) => {
     try {
-      const studentResponse = await fetch(`/api/students/${contactoEditado.idstudent}`, {
+      const studentResponse = await fetch(`http://localhost:3001/api/students/${contactoEditado.idstudent}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -276,7 +276,7 @@ const ContactosPage = () => {
         throw new Error('Error al actualizar el estudiante');
       }
   
-      const contactResponse = await fetch(`/api/contacts/${contactoEditado.idcontact}`, {
+      const contactResponse = await fetch(`http://localhost:3001/api/contacts/${contactoEditado.idcontact}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
