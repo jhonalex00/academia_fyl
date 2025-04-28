@@ -9,7 +9,6 @@ import { PiStudentFill } from "react-icons/pi";
 import { FaSchoolFlag } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
 import { MdDashboard } from "react-icons/md";
-import { MdContactPhone } from "react-icons/md";
 import { IoBook } from "react-icons/io5";
 import { useActiveRoute } from '../hooks/useActiveRoute';
 
@@ -50,12 +49,6 @@ const Navigation = () => {
           <Link href="/asignaturas" className={`nav-item ${isActive('/asignaturas') ? 'active' : ''}`}>
             <IoBook className="nav-icon" />
             <span>Asignaturas</span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/contactos" className={`nav-item ${isActive('/contactos') ? 'active' : ''}`}>
-            <MdContactPhone className="nav-icon" />
-            <span>Contactos</span>
           </Link>
         </li>
         <li>
