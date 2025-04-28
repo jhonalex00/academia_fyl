@@ -12,12 +12,21 @@ import BarChart from '@/components/dashboard/BarChart';
 import DonutChart from '@/components/dashboard/DonutChart';
 import UpcomingEvents from '@/components/dashboard/UpcomingEvents';
 import MiniCalendar from '@/components/dashboard/MiniCalendar';
+import ClientOnly from '@/components/ClientOnly';
 import { getStudents, getAcademies, getTeachers, getSubjects, getSchedules, getDashboardStats, getRecentActivities, getCalendarEvents } from '@/lib/api';
 import { formatStudents, formatTeachers, formatSubjects, calculateStats } from '@/lib/dashboard';
 import styles from './dashboard.module.css';
 
 const DashboardPage = () => {
-  const [loading, setLoading] = useState(true);  const [stats, setStats] = useState({
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    students: 0,
+    teachers: 0,
+    subjects: 0,
+    academies: 0
+  });
+  
+  const [growthRates, setGrowthRates] = useState({
     students: 0,
     teachers: 0,
     subjects: 0,
@@ -63,12 +72,15 @@ const DashboardPage = () => {
           }).counts;
           
         // Obtener datos de crecimiento desde el backend o usar valores por defecto
-        const growthRates = dashboardStats?.growth || {
+        const growthRatesData = dashboardStats?.growth || {
           students: 12,
           teachers: 5,
           subjects: 8,
           academies: 3
         };
+        
+        // Actualizar el estado de growthRates
+        setGrowthRates(growthRatesData);
         
         // Actualizar estadísticas
         setStats(statsToUse);
@@ -199,12 +211,22 @@ const DashboardPage = () => {
   const studentColumns = [
     { header: 'Nombre', accessor: 'name' },
     { header: 'DNI', accessor: 'dni' },
-    { 
-      header: 'Fecha', 
+    {      header: 'Fecha', 
       accessor: 'birthDate',
       cell: (row) => {
         const date = row.birthDate || row.fechaNacimiento;
-        return date ? new Date(date).toLocaleDateString() : 'No disponible';
+        if (!date) return 'No disponible';
+        
+        // Usar formato específico para evitar problemas de hidratación
+        try {
+          const dateObj = new Date(date);
+          const day = dateObj.getDate().toString().padStart(2, '0');
+          const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+          const year = dateObj.getFullYear();
+          return `${day}/${month}/${year}`;
+        } catch (e) {
+          return 'Formato inválido';
+        }
       }
     },
     { 
@@ -235,80 +257,84 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className={`p-8 ${styles['dashboard-container']}`}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-600">Bienvenido al panel de administración</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">        <StatCard 
-          title="Total Alumnos" 
-          value={stats.students} 
-          icon={<PiStudentFill size={24} />}
-          increment={growthRates.students}
-          color="indigo"
-        />
-        <StatCard 
-          title="Total Profesores" 
-          value={stats.teachers} 
-          icon={<GiTeacher size={24} />}
-          increment={growthRates.teachers}
-          color="green"
-        />
-        <StatCard 
-          title="Total Asignaturas" 
-          value={stats.subjects} 
-          icon={<IoBook size={24} />}
-          increment={growthRates.subjects}
-          color="orange"
-        />
-        <StatCard 
-          title="Total Academias" 
-          value={stats.academies} 
-          icon={<FaSchoolFlag size={24} />}
-          increment={growthRates.academies}
-          color="blue"
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <ChartCard 
-          title="Distribución por Asignaturas" 
-          className="lg:col-span-2"
-        >
-          <BarChart data={subjectDistributionData} className="h-full" />
-        </ChartCard>
+    <ClientOnly>
+      <div className={`p-8 ${styles['dashboard-container']}`}>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          <p className="text-gray-600">Bienvenido al panel de administración</p>
+        </div>
         
-        <ChartCard title="Alumnos por Ciclo">
-          <DonutChart data={studentsByCycleData} />
-        </ChartCard>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <DataTable 
-          title="Alumnos recientes"
-          data={recentStudents}
-          columns={studentColumns}
-          className="lg:col-span-2"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard 
+            title="Total Alumnos" 
+            value={stats.students} 
+            icon={<PiStudentFill size={24} />}
+            increment={growthRates.students}
+            color="indigo"
+          />
+          <StatCard 
+            title="Total Profesores" 
+            value={stats.teachers} 
+            icon={<GiTeacher size={24} />}
+            increment={growthRates.teachers}
+            color="green"
+          />
+          <StatCard 
+            title="Total Asignaturas" 
+            value={stats.subjects} 
+            icon={<IoBook size={24} />}
+            increment={growthRates.subjects}
+            color="orange"
+          />
+          <StatCard 
+            title="Total Academias" 
+            value={stats.academies} 
+            icon={<FaSchoolFlag size={24} />}
+            increment={growthRates.academies}
+            color="blue"
+          />
+        </div>
         
-        <RecentActivity 
-          title="Actividad reciente"
-          activities={recentActivities}
-        />
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <ChartCard 
+            title="Distribución por Asignaturas" 
+            className="lg:col-span-2"
+          >
+            <BarChart data={subjectDistributionData} className="h-full" />
+          </ChartCard>
+          
+          <ChartCard title="Alumnos por Ciclo">
+            <DonutChart data={studentsByCycleData} />
+          </ChartCard>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <DataTable 
+            title="Alumnos recientes"
+            data={recentStudents}
+            columns={studentColumns}
+            className="lg:col-span-2"
+          />
+          
+          <RecentActivity 
+            title="Actividad reciente"
+            activities={recentActivities}
+          />
+        </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <UpcomingEvents
-          title="Próximas clases"
-          events={upcomingEvents}
-          className="lg:col-span-2"
-        />
-        <MiniCalendar
-          title="Calendario"
-          events={calendarEvents}
-        />
+          <UpcomingEvents
+            title="Próximas clases"
+            events={upcomingEvents}
+            className="lg:col-span-2"
+          />
+          <MiniCalendar
+            title="Calendario"
+            events={calendarEvents}
+          />
+        </div>
       </div>
-    </div>
+    </ClientOnly>
   );
 };
 
