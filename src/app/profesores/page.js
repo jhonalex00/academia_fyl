@@ -142,37 +142,99 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
 }
 
 const ProfesoresPage = () => {
-  const [profesores, setProfesores] = useState(() => {
-    const datosGuardados = localStorage.getItem('profesores');
-    return datosGuardados ? JSON.parse(datosGuardados) : [];
-  });
+  const [profesores, setProfesores] = useState([]);
   const [profesorToEdit, setProfesorToEdit] = useState(null);
   const [busqueda, setBusqueda] = useState('');
+  const [error, setError] = useState(null);
+
+  // Cargar profesores de la base de datos
+  const cargarProfesores = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/profesores', {
+        cache: 'no-store'
+      });
+      if (!response.ok) {
+        throw new Error('Error al cargar los profesores');
+      }
+      const data = await response.json();
+      setProfesores(data);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem('profesores', JSON.stringify(profesores));
-  }, [profesores]);
+    cargarProfesores();
+  }, []);
 
-  const handleProfesorAdded = (nuevoProfesor) => {
-    const profesorConId = {
-      ...nuevoProfesor,
-      id: profesores.length ? Math.max(...profesores.map(p => p.id)) + 1 : 1
-    };
-    setProfesores([...profesores, profesorConId]);
+  const handleProfesorAdded = async (nuevoProfesor) => {
+    try {
+      const response = await fetch('http://localhost:3001/api/profesores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: nuevoProfesor.nombre,
+          email: nuevoProfesor.email,
+          phone: nuevoProfesor.telefono,
+          subjects: nuevoProfesor.asignaturas
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear el profesor');
+      }
+
+      cargarProfesores(); // Recargar la lista de profesores
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
-  const handleProfesorEdited = (profesorEditado) => {
-    setProfesores(profesores.map(prof => 
-      prof.id === profesorEditado.id ? profesorEditado : prof
-    ));
+  const handleProfesorEdited = async (profesorEditado) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/profesores/${profesorEditado.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: profesorEditado.nombre,
+          email: profesorEditado.email,
+          phone: profesorEditado.telefono,
+          subjects: profesorEditado.asignaturas
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar el profesor');
+      }
+
+      cargarProfesores(); // Recargar la lista de profesores
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
-  const handleDeleteProfesor = (id) => {
-    setProfesores(profesores.filter(prof => prof.id !== id));
+  const handleDeleteProfesor = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/profesores/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el profesor');
+      }
+
+      cargarProfesores(); // Recargar la lista de profesores
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   const profesoresFiltrados = profesores.filter(prof =>
-    prof.nombre.toLowerCase().includes(busqueda.toLowerCase())
+    prof.name?.toLowerCase().includes(busqueda.toLowerCase())  // Cambia prof.nombre por prof.name
   );
 
   return (
@@ -204,29 +266,35 @@ const ProfesoresPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {profesoresFiltrados.map((profesor) => (
-              <TableRow key={profesor.id}>
-                <TableCell>{profesor.nombre}</TableCell>
-                <TableCell>{profesor.email}</TableCell>
-                <TableCell>{profesor.telefono}</TableCell>
-                <TableCell>{profesor.asignaturas.join(', ')}</TableCell>
-                <TableCell>
-                  <div className="flex justify-center space-x-8">
-                    <button className="cursor-pointer"
-                      onClick={() => setProfesorToEdit(profesor)}
-                    >
-                      <FaEdit size={20} />
-                    </button>
-                    <button className="cursor-pointer"
-                      onClick={() => handleDeleteProfesor(profesor.id)}
-                    >
-                      <IoTrashBin size={20} />
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+          {profesoresFiltrados.map((profesor) => (
+            <TableRow key={profesor.idteacher}>
+              <TableCell>{profesor.name}</TableCell>
+              <TableCell>{profesor.email}</TableCell>
+              <TableCell>{profesor.phone}</TableCell>
+              <TableCell>{profesor.subjects?.join(', ')}</TableCell>
+              <TableCell>
+                <div className="flex justify-center space-x-8">
+                  <button className="cursor-pointer"
+                    onClick={() => setProfesorToEdit({
+                      id: profesor.idteacher,
+                      nombre: profesor.name,
+                      email: profesor.email,
+                      telefono: profesor.phone,
+                      asignaturas: profesor.subjects || []
+            })}
+          >
+            <FaEdit size={20} />
+          </button>
+          <button className="cursor-pointer"
+            onClick={() => handleDeleteProfesor(profesor.idteacher)}
+          >
+            <IoTrashBin size={20} />
+          </button>
+        </div>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
         </Table>
       </div>
     </>
