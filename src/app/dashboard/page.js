@@ -13,7 +13,7 @@ import DonutChart from '@/components/dashboard/DonutChart';
 import UpcomingEvents from '@/components/dashboard/UpcomingEvents';
 import MiniCalendar from '@/components/dashboard/MiniCalendar';
 import ClientOnly from '@/components/ClientOnly';
-import { getStudents, getAcademies, getTeachers, getSubjects, getSchedules, getDashboardStats, getRecentActivities, getCalendarEvents } from '@/lib/api';
+import { getStudents, getAcademies, getTeachers, getSubjects, getSchedules, getDashboardStats, getRecentActivities, getCalendarEvents, getSubjectStats, getStudentStats } from '@/lib/api';
 import { formatStudents, formatTeachers, formatSubjects, calculateStats } from '@/lib/dashboard';
 import styles from './dashboard.module.css';
 
@@ -46,8 +46,18 @@ const DashboardPage = () => {
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
-        
-        const [studentsRaw, teachersRaw, subjectsRaw, academies, schedules, dashboardStats, activities, calendarEventsData] = await Promise.all([
+          const [
+          studentsRaw, 
+          teachersRaw, 
+          subjectsRaw, 
+          academies, 
+          schedules, 
+          dashboardStats, 
+          activities, 
+          calendarEventsData,
+          subjectStatsData,
+          studentStatsData
+        ] = await Promise.all([
           getStudents(),
           getTeachers(),
           getSubjects(),
@@ -55,7 +65,9 @@ const DashboardPage = () => {
           getSchedules(),
           getDashboardStats().catch(() => null), // Si falla, continuamos con null
           getRecentActivities().catch(() => []),  // Si falla, continuamos con array vacío
-          getCalendarEvents(currentMonth, currentYear).catch(() => []) // Si falla, continuamos con array vacío
+          getCalendarEvents(currentMonth, currentYear).catch(() => []), // Si falla, continuamos con array vacío
+          getSubjectStats().catch(() => null), // Estadísticas detalladas de asignaturas
+          getStudentStats().catch(() => null) // Estadísticas detalladas de estudiantes
         ]);
           // Formatear los datos
         const students = formatStudents(studentsRaw);
@@ -81,9 +93,103 @@ const DashboardPage = () => {
         
         // Actualizar el estado de growthRates
         setGrowthRates(growthRatesData);
-        
-        // Actualizar estadísticas
+          // Actualizar estadísticas
         setStats(statsToUse);
+          // Actualizar datos de distribución por ciclo
+        if (subjectStatsData?.cycleDistribution) {
+          // Mapeo de ciclos a colores
+          const cycleColors = {
+            'Primaria': '#4f46e5',
+            'ESO': '#0ea5e9',
+            'Bachillerato': '#10b981',
+            'FP': '#f59e0b',
+            'Universidad': '#ef4444'
+          };
+          
+          const cycleData = subjectStatsData.cycleDistribution.map(item => ({
+            label: item.cycle || 'Sin ciclo',
+            value: parseInt(item.count) || 0,
+            color: cycleColors[item.cycle] || '#6b7280'
+          }));
+          
+          if (cycleData.length > 0) {
+            setStudentsByCycleData(cycleData);
+          } else if (dashboardStats?.cycleDistribution) {
+            // Usar los datos del dashboard general si no hay datos específicos
+            const fallbackCycleData = dashboardStats.cycleDistribution.map(item => ({
+              label: item.cycle || 'Sin ciclo',
+              value: parseInt(item.count) || 0,
+              color: cycleColors[item.cycle] || '#6b7280'
+            }));
+            
+            setStudentsByCycleData(fallbackCycleData);
+          }
+        }
+          // Actualizar distribución de asignaturas
+        try {
+          // Si tenemos datos específicos de asignaturas, usarlos primero
+          if (subjectStatsData?.yearDistribution && subjectStatsData.yearDistribution.length > 0) {
+            // Mapeo de asignaturas a colores
+            const yearColors = {
+              1: 'bg-indigo-500',
+              2: 'bg-blue-500',
+              3: 'bg-green-500',
+              4: 'bg-yellow-500',
+              5: 'bg-red-500',
+              6: 'bg-purple-500'
+            };
+            
+            // Convertir a formato para gráficos
+            const yearData = subjectStatsData.yearDistribution.map(item => ({
+              label: `${item.year}º`,
+              fullLabel: `${item.year}º Año`,
+              value: parseInt(item.count) || 0,
+              color: yearColors[item.year] || 'bg-gray-500'
+            })).slice(0, 5); // Limitar a 5 años para el gráfico
+            
+            if (yearData.length > 0) {
+              setSubjectDistributionData(yearData);
+              // Salimos de la función si ya tenemos datos
+              return;
+            }
+          }
+          
+          // Plan B: Usar los datos de subjects si no hay estadísticas específicas
+          const subjectMap = {};
+          
+          subjects.forEach(subject => {
+            const mainSubject = subject.cycle?.split(' ')[0] || 'Otras';
+            subjectMap[mainSubject] = (subjectMap[mainSubject] || 0) + 1;
+          });
+          
+          // Mapeo de asignaturas a colores
+          const subjectColors = {
+            'Matemáticas': 'bg-indigo-500',
+            'Lengua': 'bg-blue-500',
+            'Inglés': 'bg-green-500',
+            'Física': 'bg-yellow-500',
+            'Química': 'bg-red-500',
+            'Historia': 'bg-purple-500',
+            'Biología': 'bg-pink-500',
+            'Otras': 'bg-gray-500'
+          };
+          
+          // Convertir a formato para gráficos
+          const subjectData = Object.entries(subjectMap)
+            .map(([label, value]) => ({
+              label: label.substring(0, 3),  // Abreviatura de 3 letras
+              fullLabel: label,
+              value,
+              color: subjectColors[label] || 'bg-gray-500'
+            }))
+            .slice(0, 5); // Limitar a 5 asignaturas para el gráfico
+            
+          if (subjectData.length > 0) {
+            setSubjectDistributionData(subjectData);
+          }
+        } catch (error) {
+          console.error('Error al procesar distribución de asignaturas:', error);
+        }
         
         // Obtener los 5 estudiantes más recientes
         const sortedStudents = [...students].sort((a, b) => 
@@ -91,96 +197,103 @@ const DashboardPage = () => {
         ).slice(0, 5);
         
         setRecentStudents(sortedStudents);
-        
-        // Usar actividades recientes del backend si están disponibles
-        if (activities && activities.length > 0) {
-          setRecentActivities(activities);
-        } else {
-          // Actividades de respaldo si el endpoint falla
-          setRecentActivities([
-            {
-              initials: 'MS',
-              title: 'María Sánchez se ha registrado',
-              description: 'Nueva alumna en Matemáticas de 2º de ESO',
-              time: 'Hace 2 horas'
-            },
-            {
-              initials: 'JR',
-              title: 'Juan Rodríguez ha actualizado su perfil',
-              description: 'Profesor de Física y Química',
-              time: 'Hace 5 horas'
-            },
-            {
-              initials: 'LP',
-              title: 'Luis Pérez ha cancelado una clase',
-              description: 'Historia - 17:00 - 18:30',
-              time: 'Ayer'
-            },
-            {
-              initials: 'AL',
-              title: 'Academia Las Lomas añadida',
-              description: 'Nueva sede registrada en el sistema',
-              time: 'Hace 2 días'
-            }
-          ]);
-        }
-        
-        // Generar eventos próximos para la demostración
-        // En un caso real, estos vendrían de la API de horarios
-        setUpcomingEvents([
-          {
-            title: 'Clase de Matemáticas',
-            subject: '2º de ESO',
-            time: 'Hoy, 16:00 - 17:30',
-            teacher: 'Carlos Martínez',
-            teacherInitials: 'CM'
-          },
-          {
-            title: 'Clase de Inglés',
-            subject: '1º de Bachillerato',
-            time: 'Hoy, 18:00 - 19:30',
-            teacher: 'Ana López',
-            teacherInitials: 'AL'
-          },          {
-            title: 'Clase de Física',
-            subject: '2º de Bachillerato',
-            time: 'Mañana, 15:00 - 16:30',
-            teacher: 'Roberto García',
-            teacherInitials: 'RG'
+          // Usar actividades recientes del backend
+        try {
+          if (activities && activities.length > 0) {
+            setRecentActivities(activities);
+          } else {
+            setRecentActivities([]);
+            console.log('No hay actividades recientes disponibles');
           }
-        ]);
-          // Usar eventos de calendario de la API si están disponibles, o generar eventos de respaldo
-        if (calendarEventsData && calendarEventsData.length > 0) {
-          // Asegurarse de que las fechas son objetos Date
-          setCalendarEvents(calendarEventsData.map(event => ({
-            ...event,
-            date: new Date(event.date)
-          })));
-        } else {
-          // Eventos de respaldo si el endpoint falla
+        } catch (error) {
+          console.error('Error al procesar actividades recientes:', error);
+          setRecentActivities([]);
+        }
+          // Generar eventos próximos basados en los datos de horarios
+        try {
+          // Filtrar los horarios de los próximos días
           const today = new Date();
-          setCalendarEvents([
-            {
-              title: 'Clase de Matemáticas',
-              date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2),
-              teacher: 'Carlos Martínez'
-            },
-            {
-              title: 'Examen de Inglés',
-              date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5),
-              teacher: 'Ana López'
-            },
-            {
-              title: 'Tutoría',
-              date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7),
-              teacher: 'Roberto García'
-            },
-            {
-              title: 'Reunión de profesores',
-              date: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 10),
-              teacher: 'Dirección'
-            }
-          ]);
+          const nextWeek = new Date(today);
+          nextWeek.setDate(today.getDate() + 7);
+          
+          // Usar los datos de schedules para generar eventos próximos
+          if (schedules && schedules.length > 0) {
+            // Formatear los horarios como eventos próximos
+            const formattedEvents = schedules
+              .filter(schedule => {
+                if (!schedule.date) return false;
+                const scheduleDate = new Date(schedule.date);
+                return scheduleDate >= today && scheduleDate <= nextWeek;
+              })
+              .map(schedule => {
+                // Extraer iniciales del profesor (si existe)
+                const teacherName = schedule.teacherName || 'Sin profesor';
+                const teacherInitials = teacherName
+                  .split(' ')
+                  .map(name => name[0])
+                  .join('')
+                  .toUpperCase();
+                  
+                // Formatear la fecha y hora
+                const scheduleDate = new Date(schedule.date);
+                const isToday = scheduleDate.toDateString() === today.toDateString();
+                const isTomorrow = 
+                  scheduleDate.toDateString() === 
+                  new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toDateString();
+                
+                let timeStr = '';
+                if (isToday) {
+                  timeStr = 'Hoy';
+                } else if (isTomorrow) {
+                  timeStr = 'Mañana';
+                } else {
+                  const options = { weekday: 'long' };
+                  timeStr = new Intl.DateTimeFormat('es-ES', options).format(scheduleDate);
+                  timeStr = timeStr.charAt(0).toUpperCase() + timeStr.slice(1); // Capitalizar
+                }
+                
+                // Añadir horario si está disponible
+                if (schedule.startHour && schedule.finishHour) {
+                  const startTime = schedule.startHour.substring(0, 5); // HH:MM
+                  const endTime = schedule.finishHour.substring(0, 5); // HH:MM
+                  timeStr += `, ${startTime} - ${endTime}`;
+                }
+                
+                return {
+                  title: schedule.title || `Clase de ${schedule.subjectCycle || 'Materia'}`,
+                  subject: `${schedule.subjectYear || ''} ${schedule.subjectCycle || ''}`.trim() || 'Sin curso asignado',
+                  time: timeStr,
+                  teacher: teacherName,
+                  teacherInitials: teacherInitials || 'SP',
+                  location: schedule.academyName || 'Sede principal'
+                };
+              })
+              .slice(0, 3); // Tomar solo los primeros 3 eventos
+              
+            setUpcomingEvents(formattedEvents);
+          } else {
+            console.log('No hay horarios disponibles para generar eventos próximos');
+            setUpcomingEvents([]);
+          }
+        } catch (error) {
+          console.error('Error al procesar eventos próximos:', error);
+          setUpcomingEvents([]);
+        }// Usar eventos de calendario de la API
+        try {
+          if (calendarEventsData && calendarEventsData.length > 0) {
+            // Asegurarse de que las fechas son objetos Date
+            const formattedEvents = calendarEventsData.map(event => ({
+              ...event,
+              date: new Date(event.date)
+            }));
+            setCalendarEvents(formattedEvents);
+          } else {
+            setCalendarEvents([]);
+            console.log('No hay eventos de calendario disponibles');
+          }
+        } catch (error) {
+          console.error('Error al procesar eventos del calendario:', error);
+          setCalendarEvents([]);
         }
         
       } catch (error) {
@@ -192,21 +305,20 @@ const DashboardPage = () => {
     
     fetchData();
   }, []);
+    // Estado para los datos de las gráficas
+  const [subjectDistributionData, setSubjectDistributionData] = useState([
+    { label: 'Mat', value: 0, color: 'bg-indigo-500' },
+    { label: 'Len', value: 0, color: 'bg-blue-500' },
+    { label: 'Ing', value: 0, color: 'bg-green-500' },
+    { label: 'Fis', value: 0, color: 'bg-yellow-500' },
+    { label: 'Bio', value: 0, color: 'bg-red-500' }
+  ]);
   
-  // Datos para las gráficas
-  const subjectDistributionData = [
-    { label: 'Mat', value: 45, color: 'bg-indigo-500' },
-    { label: 'Len', value: 30, color: 'bg-blue-500' },
-    { label: 'Ing', value: 25, color: 'bg-green-500' },
-    { label: 'Fis', value: 15, color: 'bg-yellow-500' },
-    { label: 'Bio', value: 20, color: 'bg-red-500' }
-  ];
-  
-  const studentsByCycleData = [
-    { label: 'Primaria', value: 35, color: '#4f46e5' },
-    { label: 'ESO', value: 45, color: '#0ea5e9' },
-    { label: 'Bachillerato', value: 20, color: '#10b981' },
-  ];
+  const [studentsByCycleData, setStudentsByCycleData] = useState([
+    { label: 'Primaria', value: 0, color: '#4f46e5' },
+    { label: 'ESO', value: 0, color: '#0ea5e9' },
+    { label: 'Bachillerato', value: 0, color: '#10b981' },
+  ]);
     // Columnas para la tabla de estudiantes recientes
   const studentColumns = [
     { header: 'Nombre', accessor: 'name' },
