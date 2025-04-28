@@ -11,6 +11,7 @@ const academiasRoutes = require('./academias');
 const contactosRoutes = require('./contactos');
 const profesoresHorariosRoutes = require('./profesoresHorarios');
 const estudiantesHorariosRoutes = require('./estudiantesHorarios');
+const dashboardRoutes = require('./dashboard');
 
 // Configurar las rutas
 router.use('/estudiantes', estudiantesRoutes);
@@ -22,6 +23,7 @@ router.use('/academias', academiasRoutes);
 router.use('/contactos', contactosRoutes);
 router.use('/profesores/horarios', profesoresHorariosRoutes);
 router.use('/estudiantes/horarios', estudiantesHorariosRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 // Ruta de prueba para verificar que la API está funcionando
 router.get('/', (req, res) => {
