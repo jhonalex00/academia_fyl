@@ -1,6 +1,24 @@
 'use client';
+import { FaEdit } from "react-icons/fa";
+import { IoTrashBin } from "react-icons/io5";
 import React, { useState, useEffect } from 'react';
-import { Button, Dialog } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const profesorVacio = () => ({
   id: null,
@@ -10,229 +28,208 @@ const profesorVacio = () => ({
   asignaturas: ['']
 });
 
-const ProfesoresPage = () => {
-  const [profesores, setProfesores] = useState(() => {
-    const datosGuardados = localStorage.getItem('profesores');
-    return datosGuardados ? JSON.parse(datosGuardados) : [profesorVacio(), profesorVacio(), profesorVacio()];
-  });
-
-  const [editandoId, setEditandoId] = useState(null);
-  const [busqueda, setBusqueda] = useState('');
+export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdited }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(profesorVacio());
 
   useEffect(() => {
-    localStorage.setItem('profesores', JSON.stringify(profesores));
-  }, [profesores]);
-
-  const manejarCambio = (setter, campo, valor) => {
-    setter((prev) => ({ ...prev, [campo]: valor }));
-  };
-
-  const handleChange = (e) => manejarCambio(setFormData, e.target.name, e.target.value);
-
-  const manejarAsignaturas = (id, accion, index = null, valor = '') => {
-    setProfesores((prev) =>
-      prev.map((prof) => {
-        if (prof.id === id) {
-          let nuevasAsignaturas = [...prof.asignaturas];
-          if (accion === 'actualizar' && index !== null) {
-            nuevasAsignaturas[index] = valor;
-          } else if (accion === 'agregar') {
-            nuevasAsignaturas.push('');
-          } else if (accion === 'eliminar' && index !== null) {
-            nuevasAsignaturas = nuevasAsignaturas.filter((_, i) => i !== index);
-          }
-          return { ...prof, asignaturas: nuevasAsignaturas };
-        }
-        return prof;
-      })
-    );
-  };
-
-  const actualizarAsignatura = (id, index, valor) => manejarAsignaturas(id, 'actualizar', index, valor);
-  const agregarAsignatura = (id) => manejarAsignaturas(id, 'agregar');
-  const eliminarAsignatura = (id, index) => manejarAsignaturas(id, 'eliminar', index);
-
-  const handleEdit = (id) => {
-    const profesor = profesores.find((p) => p.id === id);
-    setFormData(profesor);
-    setEditandoId(id);
-    setIsOpen(true);
-  };
+    if (profesorToEdit) {
+      setFormData(profesorToEdit);
+      setIsOpen(true);
+    }
+  }, [profesorToEdit]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (editandoId) {
-      // Actualizar profesor existente
-      setProfesores((prev) =>
-        prev.map((prof) =>
-          prof.id === editandoId ? { ...prof, ...formData } : prof
-        )
-      );
-      setEditandoId(null);
+    if (profesorToEdit) {
+      onProfesorEdited(formData);
     } else {
-      // Añadir nuevo profesor
-      const nuevoProfesor = {
-        id: profesores.length ? Math.max(...profesores.map((p) => p.id)) + 1 : 1,
-        ...formData,
-      };
-      setProfesores([...profesores, nuevoProfesor]);
+      onProfesorAdded(formData);
     }
     setIsOpen(false);
     setFormData(profesorVacio());
   };
 
-  const eliminarProfesor = (id) => {
-    setProfesores(profesores.filter((p) => p.id !== id));
-    if (editandoId === id) setEditandoId(null);
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
-  const profesoresFiltrados = profesores.filter((prof) =>
+  return (
+    <>
+      <div className="flex justify-end mr-4">
+        <Button onClick={() => setIsOpen(true)}>
+          Añadir Profesor
+        </Button>
+      </div>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {profesorToEdit ? 'Editar Profesor' : 'Nuevo Profesor'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="nombre" className="text-sm font-medium">Nombre</label>
+                <Input
+                  id="nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="email" className="text-sm font-medium">Email</label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="telefono" className="text-sm font-medium">Teléfono</label>
+                <Input
+                  id="telefono"
+                  type="tel"
+                  name="telefono"
+                  value={formData.telefono}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="asignaturas" className="text-sm font-medium">Asignaturas</label>
+                <Input
+                  id="asignaturas"
+                  name="asignaturas"
+                  value={formData.asignaturas[0]}
+                  onChange={(e) => setFormData({...formData, asignaturas: [e.target.value]})}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsOpen(false)} type="button">
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Guardar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+const ProfesoresPage = () => {
+  const [profesores, setProfesores] = useState(() => {
+    const datosGuardados = localStorage.getItem('profesores');
+    return datosGuardados ? JSON.parse(datosGuardados) : [];
+  });
+  const [profesorToEdit, setProfesorToEdit] = useState(null);
+  const [busqueda, setBusqueda] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('profesores', JSON.stringify(profesores));
+  }, [profesores]);
+
+  const handleProfesorAdded = (nuevoProfesor) => {
+    const profesorConId = {
+      ...nuevoProfesor,
+      id: profesores.length ? Math.max(...profesores.map(p => p.id)) + 1 : 1
+    };
+    setProfesores([...profesores, profesorConId]);
+  };
+
+  const handleProfesorEdited = (profesorEditado) => {
+    setProfesores(profesores.map(prof => 
+      prof.id === profesorEditado.id ? profesorEditado : prof
+    ));
+  };
+
+  const handleDeleteProfesor = (id) => {
+    setProfesores(profesores.filter(prof => prof.id !== id));
+  };
+
+  const profesoresFiltrados = profesores.filter(prof =>
     prof.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-2">Gestión de Profesores</h1>
-      <p className="text-gray-600 mb-6">Administra los contactos de los profesores</p>
-
-      <div className="flex items-center justify-between mb-4">
-        <input
+    <>
+      <div className="flex justify-between items-center mx-4 mb-4">
+        <Input
           type="text"
           placeholder="Buscar profesor..."
-          className="border px-3 py-2 rounded w-1/3"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
+          className="max-w-xs"
         />
-        <Button
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          onClick={() => setIsOpen(true)}
-        >
-          Nuevo Profesor
-        </Button>
+        <AñadirProfesor 
+          onProfesorAdded={handleProfesorAdded}
+          profesorToEdit={profesorToEdit}
+          onProfesorEdited={handleProfesorEdited}
+        />
       </div>
-
-      <table className="w-full border shadow-sm rounded overflow-hidden text-sm">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="text-left px-4 py-2">Nombre</th>
-            <th className="text-left px-4 py-2">Email</th>
-            <th className="text-left px-4 py-2">Teléfono</th>
-            <th className="text-left px-4 py-2">Asignaturas</th>
-            <th className="text-left px-4 py-2">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {profesoresFiltrados.map((profesor) => (
-            <tr key={profesor.id} className="border-t hover:bg-gray-50">
-              <td className="px-4 py-2">{profesor.nombre}</td>
-              <td className="px-4 py-2">{profesor.email}</td>
-              <td className="px-4 py-2">{profesor.telefono}</td>
-              <td className="px-4 py-2">{profesor.asignaturas.join(', ')}</td>
-              <td className="px-4 py-2 flex space-x-2">
-                <button
-                  className="text-blue-600 hover:text-blue-800"
-                  onClick={() => handleEdit(profesor.id)}
-                >
-                  Editar
-                </button>
-                <button
-                  className="text-red-600 hover:text-red-800"
-                  onClick={() => eliminarProfesor(profesor.id)}
-                >
-                  Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="mt-4 text-sm text-gray-500">
-        Mostrando {profesoresFiltrados.length} contacto(s)
+      
+      <div className="mt-4 flex justify-center">
+        <Table className="text-center">
+          <TableHeader className="bg-neutral-100">
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Teléfono</TableHead>
+              <TableHead>Asignaturas</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {profesoresFiltrados.map((profesor) => (
+              <TableRow key={profesor.id}>
+                <TableCell>{profesor.nombre}</TableCell>
+                <TableCell>{profesor.email}</TableCell>
+                <TableCell>{profesor.telefono}</TableCell>
+                <TableCell>{profesor.asignaturas.join(', ')}</TableCell>
+                <TableCell>
+                  <div className="flex justify-center space-x-8">
+                    <button className="cursor-pointer"
+                      onClick={() => setProfesorToEdit(profesor)}
+                    >
+                      <FaEdit size={20} />
+                    </button>
+                    <button className="cursor-pointer"
+                      onClick={() => handleDeleteProfesor(profesor.id)}
+                    >
+                      <IoTrashBin size={20} />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
-
-      {/* Modal para Añadir/Editar Profesor */}
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6">
-            <Dialog.Title className="text-lg font-medium mb-4">
-              {editandoId ? 'Editar Profesor' : 'Nuevo Profesor'}
-            </Dialog.Title>
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-                  <input
-                    type="tel"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Asignaturas</label>
-                  <input
-                    type="text"
-                    name="asignaturas"
-                    value={formData.asignaturas[0]}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        asignaturas: [e.target.value]
-                      })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Guardar
-                </button>
-              </div>
-            </form>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
-    </div>
+    </>
   );
 };
 

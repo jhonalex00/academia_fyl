@@ -75,9 +75,11 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
   
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Nueva Academia</DialogTitle>
-            </DialogHeader>
+          <DialogHeader>
+          <DialogTitle>
+            {academiaToEdit ? 'Editar Academia' : 'Nueva Academia'}
+          </DialogTitle>
+        </DialogHeader>
             
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
@@ -274,8 +276,14 @@ const AcademiasPage = () => {
                 <TableCell>{academia.numStudents}</TableCell>
                 <TableCell>
                   <div className="flex justify-center space-x-8">
-                    <button className= "cursor-pointer"
-                      onClick={() => setAcademiaToEdit(academia)}
+                    <button className="cursor-pointer"
+                      onClick={() => setAcademiaToEdit({
+                        idacademy: academia.idacademy,
+                        nombre: academia.name,
+                        direccion: academia.adress,
+                        telefono: academia.phone,
+                        numAlumnos: academia.numStudents
+                      })}
                     >
                       <FaEdit size={20} />
                     </button>
