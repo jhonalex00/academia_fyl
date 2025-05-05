@@ -96,6 +96,34 @@ export const getDashboardStats = async () => {
   }
 };
 
+// Función para obtener estadísticas detalladas de asignaturas
+export const getSubjectStats = async () => {
+  try {
+    const response = await fetch('http://localhost:3001/api/dashboard/subjects/stats');
+    if (!response.ok) {
+      throw new Error('Error al obtener estadísticas de asignaturas');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para obtener estadísticas detalladas de estudiantes
+export const getStudentStats = async () => {
+  try {
+    const response = await fetch('http://localhost:3001/api/dashboard/students/stats');
+    if (!response.ok) {
+      throw new Error('Error al obtener estadísticas de estudiantes');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
 // Función para obtener actividades recientes
 export const getRecentActivities = async () => {
   try {
