@@ -81,6 +81,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .header {
@@ -173,13 +174,16 @@
   overflow: hidden;
   margin-bottom: 24px;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 /* Estilos específicos para FullCalendar */
 .calendarContainer :global(.fc) {
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
-  height: 100%;
+  flex: 1;
 }
 
 .calendarContainer :global(.fc-header-toolbar) {

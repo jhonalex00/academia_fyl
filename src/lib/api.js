@@ -151,3 +151,17 @@ export const getCalendarEvents = async (month, year) => {
     throw error;
   }
 };
+
+// Función para obtener todas las asignaturas de un profesor
+export const getTeacherSubjects = async (idteacher) => {
+  try {
+    const response = await fetch(`http://localhost:3001/api/profesores/${idteacher}/asignaturas`);
+    if (!response.ok) {
+      throw new Error('Error al obtener las asignaturas del profesor');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};

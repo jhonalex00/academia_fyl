@@ -176,7 +176,17 @@ body {
 }
 
 main {
-  margin-left: var(--sidebar-width);
+  margin-left: 15%;
+  padding: 2rem;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  transition: margin-left 0.3s ease;
+}
+
+/* Sólo para tu layout “página con menú lateral” */
+.layout main {
+  margin-left: 15%;
   padding: 2rem;
   width: 100%;
   min-height: 100vh;
