@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { getTeacherSubjects, createTeacherSubject, deleteTeacherSubject } = require('../controllers/profesorAsignaturaController');
+const { getTeacherSubjects, getTeacherSubjectsByTeacher, createTeacherSubject, deleteTeacherSubject } = require('../controllers/profesorAsignaturaController');
 
 // Obtener todas las asignaturas de profesores
 router.get('/', getTeacherSubjects);
+
+// Obtener las asignaturas de un profesor específico
+router.get('/:id', getTeacherSubjectsByTeacher);
 
 // Crear una nueva relación profesor-asignatura
 router.post('/', createTeacherSubject);
