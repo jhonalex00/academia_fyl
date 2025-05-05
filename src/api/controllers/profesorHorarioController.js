@@ -29,8 +29,7 @@ const getTeacherSchedulesByDate = async (req, res) => {  try {
     // Formatear fechas para SQL
     const startDateFormatted = startDate.toISOString().split('T')[0];
     const endDateFormatted = endDate.toISOString().split('T')[0];
-    
-    // Consulta SQL simplificada sin condiciones complejas
+      // Consulta SQL sin el campo idsubject (que no existe en la tabla)
     const query = `
       SELECT s.*, ts.idacademies
       FROM schedules s
@@ -55,10 +54,11 @@ const getTeacherSchedulesByDate = async (req, res) => {  try {
 // Crear una nueva relación profesor-horario
 const createTeacherSchedule = async (req, res) => {
   try {
-    const { idteacher, idschedule, idacademies } = req.body;
+    const { idteacher, idschedule, idacademies, idsubject } = req.body;
     
-    console.log('Creando relación profesor-horario:', { idteacher, idschedule, idacademies });
+    console.log('Creando relación profesor-horario:', { idteacher, idschedule, idacademies, idsubject });
     
+    // Ignoramos idsubject ya que la columna no existe en la tabla
     const [result] = await sequelize.query(
       'INSERT INTO teachers_schedules (idteacher, idschedule, idacademies) VALUES (?, ?, ?)', 
       { 
@@ -66,9 +66,8 @@ const createTeacherSchedule = async (req, res) => {
         type: sequelize.QueryTypes.INSERT 
       }
     );
-    
-    console.log('Resultado de la inserción profesor-horario:', result);
-    res.status(201).json({ idteacher, idschedule, idacademies });
+      console.log('Resultado de la inserción profesor-horario:', result);
+    res.status(201).json({ idteacher, idschedule, idacademies, idsubject });
   } catch (error) {
     console.error('Error al crear la relación profesor-horario:', error);
     res.status(500).json({ error: 'Error al crear la relación profesor-horario: ' + error.message });

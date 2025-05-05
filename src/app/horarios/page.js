@@ -14,6 +14,7 @@ export default function HorariosPage() {
   const calendarRef = useRef(null);
   const [profesores, setProfesores] = useState([]);
   const [academias, setAcademias] = useState([]);
+  const [asignaturas, setAsignaturas] = useState([]);
   const [profesorSeleccionado, setProfesorSeleccionado] = useState('');
   const [profesorNombre, setProfesorNombre] = useState('');
   const [eventos, setEventos] = useState([]);
@@ -22,12 +23,14 @@ export default function HorariosPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);  const [formularioHorario, setFormularioHorario] = useState({
+  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
+  const [formularioHorario, setFormularioHorario] = useState({
     fecha: '',
     horaInicio: '',
     horaFin: '',
     diaSemana: '',
     idacademies: '',
+    idsubject: '',
     repetirSemanal: false,
     semanas: 4 // Por defecto repetir por 4 semanas
   });
@@ -72,6 +75,45 @@ export default function HorariosPage() {
     }
   };
 
+  // Cargar asignaturas desde la API
+  const cargarAsignaturas = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/asignaturas');
+      if (!response.ok) {
+        throw new Error('Error al cargar asignaturas');
+      }
+      const data = await response.json();
+      setAsignaturas(data);
+    } catch (error) {
+      setError('Error al cargar asignaturas: ' + error.message);
+      console.error('Error al cargar asignaturas:', error);
+    }
+  };
+
+  // Cargar asignaturas del profesor seleccionado
+  const cargarAsignaturasProfesor = async (idProfesor) => {
+    if (!idProfesor) return;
+    
+    try {
+      const response = await fetch(`http://localhost:3001/api/profesores/${idProfesor}/asignaturas`);
+      if (!response.ok) {
+        throw new Error('Error al cargar asignaturas del profesor');
+      }
+      const data = await response.json();
+      
+      if (Array.isArray(data) && data.length > 0) {
+        setAsignaturas(data);
+      } else {
+        setAsignaturas([]);
+        setError('Este profesor no tiene asignaturas asignadas. Debe asignar asignaturas al profesor en la sección de Profesores.');
+      }
+    } catch (error) {
+      setError('Error al cargar asignaturas del profesor: ' + error.message);
+      console.error('Error al cargar asignaturas del profesor:', error);
+      setAsignaturas([]);
+    }
+  };
+
   // Cargar horarios del profesor seleccionado
   const cargarHorarioProfesor = async (idProfesor) => {
     if (!idProfesor) return;
@@ -110,14 +152,25 @@ export default function HorariosPage() {
         const academia = academias.find(a => a.idacademy === horario.idacademies);
         const nombreAcademia = academia ? academia.name : 'Academia';
         
+        // Buscar la información de la asignatura si está disponible
+        const asignatura = asignaturas.find(a => a.idsubject === horario.idsubject);
+        const nombreAsignatura = asignatura ? 
+          `${asignatura.year}º ${asignatura.cycle}` : 
+          '';
+        
+        const titulo = nombreAsignatura ? 
+          `${nombreAsignatura} - ${nombreAcademia}` : 
+          `Clase en ${nombreAcademia}`;
+          
         return {
           id: horario.idschedule,
-          title: `Clase en ${nombreAcademia}`,
+          title: titulo,
           start: fechaInicio,
           end: fechaFin,
           extendedProps: {
             idschedule: horario.idschedule,
             idacademies: horario.idacademies,
+            idsubject: horario.idsubject || '',
             weekDay: horario.weekDay,
             rawStartHour: horaInicio,
             rawEndHour: horaFin
@@ -167,7 +220,8 @@ export default function HorariosPage() {
     const colors = [
       '#4f46e5', '#0891b2', '#0d9488', '#059669', '#65a30d', 
       '#ca8a04', '#ea580c', '#dc2626', '#e11d48', '#be185d',
-      '#7e22ce', '#6d28d9'
+      '#7e22ce', '#6d28d9', '#3b82f6', '#9333ea', '#ec4899',
+      '#f97316', '#fbbf24', '#facc15', '#84cc16', '#22c55e',
     ];
     
     if (!id) return colors[0];
@@ -218,7 +272,13 @@ export default function HorariosPage() {
         !formularioHorario.horaFin || 
         !formularioHorario.diaSemana || 
         !formularioHorario.idacademies) {
-      setError('Por favor, complete todos los campos');
+      setError('Por favor, complete todos los campos obligatorios');
+      return;
+    }
+
+    // Validar que se ha seleccionado una asignatura
+    if (!formularioHorario.idsubject) {
+      setError('Por favor, seleccione una asignatura');
       return;
     }
 
@@ -273,7 +333,8 @@ export default function HorariosPage() {
             body: JSON.stringify({
               idteacher: profesorSeleccionado,
               idschedule: horarioCreado.id,
-              idacademies: formularioHorario.idacademies
+              idacademies: formularioHorario.idacademies,
+              idsubject: formularioHorario.idsubject
             }),
           });
           
@@ -316,11 +377,14 @@ export default function HorariosPage() {
           body: JSON.stringify({
             idteacher: profesorSeleccionado,
             idschedule: horarioCreado.id,
-            idacademies: formularioHorario.idacademies
+            idacademies: formularioHorario.idacademies,
+            idsubject: formularioHorario.idsubject
           }),
-        });      if (!responseAsociacion.ok) {
-        throw new Error('Error al asociar horario con profesor');
-      }
+        });
+          
+        if (!responseAsociacion.ok) {
+          throw new Error('Error al asociar horario con profesor');
+        }
       }
       
       // Recargar horarios y cerrar modal
@@ -342,7 +406,13 @@ export default function HorariosPage() {
         !formularioHorario.horaFin || 
         !formularioHorario.diaSemana || 
         !formularioHorario.idacademies) {
-      setError('Por favor, complete todos los campos');
+      setError('Por favor, complete todos los campos obligatorios');
+      return;
+    }
+
+    // Validar que se ha seleccionado una asignatura
+    if (!formularioHorario.idsubject) {
+      setError('Por favor, seleccione una asignatura');
       return;
     }
 
@@ -363,7 +433,7 @@ export default function HorariosPage() {
         throw new Error('Error al actualizar horario');
       }
 
-      // Actualizar la relación con la academia
+      // Actualizar la relación con la academia y asignatura
       // Primero eliminar la relación actual
       const deleteResponse = await fetch(`http://localhost:3001/api/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
         method: 'DELETE',
@@ -380,7 +450,8 @@ export default function HorariosPage() {
         body: JSON.stringify({
           idteacher: profesorSeleccionado,
           idschedule: eventoSeleccionado.extendedProps.idschedule,
-          idacademies: formularioHorario.idacademies
+          idacademies: formularioHorario.idacademies,
+          idsubject: formularioHorario.idsubject
         }),
       });
 
@@ -451,7 +522,10 @@ export default function HorariosPage() {
       horaInicio: '09:00',
       horaFin: '10:00',
       diaSemana: obtenerNombreDia(fechaActual.getDay()),
-      idacademies: academias.length > 0 ? academias[0].idacademy : ''
+      idacademies: academias.length > 0 ? academias[0].idacademy : '',
+      idsubject: asignaturas.length > 0 ? asignaturas[0].idsubject : '',
+      repetirSemanal: false,
+      semanas: 4
     });
     
     setModalAbierto(true);
@@ -470,7 +544,10 @@ export default function HorariosPage() {
       horaInicio: evento.extendedProps.rawStartHour.substring(0, 5),
       horaFin: evento.extendedProps.rawEndHour.substring(0, 5),
       diaSemana: evento.extendedProps.weekDay || obtenerNombreDia(fechaEvento.getDay()),
-      idacademies: evento.extendedProps.idacademies || ''
+      idacademies: evento.extendedProps.idacademies || '',
+      idsubject: evento.extendedProps.idsubject || '',
+      repetirSemanal: false,
+      semanas: 4
     });
     
     setModalAbierto(true);
@@ -487,6 +564,7 @@ export default function HorariosPage() {
       horaFin: '',
       diaSemana: '',
       idacademies: '',
+      idsubject: '',
       repetirSemanal: false,
       semanas: 4
     });
@@ -605,34 +683,52 @@ export default function HorariosPage() {
   useEffect(() => {
     cargarProfesores();
     cargarAcademias();
+    cargarAsignaturas();
   }, []);
 
   // Cargar horarios cuando se selecciona un profesor
   useEffect(() => {
     if (profesorSeleccionado) {
       cargarHorarioProfesor(profesorSeleccionado);
+      cargarAsignaturasProfesor(profesorSeleccionado);
     } else {
       setEventos([]);
     }
   }, [profesorSeleccionado]);
 
+  // Función que maneja el cambio de profesor seleccionado
+  const cambiarProfesorSeleccionado = (e) => {
+    const idProfesor = e.target.value;
+    setProfesorSeleccionado(idProfesor);
+    if (idProfesor) {
+      // Recargar los horarios y asignaturas cuando se selecciona un profesor
+      cargarHorarioProfesor(idProfesor);
+      cargarAsignaturasProfesor(idProfesor);
+    } else {
+      setEventos([]);
+      setAsignaturas([]);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <aside className={styles.sidebar}>
-        <h2>MaestroTrack</h2>
-        <input
+         <input
           type="text"
           placeholder="Buscar profesor..."
           className={styles.search}
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />
-        <ul className={styles.profesorList}>
-          {profesoresFiltrados.map((profesor) => (
+        <ul className={styles.profesorList}>          {profesoresFiltrados.map((profesor) => (
             <li
               key={profesor.idteacher}
               className={profesorSeleccionado == profesor.idteacher ? styles.selected : ''}
-              onClick={() => setProfesorSeleccionado(profesor.idteacher)}
+              onClick={() => {
+                setProfesorSeleccionado(profesor.idteacher);
+                cargarHorarioProfesor(profesor.idteacher);
+                cargarAsignaturasProfesor(profesor.idteacher);
+              }}
             >
               {profesor.name}
             </li>
@@ -679,7 +775,7 @@ export default function HorariosPage() {
         
         <div className={styles.calendarContainer}>
           {cargando ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <p>Cargando horarios...</p>
             </div>
           ) : (            <FullCalendar
@@ -689,7 +785,7 @@ export default function HorariosPage() {
               headerToolbar={false}
               events={eventos}
               locale={esLocale}
-              height="auto"
+              height="parent"
               allDaySlot={false}
               slotMinTime="08:00:00"
               slotMaxTime="22:00:00"
@@ -709,7 +805,10 @@ export default function HorariosPage() {
                     horaInicio: `${fechaSeleccionada.getHours().toString().padStart(2, '0')}:00`,
                     horaFin: `${(fechaSeleccionada.getHours() + 1).toString().padStart(2, '0')}:00`,
                     diaSemana: obtenerNombreDia(fechaSeleccionada.getDay()),
-                    idacademies: academias.length > 0 ? academias[0].idacademy : ''
+                    idacademies: academias.length > 0 ? academias[0].idacademy : '',
+                    idsubject: asignaturas.length > 0 ? asignaturas[0].idsubject : '',
+                    repetirSemanal: false,
+                    semanas: 4
                   });
                   setModoEdicion(false);
                   setEventoSeleccionado(null);
@@ -797,6 +896,23 @@ export default function HorariosPage() {
                 {academias.map(academia => (
                   <option key={academia.idacademy} value={academia.idacademy}>
                     {academia.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label htmlFor="asignatura">Asignatura</label>
+              <select
+                id="asignatura"
+                className={styles.formControl}
+                value={formularioHorario.idsubject}
+                onChange={(e) => setFormularioHorario({...formularioHorario, idsubject: e.target.value})}
+              >
+                <option value="">Seleccione una asignatura</option>
+                {asignaturas.map(asignatura => (
+                  <option key={asignatura.idsubject} value={asignatura.idsubject}>
+                    {asignatura.name}
                   </option>
                 ))}
               </select>
