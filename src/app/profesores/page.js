@@ -59,7 +59,7 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
 
   return (
     <>
-      <div className="flex justify-end mr-4 mt-4">
+      <div className="flex justify-end mr-4 mt-2">
         <Button onClick={() => setIsOpen(true)}>
           Añadir Profesor
         </Button>
@@ -239,7 +239,7 @@ const ProfesoresPage = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center mx-4 mb-4">
+      <div className="flex justify-between items-center mt-2">
         <Input
           type="text"
           placeholder="Buscar profesor..."
