@@ -76,7 +76,7 @@ return (
             <div className="mb-3">
                 <FormField control={form.control} name="telefonoAlumno" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Numero de teléfono</FormLabel>
+                        <FormLabel>Número de teléfono</FormLabel>
                         <FormControl>
                             <Input className="w-[300px]" placeholder="Ej: 612345678" {...field} />
                         </FormControl>
@@ -390,7 +390,7 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Telefono 1</FormLabel>
+                        <FormLabel>Teléfono 1</FormLabel>
                         <FormControl>
                             <Input className="w-[300px]" placeholder="Introduce el teléfono del tutor 1" {...field} />
                         </FormControl>
@@ -431,7 +431,7 @@ return (
             <div>
                 <FormField control={form.control} name="telefono2" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Telefono 2</FormLabel>
+                        <FormLabel>Teléfono 2</FormLabel>
                         <FormControl>
                             <Input className="w-[300px]" placeholder="Introduce el teléfono del tutor 2" {...field} />
                         </FormControl>
@@ -455,7 +455,7 @@ return (
         
 
         {/* DATOS ADICIONALES */}
-        <h2 className="text-lg font-bold mb-2 mt-10">Datos de adicionales</h2>
+        <h2 className="text-lg font-bold mb-2 mt-10">Datos adicionales</h2>
 
         {/* TRASTORNOS DE APRENDIZAJE */}
         <FormField control={form.control} name="trastornos"
@@ -488,7 +488,7 @@ return (
         {/* BULLYING */}
         <FormField control={form.control} name="bullying" render={({ field }) => (
             <FormItem>
-            <FormLabel className="mt-4">¿Su hijo/a sufre o ha sufrido aislamiento, bullying o  algún tipo de trato que le influya egativamente en el estudio/aprendizaje? *Opcional</FormLabel>
+            <FormLabel className="mt-4">¿Su hijo/a sufre o ha sufrido aislamiento, bullying o  algún tipo de trato que le influya negativamente en el estudio/aprendizaje? *Opcional</FormLabel>
             <FormControl>
                 <Textarea {...field} className="w-[600px]" placeholder="Escribe aquí" rows={4} />
             </FormControl>
@@ -718,7 +718,7 @@ return (
                                 <FormControl>
                                     <RadioGroupItem value="recomendacion"/>
                                 </FormControl>
-                                <FormLabel className="font-normal">Recomendacion</FormLabel>
+                                <FormLabel className="font-normal">Recomendación</FormLabel>
                             </FormItem>
                             
                             <FormItem className="flex items-center">

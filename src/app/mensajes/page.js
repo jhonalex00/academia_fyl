@@ -46,7 +46,7 @@ const MensajesPage = () => {
   );
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto mt-4">
       {/* Añadimos el input de búsqueda */}
       <div className="flex justify-between items-center mx-4 mb-4">
         <Input
@@ -58,7 +58,7 @@ const MensajesPage = () => {
         />
       </div>
       
-      <div className="mt-4">
+      <div className="mt-10">
         <Table className="text-center">
           <TableHeader className="bg-neutral-100">
             <TableRow>
