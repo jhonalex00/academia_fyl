@@ -137,19 +137,6 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
                   required
                 />
               </div>
-
-              <div className="grid w-full items-center gap-1.5">
-                <label htmlFor="numAlumnos" className="text-sm font-medium">Número de Alumnos</label>
-                <Input
-                  id="numAlumnos"
-                  type="number"
-                  name="numAlumnos"
-                  value={formData.numAlumnos}
-                  onChange={handleChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
             </div>
 
             <DialogFooter>
