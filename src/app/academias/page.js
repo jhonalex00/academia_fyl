@@ -14,26 +14,21 @@ import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 
-export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdited }) { // OnAcademiaAdded es para actualizar la lista cuando añadamos una nueva academia
-  const [isOpen, setIsOpen] = useState(false); // IsOpen controla si el modal está abierto. Empieza en false, osea que el modal está cerrado
-                                              // SetIsOpne es la función que se usa para cambiar de estado el modal
-  const [formData, setFormData] = useState({ // FormData es un objeto para almacenar los campos
-                                            // y SetFormData se usa para actualizar los campos
+export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdited }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
     nombre: '',
     direccion: '',
     telefono: '',
     numAlumnos: ''
   });
 
-  // Actualiza el formulario cuando se va a editar una academia
   useEffect(() => {
     if (academiaToEdit) {
       setFormData(academiaToEdit);
@@ -41,9 +36,19 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
     }
   }, [academiaToEdit]);
 
+  const handleAddClick = () => {
+    onAcademiaEdited(null);
+    setFormData({
+      nombre: '',
+      direccion: '',
+      telefono: '',
+      numAlumnos: ''
+    });
+    setIsOpen(true);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Enviando datos:', formData);
     if (academiaToEdit) {
       onAcademiaEdited(formData);
     } else {
@@ -65,90 +70,102 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
     });
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setFormData({
+      nombre: '',
+      direccion: '',
+      telefono: '',
+      numAlumnos: ''
+    });
+    if (academiaToEdit) {
+      onAcademiaEdited(null);
+    }
+  };
+
   return (
-      <>
-        <div className="flex justify-end mr-4 mt-4">
-          <Button onClick={() => setIsOpen(true)}>
-            Añadir Academia
-          </Button>
-        </div>
-  
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="sm:max-w-[425px]">
+    <>
+      <div className="flex justify-end mr-4 mt-4">
+        <Button onClick={handleAddClick}>
+          Añadir Academia
+        </Button>
+      </div>
+
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-          <DialogTitle>
-            {academiaToEdit ? 'Editar Academia' : 'Nueva Academia'}
-          </DialogTitle>
-        </DialogHeader>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4 py-4">
-                <div className="grid w-full items-center gap-1.5">
-                  <label htmlFor="nombre" className="text-sm font-medium">Nombre</label>
-                  <Input
-                    id="nombre"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-
-                <div className="grid w-full items-center gap-1.5">
-                  <label htmlFor="direccion" className="text-sm font-medium">Dirección</label>
-                  <Input
-                    id="direccion"
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-
-                <div className="grid w-full items-center gap-1.5">
-                  <label htmlFor="telefono" className="text-sm font-medium">Teléfono</label>
-                  <Input
-                    id="telefono"
-                    type="tel"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-
-                <div className="grid w-full items-center gap-1.5">
-                  <label htmlFor="numAlumnos" className="text-sm font-medium">Número de Alumnos</label>
-                  <Input
-                    id="numAlumnos"
-                    type="number"
-                    name="numAlumnos"
-                    value={formData.numAlumnos}
-                    onChange={handleChange}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
+            <DialogTitle>
+              {academiaToEdit ? 'Editar Academia' : 'Nueva Academia'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="nombre" className="text-sm font-medium">Nombre</label>
+                <Input
+                  id="nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
               </div>
 
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsOpen(false)} type="button">
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  Guardar
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </>
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="direccion" className="text-sm font-medium">Dirección</label>
+                <Input
+                  id="direccion"
+                  name="direccion"
+                  value={formData.direccion}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="telefono" className="text-sm font-medium">Teléfono</label>
+                <Input
+                  id="telefono"
+                  type="tel"
+                  name="telefono"
+                  value={formData.telefono}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="numAlumnos" className="text-sm font-medium">Número de Alumnos</label>
+                <Input
+                  id="numAlumnos"
+                  type="number"
+                  name="numAlumnos"
+                  value={formData.numAlumnos}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={handleClose} type="button">
+                Cancelar
+              </Button>
+              <Button type="submit">
+                {academiaToEdit ? 'Actualizar' : 'Guardar'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
-
 
 const AcademiasPage = () => {
   const [academias, setAcademias] = useState([]);
@@ -194,29 +211,34 @@ const AcademiasPage = () => {
         throw new Error('Error al crear la academia');
       }
 
-      await cargarAcademias(); // Recargar las academias después de añadir
+      await cargarAcademias();
     } catch (error) {
       setError(error.message);
     }
   };
-  
+
   const handleDeleteAcademia = async (id) => {
     try {
       const response = await fetch(`http://localhost:3001/api/academias/${id}`, {
         method: 'DELETE'
       });
-  
+
       if (!response.ok) {
         throw new Error('Error al eliminar la academia');
       }
-  
-      cargarAcademias(); // Recargar las academias
+
+      cargarAcademias();
     } catch (error) {
       setError(error.message);
     }
   };
-  
+
   const handleAcademiaEdited = async (academiaEditada) => {
+    if (!academiaEditada) {
+      setAcademiaToEdit(null);
+      return;
+    }
+
     try {
       const response = await fetch(`http://localhost:3001/api/academias/${academiaEditada.idacademy}`, {
         method: 'PUT',
@@ -226,15 +248,16 @@ const AcademiasPage = () => {
         body: JSON.stringify({
           name: academiaEditada.nombre,
           adress: academiaEditada.direccion,
-          phone: academiaEditada.telefono
+          phone: academiaEditada.telefono,
+          numStudents: academiaEditada.numAlumnos
         })
       });
-  
+
       if (!response.ok) {
         throw new Error('Error al actualizar la academia');
       }
-  
-      cargarAcademias(); // Recargar las academias
+
+      await cargarAcademias();
       setAcademiaToEdit(null);
     } catch (error) {
       setError(error.message);
@@ -245,16 +268,13 @@ const AcademiasPage = () => {
     cargarAcademias();
   }, []);
 
-
   return (
     <>
-      <div className="flex justify-end">
-        <AñadirAcademia 
-          onAcademiaAdded={handleAcademiaAdded}
-          academiaToEdit={academiaToEdit}
-          onAcademiaEdited={handleAcademiaEdited}
-        />
-      </div>
+      <AñadirAcademia 
+        onAcademiaAdded={handleAcademiaAdded}
+        academiaToEdit={academiaToEdit}
+        onAcademiaEdited={handleAcademiaEdited}
+      />
       
       <div className="mt-10 flex justify-center">
         <Table className="text-center">
@@ -276,7 +296,8 @@ const AcademiasPage = () => {
                 <TableCell>{academia.numStudents}</TableCell>
                 <TableCell>
                   <div className="flex justify-center space-x-8">
-                    <button className="cursor-pointer"
+                    <button 
+                      className="cursor-pointer"
                       onClick={() => setAcademiaToEdit({
                         idacademy: academia.idacademy,
                         nombre: academia.name,
@@ -287,7 +308,8 @@ const AcademiasPage = () => {
                     >
                       <FaEdit size={20} />
                     </button>
-                    <button className= "cursor-pointer"
+                    <button 
+                      className="cursor-pointer"
                       onClick={() => handleDeleteAcademia(academia.idacademy)}
                     >
                       <IoTrashBin size={20} />
