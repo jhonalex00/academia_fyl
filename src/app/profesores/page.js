@@ -73,7 +73,7 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
 
   return (
     <>
-      <div className="flex justify-end mr-4 mt-4">
+      <div className="flex justify-end mt-4">
         <Button onClick={handleAddClick}>
           Añadir Profesor
         </Button>
@@ -273,7 +273,7 @@ const ProfesoresPage = () => {
         />
       </div>
       
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-10">
         <Table className="text-center">
           <TableHeader className="bg-neutral-100">
             <TableRow>
