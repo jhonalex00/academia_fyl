@@ -67,7 +67,7 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
 
   return (
       <>
-        <div className="flex justify-end mr-4">
+        <div className="flex justify-end mr-4 mt-4">
           <Button onClick={() => setIsOpen(true)}>
             Añadir Academia
           </Button>
@@ -256,7 +256,7 @@ const AcademiasPage = () => {
         />
       </div>
       
-      <div className="mt-20 flex justify-center">
+      <div className="mt-10 flex justify-center">
         <Table className="text-center">
           <TableHeader className="bg-neutral-100">
             <TableRow>
