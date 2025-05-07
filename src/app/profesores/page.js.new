@@ -147,26 +147,21 @@ const ProfesoresPage = () => {
   const [profesorToEdit, setProfesorToEdit] = useState(null);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState(null);
-  // Cargar profesores de la base de datos  
+
+  // Cargar profesores de la base de datos
   const cargarProfesores = async () => {
     try {
       const data = await apiGet('/profesores');
-      if (Array.isArray(data)) {
-        setProfesores(data);
-      } else {
-        console.warn("La respuesta de profesores no es un array:", data);
-        setProfesores([]);
-      }
+      setProfesores(data);
     } catch (error) {
-      console.error("Error al cargar profesores:", error);
-      setError(error.message || "Error al cargar profesores");
-      setProfesores([]);
+      setError(error.message);
     }
   };
 
   useEffect(() => {
     cargarProfesores();
   }, []);
+
   const handleProfesorAdded = async (nuevoProfesor) => {
     try {
       await apiPost('/profesores', {
@@ -175,12 +170,13 @@ const ProfesoresPage = () => {
         phone: nuevoProfesor.telefono,
         subjects: nuevoProfesor.asignaturas
       });
-      
+
       cargarProfesores(); // Recargar la lista de profesores
     } catch (error) {
       setError(error.message);
     }
   };
+
   const handleProfesorEdited = async (profesorEditado) => {
     try {
       await apiPut(`/profesores/${profesorEditado.id}`, {
@@ -189,12 +185,13 @@ const ProfesoresPage = () => {
         phone: profesorEditado.telefono,
         subjects: profesorEditado.asignaturas
       });
-      
+
       cargarProfesores(); // Recargar la lista de profesores
     } catch (error) {
       setError(error.message);
     }
   };
+
   const handleDeleteProfesor = async (id) => {
     try {
       await apiDelete(`/profesores/${id}`);
@@ -205,7 +202,7 @@ const ProfesoresPage = () => {
   };
 
   const profesoresFiltrados = profesores.filter(prof =>
-    prof.name?.toLowerCase().includes(busqueda.toLowerCase())  // Cambia prof.nombre por prof.name
+    prof.name?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -252,20 +249,20 @@ const ProfesoresPage = () => {
                       email: profesor.email,
                       telefono: profesor.phone,
                       asignaturas: profesor.subjects || []
-            })}
-          >
-            <FaEdit size={20} />
-          </button>
-          <button className="cursor-pointer"
-            onClick={() => handleDeleteProfesor(profesor.idteacher)}
-          >
-            <IoTrashBin size={20} />
-          </button>
-        </div>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+                    })}
+                  >
+                    <FaEdit size={20} />
+                  </button>
+                  <button className="cursor-pointer"
+                    onClick={() => handleDeleteProfesor(profesor.idteacher)}
+                  >
+                    <IoTrashBin size={20} />
+                  </button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+          </TableBody>
         </Table>
       </div>
     </>

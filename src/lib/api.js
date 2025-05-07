@@ -1,25 +1,51 @@
-// Función para obtener todos los estudiantes
+'use client';
+
+import { apiGet, apiPost, apiPut, apiDelete } from './fetchClient';
+
+// Función para obtener todos los alumnos
 export const getStudents = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/estudiantes');
-    if (!response.ok) {
-      throw new Error('Error al obtener los estudiantes');
-    }
-    return await response.json();
+    return await apiGet('/alumnos');
   } catch (error) {
     console.error('Error:', error);
     throw error;
   }
 };
 
-// Función para obtener todas las academias
-export const getAcademies = async () => {
+// Función para obtener un alumno por ID
+export const getStudentById = async (id) => {
   try {
-    const response = await fetch('http://localhost:3001/api/academias');
-    if (!response.ok) {
-      throw new Error('Error al obtener las academias');
-    }
-    return await response.json();
+    return await apiGet(`/alumnos/${id}`);
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para crear un nuevo alumno
+export const createStudent = async (student) => {
+  try {
+    return await apiPost('/alumnos', student);
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para actualizar un alumno
+export const updateStudent = async (id, student) => {
+  try {
+    return await apiPut(`/alumnos/${id}`, student);
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para eliminar un alumno
+export const deleteStudent = async (id) => {
+  try {
+    return await apiDelete(`/alumnos/${id}`);
   } catch (error) {
     console.error('Error:', error);
     throw error;
@@ -29,11 +55,47 @@ export const getAcademies = async () => {
 // Función para obtener todos los profesores
 export const getTeachers = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/profesores');
-    if (!response.ok) {
-      throw new Error('Error al obtener los profesores');
-    }
-    return await response.json();
+    return await apiGet('/profesores');
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para obtener un profesor por ID
+export const getTeacherById = async (id) => {
+  try {
+    return await apiGet(`/profesores/${id}`);
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para crear un nuevo profesor
+export const createTeacher = async (teacher) => {
+  try {
+    return await apiPost('/profesores', teacher);
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para actualizar un profesor
+export const updateTeacher = async (id, teacher) => {
+  try {
+    return await apiPut(`/profesores/${id}`, teacher);
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+// Función para eliminar un profesor
+export const deleteTeacher = async (id) => {
+  try {
+    return await apiDelete(`/profesores/${id}`);
   } catch (error) {
     console.error('Error:', error);
     throw error;
@@ -43,12 +105,8 @@ export const getTeachers = async () => {
 // Función para obtener todas las asignaturas
 export const getSubjects = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/asignaturas');
-    if (!response.ok) {
-      throw new Error('Error al obtener las asignaturas');
-    }
-    return await response.json();
-  } catch (error) {
+    return await apiGet('/asignaturas');
+  } catch (error){
     console.error('Error:', error);
     throw error;
   }
@@ -57,11 +115,7 @@ export const getSubjects = async () => {
 // Función para obtener todas las inscripciones
 export const getEnrolments = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/inscripciones');
-    if (!response.ok) {
-      throw new Error('Error al obtener las inscripciones');
-    }
-    return await response.json();
+    return await apiGet('/inscripciones');
   } catch (error) {
     console.error('Error:', error);
     throw error;
@@ -71,11 +125,7 @@ export const getEnrolments = async () => {
 // Función para obtener los horarios
 export const getSchedules = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/horarios');
-    if (!response.ok) {
-      throw new Error('Error al obtener los horarios');
-    }
-    return await response.json();
+    return await apiGet('/horarios');
   } catch (error) {
     console.error('Error:', error);
     throw error;
@@ -85,39 +135,27 @@ export const getSchedules = async () => {
 // Función para obtener estadísticas del dashboard
 export const getDashboardStats = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/dashboard/stats');
-    if (!response.ok) {
-      throw new Error('Error al obtener estadísticas del dashboard');
-    }
-    return await response.json();
+    return await apiGet('/dashboard/stats');
   } catch (error) {
     console.error('Error:', error);
     throw error;
   }
 };
 
-// Función para obtener estadísticas detalladas de asignaturas
+// Función para obtener estadísticas de asignaturas
 export const getSubjectStats = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/dashboard/subjects/stats');
-    if (!response.ok) {
-      throw new Error('Error al obtener estadísticas de asignaturas');
-    }
-    return await response.json();
+    return await apiGet('/dashboard/subjects/stats');
   } catch (error) {
     console.error('Error:', error);
     throw error;
   }
 };
 
-// Función para obtener estadísticas detalladas de estudiantes
+// Función para obtener estadísticas de estudiantes
 export const getStudentStats = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/dashboard/students/stats');
-    if (!response.ok) {
-      throw new Error('Error al obtener estadísticas de estudiantes');
-    }
-    return await response.json();
+    return await apiGet('/dashboard/students/stats');
   } catch (error) {
     console.error('Error:', error);
     throw error;
@@ -127,11 +165,7 @@ export const getStudentStats = async () => {
 // Función para obtener actividades recientes
 export const getRecentActivities = async () => {
   try {
-    const response = await fetch('http://localhost:3001/api/dashboard/activities');
-    if (!response.ok) {
-      throw new Error('Error al obtener actividades recientes');
-    }
-    return await response.json();
+    return await apiGet('/dashboard/activities');
   } catch (error) {
     console.error('Error:', error);
     throw error;
@@ -141,25 +175,17 @@ export const getRecentActivities = async () => {
 // Función para obtener eventos del calendario
 export const getCalendarEvents = async (month, year) => {
   try {
-    const response = await fetch(`http://localhost:3001/api/dashboard/calendar?month=${month}&year=${year}`);
-    if (!response.ok) {
-      throw new Error('Error al obtener eventos del calendario');
-    }
-    return await response.json();
+    return await apiGet(`/dashboard/calendar?month=${month}&year=${year}`);
   } catch (error) {
     console.error('Error:', error);
     throw error;
   }
 };
 
-// Función para obtener todas las asignaturas de un profesor
+// Función para obtener asignaturas de un profesor
 export const getTeacherSubjects = async (idteacher) => {
   try {
-    const response = await fetch(`http://localhost:3001/api/profesores/${idteacher}/asignaturas`);
-    if (!response.ok) {
-      throw new Error('Error al obtener las asignaturas del profesor');
-    }
-    return await response.json();
+    return await apiGet(`/profesores/${idteacher}/asignaturas`);
   } catch (error) {
     console.error('Error:', error);
     throw error;

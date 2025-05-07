@@ -8,7 +8,7 @@ const {
   updateUsuario, 
   deleteUsuario 
 } = require('../controllers/usuarioController');
-const authMiddleware = require('../../middleware/auth');
+const { authenticate } = require('../../middleware/auth');
 
 // Rutas públicas (sin autenticación)
 // POST /api/usuarios/registro - Registrar un nuevo usuario
@@ -19,15 +19,15 @@ router.post('/login', loginUsuario);
 
 // Rutas protegidas (requieren autenticación)
 // GET /api/usuarios - Obtener todos los usuarios
-router.get('/', authMiddleware, getUsuarios);
+router.get('/', authenticate, getUsuarios);
 
 // GET /api/usuarios/:id - Obtener un usuario por ID
-router.get('/:id', authMiddleware, getUsuarioById);
+router.get('/:id', authenticate, getUsuarioById);
 
 // PUT /api/usuarios/:id - Actualizar un usuario
-router.put('/:id', authMiddleware, updateUsuario);
+router.put('/:id', authenticate, updateUsuario);
 
 // DELETE /api/usuarios/:id - Eliminar un usuario
-router.delete('/:id', authMiddleware, deleteUsuario);
+router.delete('/:id', authenticate, deleteUsuario);
 
 module.exports = router;

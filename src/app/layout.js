@@ -10,15 +10,28 @@ import { FaSchoolFlag } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
 import { MdDashboard } from "react-icons/md";
 import { MdMessage } from "react-icons/md";
+import { FiLogOut } from "react-icons/fi";
 import { useActiveRoute } from '../hooks/useActiveRoute';
+import { AuthProvider } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
+import ProtectedLayout from '@/components/auth/ProtectedLayout';
 
 const Navigation = () => {
   const { isActive } = useActiveRoute();
+  const { user, logout } = useAuth();
+
+  // Si no hay usuario autenticado, no mostrar la navegación
+  if (!user) return null;
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <nav className="navigation">
       <div className="nav-header">
         <h1 className="nav-title">Academia FyL</h1>
+        <div className="text-sm text-gray-400 mt-1">{user?.name || 'Usuario'}</div>
       </div>
       <ul className="nav-links">
         <li>
@@ -59,10 +72,16 @@ const Navigation = () => {
         </li>
       </ul>
       <div className="nav-footer">
-        <Link href="/configuracion" className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}>
-          <IoMdSettings className="nav-icon" />
-          <span>Configuración</span>
-        </Link>
+        <div className="flex flex-col space-y-2">
+          <Link href="/configuracion" className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}>
+            <IoMdSettings className="nav-icon" />
+            <span>Configuración</span>
+          </Link>
+          <button onClick={handleLogout} className="nav-item text-red-500 hover:bg-red-50">
+            <FiLogOut className="nav-icon" />
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
       </div>
     </nav>
   );
@@ -75,10 +94,14 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body>
-        <div className="layout">
-          <Navigation />
-          <main>{children}</main>
-        </div>
+        <AuthProvider>
+          <div className="layout">
+            <Navigation />
+            <main>
+              <ProtectedLayout>{children}</ProtectedLayout>
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

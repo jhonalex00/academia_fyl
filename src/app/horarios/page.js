@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './horarios.module.css';
+import { apiGet, apiPost, apiPut, apiDelete, fetchWithAuth, API_BASE_URL } from '@/lib/fetchClient';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -40,17 +41,11 @@ export default function HorariosPage() {
     if (!fecha) return '';
     const f = new Date(fecha);
     return `${f.getDate().toString().padStart(2, '0')}/${(f.getMonth() + 1).toString().padStart(2, '0')}/${f.getFullYear()}`;
-  };
-
-  // Cargar profesores desde la API
+  };  // Cargar profesores desde la API
   const cargarProfesores = async () => {
     try {
       setCargando(true);
-      const response = await fetch('http://localhost:3001/api/profesores');
-      if (!response.ok) {
-        throw new Error('Error al cargar profesores');
-      }
-      const data = await response.json();
+      const data = await apiGet('/profesores');
       setProfesores(data);
     } catch (error) {
       setError('Error al cargar profesores: ' + error.message);
@@ -58,30 +53,38 @@ export default function HorariosPage() {
     } finally {
       setCargando(false);
     }
-  };
-
-  // Cargar academias desde la API
+  };  // Cargar academias desde la API
   const cargarAcademias = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/academias');
-      if (!response.ok) {
-        throw new Error('Error al cargar academias');
-      }
-      const data = await response.json();
+      const data = await apiGet('/academias');
       setAcademias(data);
     } catch (error) {
       setError('Error al cargar academias: ' + error.message);
       console.error('Error al cargar academias:', error);
     }
   };
-
   // Cargar asignaturas desde la API
   const cargarAsignaturas = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/asignaturas');
+      // Obtener el token del localStorage
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      
+      const response = await fetch('http://localhost:3001/api/asignaturas', {
+        headers: {
+          'Authorization': `Bearer ${token || ''}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       if (!response.ok) {
+        if (response.status === 401) {
+          // Si hay un error de autenticación, redirigir al login
+          router.push('/login');
+          throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+        }
         throw new Error('Error al cargar asignaturas');
       }
+      
       const data = await response.json();
       setAsignaturas(data);
     } catch (error) {
@@ -95,11 +98,7 @@ export default function HorariosPage() {
     if (!idProfesor) return;
     
     try {
-      const response = await fetch(`http://localhost:3001/api/profesores/${idProfesor}/asignaturas`);
-      if (!response.ok) {
-        throw new Error('Error al cargar asignaturas del profesor');
-      }
-      const data = await response.json();
+      const data = await apiGet(`/profesores/${idProfesor}/asignaturas`);
       
       if (Array.isArray(data) && data.length > 0) {
         setAsignaturas(data);
@@ -120,12 +119,7 @@ export default function HorariosPage() {
     
     try {
       setCargando(true);
-      const response = await fetch(`http://localhost:3001/api/profesores/${idProfesor}/horarios`);
-      if (!response.ok) {
-        throw new Error('Error al cargar horarios del profesor');
-      }
-      
-      const data = await response.json();
+      const data = await apiGet(`/profesores/${idProfesor}/horarios`);
       
       // Transformar los datos para FullCalendar
       const eventosCalendario = data.map(horario => {
@@ -304,22 +298,12 @@ export default function HorariosPage() {
           });
           
           // Crear el horario para esta semana
-          const responseHorario = await fetch('http://localhost:3001/api/horarios', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              date: fechaFormateada,
-              weekDay: formularioHorario.diaSemana,
-              startHour: formularioHorario.horaInicio,
-              finishHour: formularioHorario.horaFin
-            }),
+          const horarioCreado = await apiPost('/horarios', {
+            date: fechaFormateada,
+            weekDay: formularioHorario.diaSemana,
+            startHour: formularioHorario.horaInicio,
+            finishHour: formularioHorario.horaFin
           });
-
-          if (!responseHorario.ok) {
-            throw new Error(`Error al crear horario para la semana ${i+1}`);
-          }
-          
-          const horarioCreado = await responseHorario.json();
           
           // Comprobar que el horario tiene un ID válido
           if (!horarioCreado || !horarioCreado.id) {
@@ -327,20 +311,12 @@ export default function HorariosPage() {
           }
           
           // Asociar el horario con el profesor y la academia
-          const responseAsociacion = await fetch('http://localhost:3001/api/profesores/horarios', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              idteacher: profesorSeleccionado,
-              idschedule: horarioCreado.id,
-              idacademies: formularioHorario.idacademies,
-              idsubject: formularioHorario.idsubject
-            }),
+          await apiPost('/profesores/horarios', {
+            idteacher: profesorSeleccionado,
+            idschedule: horarioCreado.id,
+            idacademies: formularioHorario.idacademies,
+            idsubject: formularioHorario.idsubject
           });
-          
-          if (!responseAsociacion.ok) {
-            throw new Error(`Error al asociar el horario de la semana ${i+1} con el profesor`);
-          }
           
           horariosCreados.push(horarioCreado.id);
         }
@@ -348,22 +324,12 @@ export default function HorariosPage() {
         console.log(`Se crearon ${horariosCreados.length} horarios recurrentes:`, horariosCreados);
       } else {
         // Crear un solo horario (comportamiento original)
-        const responseHorario = await fetch('http://localhost:3001/api/horarios', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            date: formularioHorario.fecha,
-            weekDay: formularioHorario.diaSemana,
-            startHour: formularioHorario.horaInicio,
-            finishHour: formularioHorario.horaFin
-          }),
+        const horarioCreado = await apiPost('/horarios', {
+          date: formularioHorario.fecha,
+          weekDay: formularioHorario.diaSemana,
+          startHour: formularioHorario.horaInicio,
+          finishHour: formularioHorario.horaFin
         });
-
-        if (!responseHorario.ok) {
-          throw new Error('Error al crear horario');
-        }      
-        
-        const horarioCreado = await responseHorario.json();
 
         // Comprobar que el horario tiene un ID válido
         if (!horarioCreado || !horarioCreado.id) {
@@ -371,20 +337,12 @@ export default function HorariosPage() {
         }
 
         // Asociar el horario con el profesor y la academia
-        const responseAsociacion = await fetch('http://localhost:3001/api/profesores/horarios', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            idteacher: profesorSeleccionado,
-            idschedule: horarioCreado.id,
-            idacademies: formularioHorario.idacademies,
-            idsubject: formularioHorario.idsubject
-          }),
+        await apiPost('/profesores/horarios', {
+          idteacher: profesorSeleccionado,
+          idschedule: horarioCreado.id,
+          idacademies: formularioHorario.idacademies,
+          idsubject: formularioHorario.idsubject
         });
-          
-        if (!responseAsociacion.ok) {
-          throw new Error('Error al asociar horario con profesor');
-        }
       }
       
       // Recargar horarios y cerrar modal
@@ -418,46 +376,24 @@ export default function HorariosPage() {
 
     try {
       // Actualizar el horario
-      const responseHorario = await fetch(`http://localhost:3001/api/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: formularioHorario.fecha,
-          weekDay: formularioHorario.diaSemana,
-          startHour: formularioHorario.horaInicio,
-          finishHour: formularioHorario.horaFin
-        }),
+      await apiPut(`/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
+        date: formularioHorario.fecha,
+        weekDay: formularioHorario.diaSemana,
+        startHour: formularioHorario.horaInicio,
+        finishHour: formularioHorario.horaFin
       });
-
-      if (!responseHorario.ok) {
-        throw new Error('Error al actualizar horario');
-      }
 
       // Actualizar la relación con la academia y asignatura
       // Primero eliminar la relación actual
-      const deleteResponse = await fetch(`http://localhost:3001/api/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
-        method: 'DELETE',
-      });
-
-      if (!deleteResponse.ok) {
-        throw new Error('Error al eliminar la relación anterior');
-      }
+      await apiDelete(`/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`);
 
       // Luego crear la nueva relación
-      const createResponse = await fetch('http://localhost:3001/api/profesores/horarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idteacher: profesorSeleccionado,
-          idschedule: eventoSeleccionado.extendedProps.idschedule,
-          idacademies: formularioHorario.idacademies,
-          idsubject: formularioHorario.idsubject
-        }),
+      await apiPost('/profesores/horarios', {
+        idteacher: profesorSeleccionado,
+        idschedule: eventoSeleccionado.extendedProps.idschedule,
+        idacademies: formularioHorario.idacademies,
+        idsubject: formularioHorario.idsubject
       });
-
-      if (!createResponse.ok) {
-        throw new Error('Error al crear la nueva relación');
-      }
 
       // Recargar horarios y cerrar modal
       await cargarHorarioProfesor(profesorSeleccionado);
@@ -478,22 +414,10 @@ export default function HorariosPage() {
 
     try {
       // Eliminar la relación profesor-horario
-      const deleteRelacionResponse = await fetch(`http://localhost:3001/api/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
-        method: 'DELETE',
-      });
-
-      if (!deleteRelacionResponse.ok) {
-        throw new Error('Error al eliminar la relación profesor-horario');
-      }
+      await apiDelete(`/profesores/${profesorSeleccionado}/horarios/${eventoSeleccionado.extendedProps.idschedule}`);
 
       // Eliminar el horario
-      const deleteHorarioResponse = await fetch(`http://localhost:3001/api/horarios/${eventoSeleccionado.extendedProps.idschedule}`, {
-        method: 'DELETE',
-      });
-
-      if (!deleteHorarioResponse.ok) {
-        throw new Error('Error al eliminar el horario');
-      }
+      await apiDelete(`/horarios/${eventoSeleccionado.extendedProps.idschedule}`);
 
       // Recargar horarios y cerrar modal
       await cargarHorarioProfesor(profesorSeleccionado);
@@ -597,22 +521,12 @@ export default function HorariosPage() {
       });
       
       // Actualizar el horario en la base de datos
-      const responseHorario = await fetch(`http://localhost:3001/api/horarios/${idschedule}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: nuevaFecha,
-          weekDay: nuevoDiaSemana,
-          startHour: nuevaHoraInicio,
-          finishHour: nuevaHoraFin
-        }),
+      await apiPut(`/horarios/${idschedule}`, {
+        date: nuevaFecha,
+        weekDay: nuevoDiaSemana,
+        startHour: nuevaHoraInicio,
+        finishHour: nuevaHoraFin
       });
-
-      if (!responseHorario.ok) {
-        // Si falla, revertimos el cambio en el calendario
-        info.revert();
-        throw new Error('Error al actualizar la duración del horario');
-      }
       
       setError('');
       await cargarHorarioProfesor(profesorSeleccionado);
@@ -646,22 +560,12 @@ export default function HorariosPage() {
       });
       
       // Actualizar el horario en la base de datos
-      const responseHorario = await fetch(`http://localhost:3001/api/horarios/${idschedule}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: nuevaFecha,
-          weekDay: nuevoDiaSemana,
-          startHour: nuevaHoraInicio,
-          finishHour: nuevaHoraFin
-        }),
+      await apiPut(`/horarios/${idschedule}`, {
+        date: nuevaFecha,
+        weekDay: nuevoDiaSemana,
+        startHour: nuevaHoraInicio,
+        finishHour: nuevaHoraFin
       });
-
-      if (!responseHorario.ok) {
-        // Si falla, revertimos el cambio en el calendario
-        info.revert();
-        throw new Error('Error al actualizar el horario');
-      }
       
       setError('');
       await cargarHorarioProfesor(profesorSeleccionado);

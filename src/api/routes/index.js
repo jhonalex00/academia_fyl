@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const { authenticate, authorize } = require('../../middleware/auth');
 
 // Importar todas las rutas
+const authRoutes = require('./auth');
 const estudiantesRoutes = require('./estudiantes');
 const profesoresRoutes = require('./profesores');
 const asignaturasRoutes = require('./asignaturas');
@@ -13,17 +15,22 @@ const profesoresHorariosRoutes = require('./profesoresHorarios');
 const estudiantesHorariosRoutes = require('./estudiantesHorarios');
 const dashboardRoutes = require('./dashboard');
 
-// Configurar las rutas
-router.use('/estudiantes', estudiantesRoutes);
-router.use('/profesores', profesoresRoutes);
-router.use('/asignaturas', asignaturasRoutes);
-router.use('/horarios', horariosRoutes);
-router.use('/usuarios', usuariosRoutes);
-router.use('/academias', academiasRoutes);
-router.use('/contactos', contactosRoutes);
-router.use('/profesores/horarios', profesoresHorariosRoutes);
-router.use('/estudiantes/horarios', estudiantesHorariosRoutes);
-router.use('/dashboard', dashboardRoutes);
+// Rutas públicas (sin autenticación)
+router.use('/auth', authRoutes);
+
+// Rutas protegidas (requieren autenticación)
+router.use('/estudiantes', authenticate, estudiantesRoutes);
+router.use('/profesores', authenticate, profesoresRoutes);
+router.use('/asignaturas', authenticate, asignaturasRoutes);
+router.use('/horarios', authenticate, horariosRoutes);
+// Para rutas con autorización de roles específicos
+const adminOnly = authorize(['admin']);
+router.use('/usuarios', authenticate, adminOnly, usuariosRoutes);
+router.use('/academias', authenticate, academiasRoutes);
+router.use('/contactos', authenticate, contactosRoutes);
+router.use('/profesores/horarios', authenticate, profesoresHorariosRoutes);
+router.use('/estudiantes/horarios', authenticate, estudiantesHorariosRoutes);
+router.use('/dashboard', authenticate, dashboardRoutes);
 
 // Ruta de prueba para verificar que la API está funcionando
 router.get('/', (req, res) => {
