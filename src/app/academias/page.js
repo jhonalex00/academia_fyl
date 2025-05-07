@@ -26,7 +26,6 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
     nombre: '',
     direccion: '',
     telefono: '',
-    numAlumnos: ''
   });
 
   useEffect(() => {
@@ -42,7 +41,6 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
       nombre: '',
       direccion: '',
       telefono: '',
-      numAlumnos: ''
     });
     setIsOpen(true);
   };
@@ -59,7 +57,6 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
       nombre: '',
       direccion: '',
       telefono: '',
-      numAlumnos: ''
     });
   };
 
@@ -76,7 +73,6 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
       nombre: '',
       direccion: '',
       telefono: '',
-      numAlumnos: ''
     });
     if (academiaToEdit) {
       onAcademiaEdited(null);
