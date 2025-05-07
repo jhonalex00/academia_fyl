@@ -150,7 +150,7 @@
 }
 
 .newClassButton {
-  background-color: #3b82f6;
+  background-color: #01A595;
   color: white;
   padding: 10px 16px;
   border: none;
@@ -164,7 +164,7 @@
 }
 
 .newClassButton:hover {
-  background-color: #2563eb;
+  background-color: #9DD6CD;
 }
 
 .calendarContainer {

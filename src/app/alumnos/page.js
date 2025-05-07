@@ -51,15 +51,15 @@ const AlumnosPage = () => {
 
   return (
     <div >
-      <div className="flex justify-between">
-        <Input className="max-w-60" type="text" placeholder="Buscar alumno" />
+      <div className="flex justify-between mr-4 mt-4">
+        <Input className="max-w-60" type="text" placeholder="Buscar alumno..." />
             <Button variant="default" onClick={handleNuevoAlumno}>Nuevo alumno</Button>
       </div>
-      <div className="mt-20 flex justify-center">
+      <div className="mt-10 flex justify-center">
         <Table className="text-center">
           <TableHeader className="bg-neutral-100">
             <TableRow >
-              <TableHead>Avatar</TableHead>
+              <TableHead>Foto</TableHead>
               <TableHead>Nombre</TableHead>
               <TableHead>Curso</TableHead>
               <TableHead>Ciclo</TableHead>

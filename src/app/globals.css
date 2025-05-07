@@ -122,7 +122,7 @@ body {
 .nav-title {
   font-size: 1.25rem;
   font-weight: bold;
-  color: var(--sidebar-active);
+  color: #FF0C4E;
   margin: 0;
   text-align: center;
 }
@@ -150,12 +150,12 @@ body {
 }
 
 .nav-item:hover {
-  background-color: var(--sidebar-hover);
-  color: var(--sidebar-active);
+  background-color: #9DD6CD;
+  color: white;
 }
 
 .nav-item:active, .nav-item.active {
-  background-color: var(--sidebar-active);
+  background-color: #01A595;
   color: white;
 }
 

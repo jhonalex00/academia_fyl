@@ -648,7 +648,7 @@ export default function HorariosPage() {
             onClick={abrirModalCreacion}
             disabled={!profesorSeleccionado}
           >
-            + Nueva Clase
+            Nueva Clase
           </button>
         </header>
 

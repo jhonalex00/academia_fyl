@@ -32,7 +32,7 @@ return (
 
         {/* DATOS PERSONALES */}
         <h2 className="text-lg font-bold mb-2">Datos personales</h2>
-        <div className="grid grid-cols-2 grid-rows-3 gap-2">
+        <div className="grid grid-cols-2 grid-rows-3 gap-2 w-[700px]">
             <div className="mb-2">
                 <FormField control={form.control} name="nombre"
                 rules={{ required: "*Campo obligatorio" }}
@@ -40,7 +40,7 @@ return (
                     <FormItem>
                         <FormLabel>Nombre</FormLabel>
                         <FormControl>
-                            <Input placeholder="Introduce el nombre del alumno" {...field} />
+                            <Input className="w-[300px]" placeholder="Introduce el nombre del alumno" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -53,7 +53,7 @@ return (
                     <FormItem>
                         <FormLabel>Apellidos</FormLabel>
                         <FormControl>
-                            <Input placeholder="Introduce los apellidos del alumno" {...field} />
+                            <Input className="w-[300px]" placeholder="Introduce los apellidos del alumno" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -76,9 +76,9 @@ return (
             <div className="mb-3">
                 <FormField control={form.control} name="telefonoAlumno" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Numero de teléfono</FormLabel>
+                        <FormLabel>Número de teléfono</FormLabel>
                         <FormControl>
-                            <Input placeholder="Ej: 612345678" {...field} />
+                            <Input className="w-[300px]" placeholder="Ej: 612345678" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -89,7 +89,7 @@ return (
                     <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                            <Input placeholder="ejemplo@gmail.com" {...field} />
+                            <Input className="w-[300px]" placeholder="ejemplo@gmail.com" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -129,7 +129,7 @@ return (
                 <FormItem>
                     <FormLabel>CEIP/IES/Universidad</FormLabel>
                     <FormControl>
-                        <Input placeholder="Introduce el nombre del centro" {...field} />
+                        <Input className="w-[300px]" placeholder="Introduce el nombre del centro" {...field} />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
@@ -142,7 +142,7 @@ return (
         rules={{ required: "*Campo obligatorio" }}
         render={({ field }) => (
             <FormItem >
-            <FormLabel>Modalidad</FormLabel>
+            <FormLabel className="mt-4">Modalidad</FormLabel>
             <FormControl>
             <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
             <div className="flex gap-6">
@@ -154,14 +154,14 @@ return (
                     <FormLabel className="font-normal">Presencial</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-0">
+                <FormItem className="flex items-center">
                     <FormControl>
                     <RadioGroupItem value="online" />
                     </FormControl>
                     <FormLabel className="font-normal">Online</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-0">
+                <FormItem className="flex items-center">
                     <FormControl>
                     <RadioGroupItem value="mixto" />
                     </FormControl>
@@ -180,7 +180,7 @@ return (
         rules={{ required: "*Campo obligatorio" }}
         render={({ field }) => (
             <FormItem >
-            <FormLabel>Tipo (respecto a las clases en la academia)</FormLabel>
+            <FormLabel className="mt-4">Tipo (respecto a las clases en la academia)</FormLabel>
             <FormControl>
             <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
             
@@ -192,21 +192,21 @@ return (
                     <FormLabel className="font-normal">Grupo</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-0">
+                <FormItem className="flex items-center">
                     <FormControl>
                     <RadioGroupItem value="particular"/>
                     </FormControl>
                     <FormLabel className="font-normal">Particular</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-0">
+                <FormItem className="flex items-center">
                     <FormControl>
                     <RadioGroupItem value="personalizado" />
                     </FormControl>
                     <FormLabel className="font-normal">Personalizado(2/3)</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-0">
+                <FormItem className="flex items-center">
                     <FormControl>
                     <RadioGroupItem value="mixto" />
                     </FormControl>
@@ -224,20 +224,20 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem>
-            <FormLabel>¿Ha repetido curso?</FormLabel>
+            <FormLabel className="mt-4">¿Ha repetido curso?</FormLabel>
             <FormControl>
                 <RadioGroup onValueChange={(value) => {field.onChange(value) 
                 setHaRepetido(value)}} defaultValue={field.value} className="flex flex-col space-y-1">
 
                 <div className="flex gap-6">
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="si" />
                     </FormControl>
                     <FormLabel className="font-normal">Sí</FormLabel>
                     </FormItem>
 
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="no" />
                     </FormControl>
@@ -255,7 +255,7 @@ return (
                     <FormItem className="mt-4">
                     <FormLabel>¿Cuál?</FormLabel>
                     <FormControl>
-                        <Input placeholder="Por ejemplo: 2º de ESO" {...field} />
+                        <Input className="w-[300px]" placeholder="Por ejemplo: 2º de ESO" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -271,7 +271,7 @@ return (
         rules={{ required: "*Campo obligatorio" }}
         render={({ field }) => (
             <FormItem >
-            <FormLabel>¿Cómo prefieren que se enfoquen las clases de su hijo/a?</FormLabel>
+            <FormLabel className="mt-4">¿Cómo prefieren que se enfoquen las clases de su hijo/a?</FormLabel>
             <FormControl>
             <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
             
@@ -283,14 +283,14 @@ return (
                     <FormLabel className="font-normal">Resolver dudas</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-0">
+                <FormItem className="flex items-center">
                     <FormControl>
                     <RadioGroupItem value="habito"/>
                     </FormControl>
                     <FormLabel className="font-normal">Hacer deberes y crear hábito de estudio</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-0">
+                <FormItem className="flex items-center">
                     <FormControl>
                     <RadioGroupItem value="ambos"/>
                     </FormControl>
@@ -304,7 +304,7 @@ return (
         )}/>
 
 
-        <h2 className="text-lg font-bold mb-2 mt-10">Datos de contacto</h2>
+        <h2 className="text-lg font-bold mb-2 mt-14">Datos de contacto</h2>
 
         {/* RADIO TUTORES */}
         <FormField control={form.control} name="tutoresSeparados"
@@ -315,14 +315,14 @@ return (
             <FormControl>
             <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
             <div className="flex gap-6">
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="si" />
                     </FormControl>
                     <FormLabel className="font-normal">Sí</FormLabel>
                     </FormItem>
 
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="no"/>
                     </FormControl>
@@ -344,14 +344,14 @@ return (
             <FormControl>
             <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
             <div className="flex gap-6">
-                <FormItem className="flex items-center space-x-2">
+                <FormItem className="flex items-center">
                 <FormControl>
                     <RadioGroupItem value="tutor1" />
                 </FormControl>
                 <FormLabel className="font-normal">Solo tutor 1</FormLabel>
                 </FormItem>
 
-                <FormItem className="flex items-center space-x-2">
+                <FormItem className="flex items-center">
                 <FormControl>
                     <RadioGroupItem value="ambos"/>
                 </FormControl>
@@ -366,47 +366,47 @@ return (
 
 
         {/* NOMBRE, TELEFONO, EMAIL DE LOS TUTORES */}
-        <div className="grid grid-cols-2 grid-rows-4 gap-4">
+        <div className="grid grid-cols-2 grid-rows-4 w-[700px] gap-x-2 gap-y-4">
 
             {/* TUTOR 1 */}
-            <div className="mb-2">
+            <div className="mt-4">
             <FormField control={form.control} name="tutor1"
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
                 <FormItem>
                     <FormLabel>Nombre tutor 1</FormLabel>
                     <FormControl>
-                        <Input placeholder="Introduce el nombre del tutor" {...field} />
+                        <Input className="w-[300px]" placeholder="Introduce el nombre del tutor 1" {...field} />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
             )}/>
             </div>
 
-            <div className="mb-2"></div>
+            <div></div>
 
-            <div className="mb-2">
+            <div>
                 <FormField control={form.control} name="telefono1"
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Telefono 1</FormLabel>
+                        <FormLabel>Teléfono 1</FormLabel>
                         <FormControl>
-                            <Input placeholder="Introduce el teléfono del tutor 1" {...field} />
+                            <Input className="w-[300px]" placeholder="Introduce el teléfono del tutor 1" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}/>
             </div>
 
-            <div className="mb-2">
+            <div>
                 <FormField control={form.control} name="email1"
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Email 1</FormLabel>
                         <FormControl>
-                            <Input placeholder="Introduce el email del tutor 1" {...field} />
+                            <Input className="w-[300px]" placeholder="Introduce el email del tutor 1" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -414,38 +414,38 @@ return (
             </div>
 
             {/* TUTOR 2 */}
-            <div className="mb-2">
+            <div className="mt-4">
                 <FormField control={form.control} name="tutor2" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Nombre tutor 2</FormLabel>
                         <FormControl>
-                            <Input placeholder="Introduce el nombre del tutor" {...field} />
+                            <Input className="w-[300px]" placeholder="Introduce el nombre del tutor 2" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}/>
             </div>
 
-            <div className="mb-2"></div>
+            <div></div>
 
-            <div className="mb-2">
+            <div>
                 <FormField control={form.control} name="telefono2" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Telefono 2</FormLabel>
+                        <FormLabel>Teléfono 2</FormLabel>
                         <FormControl>
-                            <Input placeholder="Introduce el teléfono del tutor 2" {...field} />
+                            <Input className="w-[300px]" placeholder="Introduce el teléfono del tutor 2" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}/>
             </div>
 
-            <div className="mb-2">
+            <div>
                 <FormField control={form.control} name="email2" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Email 2</FormLabel>
                         <FormControl>
-                            <Input placeholder="Introduce el email del tutor 2" {...field} />
+                            <Input className="w-[300px]" placeholder="Introduce el email del tutor 2" {...field} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -455,16 +455,16 @@ return (
         
 
         {/* DATOS ADICIONALES */}
-        <h2 className="text-lg font-bold mb-2 mt-10">Datos de adicionales</h2>
+        <h2 className="text-lg font-bold mb-2 mt-10">Datos adicionales</h2>
 
         {/* TRASTORNOS DE APRENDIZAJE */}
         <FormField control={form.control} name="trastornos"
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem>
-            <FormLabel>¿Tiene trastornos o dificultades relacionadas con el aprendizaje?</FormLabel>
+            <FormLabel className="mt-4">¿Tiene trastornos o dificultades relacionadas con el aprendizaje?</FormLabel>
             <FormControl>
-                <Textarea {...field} placeholder="Escribe aquí" rows={4} />
+                <Textarea {...field} className="w-[600px]" placeholder="Escribe aquí" rows={4} />
             </FormControl>
             <FormMessage />
             </FormItem>
@@ -476,9 +476,9 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem>
-            <FormLabel>¿Tiene alergias o problemas de movilidad?</FormLabel>
+            <FormLabel className="mt-4">¿Tiene alergias o problemas de movilidad?</FormLabel>
             <FormControl>
-                <Textarea {...field} placeholder="Escribe aquí" rows={4} />
+                <Textarea {...field} className="w-[600px]" placeholder="Escribe aquí" rows={4} />
             </FormControl>
             <FormMessage />
             </FormItem>
@@ -488,9 +488,9 @@ return (
         {/* BULLYING */}
         <FormField control={form.control} name="bullying" render={({ field }) => (
             <FormItem>
-            <FormLabel>¿Su hijo/a sufre o ha sufrido aislamiento, bullying o  algún tipo de trato que le influya egativamente en el estudio/aprendizaje? *Opcional</FormLabel>
+            <FormLabel className="mt-4">¿Su hijo/a sufre o ha sufrido aislamiento, bullying o  algún tipo de trato que le influya negativamente en el estudio/aprendizaje? *Opcional</FormLabel>
             <FormControl>
-                <Textarea {...field} placeholder="Escribe aquí" rows={4} />
+                <Textarea {...field} className="w-[600px]" placeholder="Escribe aquí" rows={4} />
             </FormControl>
             <FormMessage />
             </FormItem>
@@ -499,9 +499,9 @@ return (
         {/* OBSERVACIONES */}
         <FormField control={form.control} name="observaciones" render={({ field }) => (
             <FormItem>
-            <FormLabel>Observaciones</FormLabel>
+            <FormLabel className="mt-4">Observaciones</FormLabel>
             <FormControl>
-                <Textarea {...field} placeholder="Escribe aquí" rows={4} />
+                <Textarea {...field} className="w-[600px]" placeholder="Escribe aquí" rows={4} />
             </FormControl>
             <FormMessage />
             </FormItem>
@@ -513,20 +513,20 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem>
-            <FormLabel>¿Viene con hermanos?</FormLabel>
+            <FormLabel className="mt-4">¿Viene con hermanos?</FormLabel>
             <FormControl>
                 <RadioGroup onValueChange={(value) => {field.onChange(value) 
                 setConHermanos(value)}} defaultValue={field.value} className="flex flex-col space-y-1">
 
                 <div className="flex gap-6">
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="si" />
                     </FormControl>
                     <FormLabel className="font-normal">Sí</FormLabel>
                     </FormItem>
 
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="no" />
                     </FormControl>
@@ -544,7 +544,7 @@ return (
                     <FormItem className="mt-4">
                     <FormLabel>¿Quién?</FormLabel>
                     <FormControl>
-                        <Input placeholder="Introduce el nombre del hermano" {...field} />
+                        <Input className="w-[300px]" placeholder="Introduce el nombre del hermano" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -560,18 +560,18 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem >
-            <FormLabel>¿Consienten que vaya y venga solo a clase?</FormLabel>
+            <FormLabel className="mt-4">¿Consienten que vaya y venga solo a clase?</FormLabel>
             <FormControl>
             <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
             <div className="flex gap-6">
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="si" />
                     </FormControl>
                     <FormLabel className="font-normal">Sí</FormLabel>
                     </FormItem>
 
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="no"/>
                     </FormControl>
@@ -589,18 +589,18 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem >
-            <FormLabel>¿Autorizan que, de forma excepcional, le requisemos el móvil/tablet durante el horario de clase?</FormLabel>
+            <FormLabel className="mt-4">¿Autorizan que, de forma excepcional, le requisemos el móvil/tablet durante el horario de clase?</FormLabel>
             <FormControl>
             <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
             <div className="flex gap-6">
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="si" />
                     </FormControl>
                     <FormLabel className="font-normal">Sí</FormLabel>
                     </FormItem>
 
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="no"/>
                     </FormControl>
@@ -620,20 +620,20 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem>
-            <FormLabel>En caso de realizar fotografías con fines educativos/publicitarios, ¿consiente que su hijo/a aparezca en ellas?</FormLabel>
+            <FormLabel className="mt-4">En caso de realizar fotografías con fines educativos/publicitarios, ¿consiente que su hijo/a aparezca en ellas?</FormLabel>
             <FormControl>
                 <RadioGroup onValueChange={(value) => {field.onChange(value) 
                 setConsienteFotos(value)}} defaultValue={field.value} className="flex flex-col space-y-1">
 
                 <div className="flex gap-6">
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="si" />
                     </FormControl>
                     <FormLabel className="font-normal">Sí</FormLabel>
                     </FormItem>
 
-                    <FormItem className="flex items-center space-x-2">
+                    <FormItem className="flex items-center">
                     <FormControl>
                         <RadioGroupItem value="no" />
                     </FormControl>
@@ -648,18 +648,18 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
                     <FormItem >
-                    <FormLabel>¿Consiente que dichas fotos fueran subidas a Redes sociales?</FormLabel>
+                    <FormLabel className="mt-4">¿Consiente que dichas fotos fueran subidas a Redes sociales?</FormLabel>
                     <FormControl>
                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
                     <div className="flex gap-6">
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                             <FormControl>
                                 <RadioGroupItem value="si" />
                             </FormControl>
                             <FormLabel className="font-normal">Sí</FormLabel>
                             </FormItem>
         
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                             <FormControl>
                                 <RadioGroupItem value="no"/>
                             </FormControl>
@@ -682,46 +682,46 @@ return (
                 rules={{ required: "*Campo obligatorio" }}
                 render={({ field }) => (
             <FormItem >
-                <FormLabel>¿Cómo nos has conocido?</FormLabel>
+                <FormLabel className="mt-6">¿Cómo nos has conocido?</FormLabel>
                 <FormControl>
                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
                             
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                                 <FormControl>
                                     <RadioGroupItem value="rrss" />
                                 </FormControl>
                                 <FormLabel className="font-normal">RRSS</FormLabel>
                             </FormItem>
 
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                                 <FormControl>
                                     <RadioGroupItem value="web"/>
                                 </FormControl>
                                 <FormLabel className="font-normal">Web</FormLabel>
                             </FormItem>
 
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                                 <FormControl>
                                     <RadioGroupItem value="maps"/>
                                 </FormControl>
                                 <FormLabel className="font-normal">Google Maps</FormLabel>
                             </FormItem>
 
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                                 <FormControl>
                                     <RadioGroupItem value="anuncio"/>
                                 </FormControl>
                                 <FormLabel className="font-normal">Anuncio</FormLabel>
                             </FormItem>
 
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                                 <FormControl>
                                     <RadioGroupItem value="recomendacion"/>
                                 </FormControl>
-                                <FormLabel className="font-normal">Recomendacion</FormLabel>
+                                <FormLabel className="font-normal">Recomendación</FormLabel>
                             </FormItem>
                             
-                            <FormItem className="flex items-center space-x-2">
+                            <FormItem className="flex items-center">
                                 <FormControl>
                                     <RadioGroupItem value="porDelante"/>
                                 </FormControl>
@@ -736,7 +736,7 @@ return (
         <FormField control={form.control} name="terminos"
         rules={{ required: "*Debes aceptar los términos y condiciones" }}
         render={({ field }) => (
-        <FormItem className="flex items-start space-x-3 space-y-0">
+        <FormItem className="flex items-start space-x-2 mt-16 mb-10 max-w-[1200px]">
         <FormControl>
             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
         </FormControl>
