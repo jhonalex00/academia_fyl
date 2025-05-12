@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -25,28 +26,66 @@ const API_BASE_URL = 'http://localhost:3001/api';
 
 // Funciones de utilidad para llamadas a la API
 const fetchWithAuth = async (url, options = {}) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const headers = {
-    'Authorization': `Bearer ${token || ''}`,
-    'Content-Type': 'application/json',
-    ...options.headers
-  };
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const headers = {
+      'Authorization': `Bearer ${token || ''}`,
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
 
-  const response = await fetch(url, { ...options, headers });
-  
-  if (response.status === 401) {
-    // Si hay un error de autenticación, redirigir al login
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
+    const requestOptions = {
+      ...options,
+      headers
+    };
+
+    console.log('Enviando petición:', {
+      url,
+      method: options.method || 'GET',
+      body: options.body ? JSON.parse(options.body) : undefined
+    });
+
+    const response = await fetch(url, requestOptions);
+    
+    // Obtener el texto de la respuesta primero
+    const responseText = await response.text();
+    
+    // Intentar parsear como JSON
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch {
+      // Si no es JSON, usar el texto directamente
+      responseData = responseText;
     }
-    throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
-  }
 
-  if (!response.ok) {
-    throw new Error(`Error en la petición: ${response.statusText}`);
-  }
+    if (!response.ok) {
+      // Construir un mensaje de error más detallado
+      const errorMessage = typeof responseData === 'object' && responseData.error 
+        ? responseData.error 
+        : `Error del servidor (${response.status}): ${responseText || response.statusText}`;
+      
+      console.error('Error en la respuesta:', {
+        status: response.status,
+        statusText: response.statusText,
+        responseData,
+        url,
+        method: options.method
+      });
+      
+      throw new Error(errorMessage);
+    }
 
-  return response.json();
+    return responseData;
+  } catch (error) {
+    console.error('Error en fetchWithAuth:', {
+      message: error.message,
+      stack: error.stack,
+      url,
+      method: options.method
+    });
+    throw error;
+  }
 };
 
 const profesorVacio = () => ({
@@ -114,6 +153,9 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
             <DialogTitle>
               {profesorToEdit ? 'Editar Profesor' : 'Nuevo Profesor'}
             </DialogTitle>
+            <DialogDescription>
+              {profesorToEdit ? 'Modifica los datos del profesor' : 'Ingresa los datos del nuevo profesor'}
+            </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleSubmit}>
@@ -212,22 +254,45 @@ const ProfesoresPage = () => {
   }, []);
 
   const handleProfesorAdded = async (nuevoProfesor) => {
-    try {
-      await fetchWithAuth(`${API_BASE_URL}/profesores`, {
-        method: 'POST',
-        body: JSON.stringify({
-          name: nuevoProfesor.nombre,
-          email: nuevoProfesor.email,
-          phone: nuevoProfesor.telefono,
-          subjects: nuevoProfesor.asignaturas
-        })
-      });
-
-      cargarProfesores(); // Recargar la lista de profesores
-    } catch (error) {
-      setError(error.message);
+  try {
+    // Validación de campos
+    if (!nuevoProfesor.nombre || !nuevoProfesor.email || !nuevoProfesor.telefono) {
+      throw new Error('Todos los campos son obligatorios');
     }
-  };
+
+    // Preparar datos
+    const profesorData = {
+      name: nuevoProfesor.nombre.trim(),
+      email: nuevoProfesor.email.trim(),
+      phone: nuevoProfesor.telefono.trim(),
+      subjects: Array.isArray(nuevoProfesor.asignaturas) && nuevoProfesor.asignaturas.length > 0
+        ? nuevoProfesor.asignaturas.filter(Boolean).map(s => s.trim())
+        : [],
+      status: 'activo'
+    };
+
+    console.log('Intentando crear profesor:', profesorData);
+
+    const url = `${API_BASE_URL}/profesores`;
+    const response = await fetchWithAuth(url, {
+      method: 'POST',
+      body: JSON.stringify(profesorData)
+    });
+
+    console.log('Profesor creado exitosamente:', response);
+    
+    // Solo recargar si la creación fue exitosa
+    await cargarProfesores();
+    setError(null);
+    
+    return response;
+
+  } catch (error) {
+    console.error('Error detallado al crear profesor:', error);
+    setError(error.message || 'Error al crear el profesor');
+    throw error;
+  }
+};
 
   const handleProfesorEdited = async (profesorEditado) => {
     if (!profesorEditado) {

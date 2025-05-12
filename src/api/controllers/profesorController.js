@@ -27,13 +27,54 @@ const getTeacherById = async (req, res) => {
 // Crear un nuevo profesor
 const createTeacher = async (req, res) => {
   try {
-    console.log('Datos recibidos:', req.body); // Añadir log para ver los datos
-    const { name, phone, email, status } = req.body;
-    const [result] = await sequelize.query('INSERT INTO teachers (name, phone, email, status) VALUES (?, ?, ?, ?)', [name, phone, email, status]);
-    res.status(201).json({ id: result.insertId, name, phone, email, status });
+    console.log('Datos recibidos en el servidor:', req.body);
+    
+    const { name, phone, email, subjects, status } = req.body;
+
+    // Validar datos requeridos
+    if (!name || !email || !phone) {
+      return res.status(400).json({ 
+        error: 'Faltan campos obligatorios (nombre, email, teléfono)' 
+      });
+    }
+
+    // Primero crear el profesor
+    const [result] = await sequelize.query(
+      'INSERT INTO teachers (name, phone, email, status) VALUES (?, ?, ?, ?)',
+      {
+        replacements: [name, phone, email, status || 'activo']
+      }
+    );
+
+    const teacherId = result.insertId;
+
+    // Luego insertar las asignaturas si existen
+    if (subjects && subjects.length > 0) {
+      for (const subject of subjects) {
+        await sequelize.query(
+          'INSERT INTO teacher_subjects (teacher_id, subject_name) VALUES (?, ?)',
+          {
+            replacements: [teacherId, subject]
+          }
+        );
+      }
+    }
+
+    res.status(201).json({
+      id: teacherId,
+      name,
+      email,
+      phone,
+      subjects,
+      status: status || 'activo'
+    });
+
   } catch (error) {
-    console.error('Error al crear el profesor:', error); // Mejorar el log de error
-    res.status(500).json({ error: 'Error al crear el profesor' });
+    console.error('Error al crear profesor:', error);
+    res.status(500).json({ 
+      error: 'Error al crear el profesor',
+      details: error.message 
+    });
   }
 };
 
