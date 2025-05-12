@@ -75,7 +75,7 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
   return (
     <>
       <div className="flex justify-end mr-4 mt-2">
-        <Button onClick={() => setIsOpen(true)}>
+        <Button onClick={handleAddClick}>
           Añadir Profesor
         </Button>
       </div>
@@ -161,10 +161,11 @@ const ProfesoresPage = () => {
   const [profesorToEdit, setProfesorToEdit] = useState(null);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState(null);
+
   // Cargar profesores de la base de datos  
   const cargarProfesores = async () => {
     try {
-      const data = await apiGet('/profesores');
+      const data = await apiGet('/api/profesores');
       if (Array.isArray(data)) {
         setProfesores(data);
       } else {
@@ -181,21 +182,33 @@ const ProfesoresPage = () => {
   useEffect(() => {
     cargarProfesores();
   }, []);
+
   const handleProfesorAdded = async (nuevoProfesor) => {
-  try {
-    await apiPost('/profesores', {
-    name: nuevoProfesor.nombre,
-    email: nuevoProfesor.email,
-    phone: nuevoProfesor.telefono,
-    status: 'activo', // O el valor adecuado según tu estructura
-  });
+    try {
+      const profesorData = {
+        name: nuevoProfesor.nombre,
+        email: nuevoProfesor.email,
+        phone: nuevoProfesor.telefono,
+        subjects: Array.isArray(nuevoProfesor.asignaturas) 
+          ? nuevoProfesor.asignaturas 
+          : [nuevoProfesor.asignaturas],
+        status: 'activo'
+      };
 
+      console.log('Datos a enviar:', profesorData);
 
-    cargarProfesores(); // Recargar la lista de profesores
-  } catch (error) {
-    setError(error.message);
-  }
-};
+      const response = await apiPost('/api/profesores', profesorData);
+      
+      if (!response) {
+        throw new Error('No se recibió respuesta del servidor');
+      }
+
+      await cargarProfesores();
+    } catch (error) {
+      console.error('Error detallado al añadir profesor:', error);
+      setError(error.message || 'Error al añadir profesor');
+    }
+  };
 
   const handleProfesorEdited = async (profesorEditado) => {
     if (!profesorEditado) {
@@ -204,37 +217,38 @@ const ProfesoresPage = () => {
     }
 
     try {
-  await apiPut(`/profesores/${profesorEditado.id}`, {
-    name: profesorEditado.nombre,
-    email: profesorEditado.email,
-    phone: profesorEditado.telefono,
-    subjects: profesorEditado.asignaturas
-  });
-
-  cargarProfesores(); // Recargar la lista de profesores
-} catch (error) {
-  setError(error.message);
-}
-};
-
-  const handleDeleteProfesor = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:3001/api/profesores/${id}`, {
-        method: 'DELETE'
+      await apiPut(`/api/profesores/${profesorEditado.id}`, {
+        name: profesorEditado.nombre,
+        email: profesorEditado.email,
+        phone: profesorEditado.telefono,
+        subjects: profesorEditado.asignaturas,
+        status: 'activo'
       });
 
-      if (!response.ok) {
-        throw new Error('Error al eliminar el profesor');
-      }
-
-      cargarProfesores(); // Recargar la lista de profesores
+      await cargarProfesores();
+      setProfesorToEdit(null);
     } catch (error) {
+      console.error('Error al editar profesor:', error);
       setError(error.message);
     }
   };
 
-  const profesoresFiltrados = profesores.filter(prof =>
-    prof.name?.toLowerCase().includes(busqueda.toLowerCase())
+  const handleDeleteProfesor = async (id) => {
+    if (!confirm('¿Está seguro de que desea eliminar este profesor?')) {
+      return;
+    }
+
+    try {
+      await apiDelete(`/api/profesores/${id}`);
+      await cargarProfesores();
+    } catch (error) {
+      console.error('Error al eliminar profesor:', error);
+      setError(error.message);
+    }
+  };
+
+  const profesoresFiltrados = profesores.filter(profesor => 
+    profesor.name?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -254,6 +268,12 @@ const ProfesoresPage = () => {
         />
       </div>
       
+      {error && (
+        <div className="text-red-500 p-4 mb-4">
+          {error}
+        </div>
+      )}
+
       <div className="flex justify-center mt-10">
         <Table className="text-center">
           <TableHeader className="bg-neutral-100">
@@ -276,12 +296,12 @@ const ProfesoresPage = () => {
                   <div className="flex justify-center space-x-8">
                     <button className="cursor-pointer"
                       onClick={() => setProfesorToEdit({
-                      id: profesor.idteacher, // Esto está bien
-                      nombre: profesor.name,
-                      email: profesor.email,
-                      telefono: profesor.phone,
-                      asignaturas: profesor.subjects || []
-                    })}
+                        id: profesor.idteacher,
+                        nombre: profesor.name,
+                        email: profesor.email,
+                        telefono: profesor.phone,
+                        asignaturas: profesor.subjects || []
+                      })}
                     >
                       <FaEdit size={20} />
                     </button>
