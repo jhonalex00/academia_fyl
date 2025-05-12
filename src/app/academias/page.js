@@ -32,11 +32,13 @@ const createAcademy = async (data) => {
     });
 
     if (!response.ok) {
-      throw new Error('Error al crear la academia');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al crear la academia');
     }
 
-    return await response.json(); // Devuelve la respuesta del servidor
+    return await response.json();
   } catch (error) {
+    console.error('Error en createAcademy:', error.message);
     throw error;
   }
 };
