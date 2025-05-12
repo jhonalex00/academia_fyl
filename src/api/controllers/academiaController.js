@@ -1,12 +1,13 @@
 const { sequelize } = require('../../db/config');
 
+
 // Obtener todas las academias
 const getAcademies = async (req, res) => {
   try {
+    console.log("HEADERS:", req.headers); // Aquí req está definido
     const [rows] = await sequelize.query('SELECT * FROM academies');
     res.status(200).json(rows);
   } catch (error) {
-    console.error('Error al obtener las academias:', error); // Agregar log
     res.status(500).json({ error: 'Error al obtener las academias' });
   }
 };

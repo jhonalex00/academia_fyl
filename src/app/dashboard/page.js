@@ -13,7 +13,7 @@ import DonutChart from '@/components/dashboard/DonutChart';
 import UpcomingEvents from '@/components/dashboard/UpcomingEvents';
 import MiniCalendar from '@/components/dashboard/MiniCalendar';
 import ClientOnly from '@/components/ClientOnly';
-import { getStudents, getAcademies, getTeachers, getSubjects, getSchedules, getDashboardStats, getRecentActivities, getCalendarEvents, getSubjectStats, getStudentStats } from '@/lib/api';
+//import { getStudents, getAcademies, getTeachers, getSubjects, getSchedules, getDashboardStats, getRecentActivities, getCalendarEvents, getSubjectStats, getStudentStats } from '@/lib/api';
 import { formatStudents, formatTeachers, formatSubjects, calculateStats } from '@/lib/dashboard';
 import styles from './dashboard.module.css';
 

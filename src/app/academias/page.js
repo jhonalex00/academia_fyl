@@ -20,12 +20,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Función para crear una academia
+const createAcademy = async (data) => {
+  try {
+    const response = await fetch('http://localhost:3001/api/academias', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-import { createAcademy } from '@/services/academias';
+    if (!response.ok) {
+      throw new Error('Error al crear la academia');
+    }
 
+    return await response.json(); // Devuelve la respuesta del servidor
+  } catch (error) {
+    throw error;
+  }
+};
 
+// Componente para añadir o editar academias
 export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
-  // Para el control de apertura y cierre del modal
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -33,7 +50,7 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
     phone: '',
   });
 
-  // Para el control de la edicion de datos de academias existentes
+  // Maneja la edición de academias existentes
   useEffect(() => {
     if (academyToEdit) {
       setFormData(academyToEdit);
@@ -41,7 +58,7 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
     }
   }, [academyToEdit]);
 
-  // Para el control de la apertura del modal para añadir una nueva academia
+  // Abre el modal para añadir una nueva academia
   const handleAddClick = () => {
     onAcademyEdited(null);
     setFormData({
@@ -52,13 +69,15 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
     setIsOpen(true);
   };
 
-  // Para el control del envio del formulario
+  // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await createAcademy(formData);
-      // Aquí va el toast :)
+      const newAcademy = await createAcademy(formData); // Llama a createAcademy
+      if (onAcademyAdded) {
+        onAcademyAdded(newAcademy);
+      }
       setIsOpen(false);
       setFormData({
         name: '',
@@ -67,20 +86,18 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
       });
     } catch (error) {
       console.error("Error al crear la academia:", error);
-      // Aquí va el toast :(
     }
   };
 
-  // Para el control de los cambios en los inputs del formulario
+  // Maneja los cambios en los inputs del formulario
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  // Para el control del cierre del modal
-  // y la limpieza de los datos del formulario
+  // Cierra el modal y limpia los datos del formulario
   const handleClose = () => {
     setIsOpen(false);
     setFormData({
@@ -108,7 +125,7 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
               {academyToEdit ? 'Editar Academia' : 'Nueva Academia'}
             </DialogTitle>
           </DialogHeader>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid w-full items-center gap-1.5">
@@ -141,7 +158,7 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
                   id="phone"
                   type="tel"
                   name="phone"
-                  value={formData.telefono}
+                  value={formData.phone}
                   onChange={handleChange}
                   className="col-span-3"
                   required
@@ -164,24 +181,25 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
   );
 }
 
+// Página principal de academias
 const AcademiasPage = () => {
   const [academies, setAcademies] = useState([]);
   const [academyToEdit, setAcademyToEdit] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Lee las academias desde el backend
   const readAcademies = async () => {
     setIsLoading(true);
     try {
       const response = await fetch('http://localhost:3001/api/academias', {
-        cache: 'no-store'
+        cache: 'no-store',
       });
       if (!response.ok) {
         throw new Error('Error al cargar las academias');
       }
       const data = await response.json();
-      const academiasUnicas = Array.from(new Map(data.map(item => [item.idacademy, item])).values());
-      setAcademies(academiasUnicas);
+      setAcademies(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -189,34 +207,16 @@ const AcademiasPage = () => {
     }
   };
 
-  const handleAcademyAdded = async (newAcademy) => {
-    try {
-      const response = await fetch('http://localhost:3001/api/academias', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newAcademy.name,
-          adress: newAcademy.adress,
-          phone: newAcademy.phone,
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al crear la academia');
-      }
-
-      await readAcademies();
-    } catch (error) {
-      setError(error.message);
-    }
+  // Maneja la creación de academias
+  const handleAcademyAdded = async () => {
+    await readAcademies();
   };
 
+  // Maneja la eliminación de academias
   const handleDeleteAcademy = async (id) => {
     try {
       const response = await fetch(`http://localhost:3001/api/academias/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (!response.ok) {
@@ -229,49 +229,18 @@ const AcademiasPage = () => {
     }
   };
 
-  const handleAcademyEdited = async (academyEdited) => {
-    if (!academyEdited) {
-      setAcademyToEdit(null);
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:3001/api/academias/${academyEdited.idacademy}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: academyEdited.nombre,
-          adress: academyEdited.direccion,
-          phone: academyEdited.telefono,
-
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al actualizar la academia');
-      }
-
-      await readAcademies();
-      setAcademyToEdit(null);
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
   useEffect(() => {
     readAcademies();
   }, []);
 
   return (
     <>
-      <AddAcademy 
+      <AddAcademy
         onAcademyAdded={handleAcademyAdded}
         academyToEdit={academyToEdit}
-        onAcademyEdited={handleAcademyEdited}
+        onAcademyEdited={setAcademyToEdit}
       />
-      
+
       <div className="mt-10 flex justify-center">
         <Table className="text-center">
           <TableHeader className="bg-neutral-100">
@@ -279,7 +248,6 @@ const AcademiasPage = () => {
               <TableHead>Academia</TableHead>
               <TableHead>Dirección</TableHead>
               <TableHead>Teléfono</TableHead>
-              <TableHead>Nº Alumnos</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -289,21 +257,15 @@ const AcademiasPage = () => {
                 <TableCell>{academy.name}</TableCell>
                 <TableCell>{academy.adress}</TableCell>
                 <TableCell>{academy.phone}</TableCell>
-                <TableCell>{academy.numStudents}</TableCell>
                 <TableCell>
                   <div className="flex justify-center space-x-8">
-                    <button 
+                    <button
                       className="cursor-pointer"
-                      onClick={() => setAcademyToEdit({
-                        idacademy: academy.idacademy,
-                        name: academy.name,
-                        adress: academy.adress,
-                        phone: academy.phone,
-                      })}
+                      onClick={() => setAcademyToEdit(academy)}
                     >
                       <FaEdit size={20} />
                     </button>
-                    <button 
+                    <button
                       className="cursor-pointer"
                       onClick={() => handleDeleteAcademy(academy.idacademy)}
                     >
