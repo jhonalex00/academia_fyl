@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { loginContact } from '@/api/controllers/authController';
+const { loginUser } = require('@/api/controllers/authController');
 
 export async function POST(request) {
   try {
@@ -24,12 +24,12 @@ export async function POST(request) {
     };
     
     // Llamar al controlador
-    await loginContact(req, res);
+    await loginUser(req, res);
     
     // Devolver respuesta en formato NextResponse
     return NextResponse.json(responseBody, { status: statusCode });
   } catch (error) {
-    console.error('Error en la ruta de login de contacto:', error);
+    console.error('Error en la ruta de login de usuario:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

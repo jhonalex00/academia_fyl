@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { loginTeacher } from '@/api/controllers/authController';
+const { loginTeacher } = require('@/api/controllers/authController');
 
 export async function POST(request) {
   try {

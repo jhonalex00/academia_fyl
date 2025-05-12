@@ -2,7 +2,6 @@
 import { FaEdit } from "react-icons/fa";
 import { IoTrashBin } from "react-icons/io5";
 import React, { useState, useEffect } from 'react';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/fetchClient';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +19,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+// Constantes para la API
+const API_BASE_URL = 'http://localhost:3001/api';
+
+// Funciones de utilidad para llamadas a la API
+const fetchWithAuth = async (url, options = {}) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const headers = {
+    'Authorization': `Bearer ${token || ''}`,
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  const response = await fetch(url, { ...options, headers });
+  
+  if (response.status === 401) {
+    // Si hay un error de autenticación, redirigir al login
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+    throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Error en la petición: ${response.statusText}`);
+  }
+
+  return response.json();
+};
 
 const profesorVacio = () => ({
   id: null,
@@ -165,7 +193,7 @@ const ProfesoresPage = () => {
   // Cargar profesores de la base de datos  
   const cargarProfesores = async () => {
     try {
-      const data = await apiGet('/api/profesores');
+      const data = await fetchWithAuth(`${API_BASE_URL}/profesores`);
       if (Array.isArray(data)) {
         setProfesores(data);
       } else {
@@ -185,28 +213,19 @@ const ProfesoresPage = () => {
 
   const handleProfesorAdded = async (nuevoProfesor) => {
     try {
-      const profesorData = {
-        name: nuevoProfesor.nombre,
-        email: nuevoProfesor.email,
-        phone: nuevoProfesor.telefono,
-        subjects: Array.isArray(nuevoProfesor.asignaturas) 
-          ? nuevoProfesor.asignaturas 
-          : [nuevoProfesor.asignaturas],
-        status: 'activo'
-      };
+      await fetchWithAuth(`${API_BASE_URL}/profesores`, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: nuevoProfesor.nombre,
+          email: nuevoProfesor.email,
+          phone: nuevoProfesor.telefono,
+          subjects: nuevoProfesor.asignaturas
+        })
+      });
 
-      console.log('Datos a enviar:', profesorData);
-
-      const response = await apiPost('/api/profesores', profesorData);
-      
-      if (!response) {
-        throw new Error('No se recibió respuesta del servidor');
-      }
-
-      await cargarProfesores();
+      cargarProfesores(); // Recargar la lista de profesores
     } catch (error) {
-      console.error('Error detallado al añadir profesor:', error);
-      setError(error.message || 'Error al añadir profesor');
+      setError(error.message);
     }
   };
 
@@ -217,18 +236,18 @@ const ProfesoresPage = () => {
     }
 
     try {
-      await apiPut(`/api/profesores/${profesorEditado.id}`, {
-        name: profesorEditado.nombre,
-        email: profesorEditado.email,
-        phone: profesorEditado.telefono,
-        subjects: profesorEditado.asignaturas,
-        status: 'activo'
+      await fetchWithAuth(`${API_BASE_URL}/profesores/${profesorEditado.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: profesorEditado.nombre,
+          email: profesorEditado.email,
+          phone: profesorEditado.telefono,
+          subjects: profesorEditado.asignaturas
+        })
       });
 
-      await cargarProfesores();
-      setProfesorToEdit(null);
+      cargarProfesores(); // Recargar la lista de profesores
     } catch (error) {
-      console.error('Error al editar profesor:', error);
       setError(error.message);
     }
   };
@@ -239,8 +258,11 @@ const ProfesoresPage = () => {
     }
 
     try {
-      await apiDelete(`/api/profesores/${id}`);
-      await cargarProfesores();
+      await fetchWithAuth(`${API_BASE_URL}/profesores/${id}`, {
+        method: 'DELETE'
+      });
+
+      cargarProfesores(); // Recargar la lista de profesores
     } catch (error) {
       console.error('Error al eliminar profesor:', error);
       setError(error.message);

@@ -18,10 +18,10 @@ const Usuario = sequelize.define('Usuario', {
     allowNull: true,
     field: 'password'
   },
-  rol: {
-    type: DataTypes.STRING(50),
+  idacademy: {
+    type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'rol'
+    field: 'idacademy'
   }
 }, {
   tableName: 'users',
