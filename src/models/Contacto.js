@@ -18,6 +18,16 @@ const Contacto = sequelize.define('Contacto', {
     allowNull: true,
     field: 'nameContact'
   },
+  email: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'email'
+  },
+  password: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'password'
+  },
   idEstudiante: {
     type: DataTypes.INTEGER,
     allowNull: true,

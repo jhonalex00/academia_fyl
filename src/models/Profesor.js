@@ -12,6 +12,22 @@ const Profesor = sequelize.define('Profesor', {
     type: DataTypes.STRING(50),
     allowNull: true,
     field: 'name'
+  },
+  email: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'email'
+  },
+  password: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    field: 'password'
+  },
+  status: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    field: 'status',
+    defaultValue: 'active'
   }
 }, {
   tableName: 'teachers',

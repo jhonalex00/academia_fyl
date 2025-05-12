@@ -37,16 +37,13 @@ export default function LoginForm() {
     const { name, value } = e.target;
     setContactCredentials(prev => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       let endpoint = '';
-      let credentials = {};
-
-      if (activeTab === 'admin') {
+      let credentials = {};      if (activeTab === 'admin') {
         endpoint = '/api/auth/login/user';
         credentials = adminCredentials;
       } else if (activeTab === 'teacher') {

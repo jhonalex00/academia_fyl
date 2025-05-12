@@ -2,7 +2,6 @@
 import { FaEdit } from "react-icons/fa";
 import { IoTrashBin } from "react-icons/io5";
 import React, { useState, useEffect } from 'react';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/fetchClient';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +19,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+// Constantes para la API
+const API_BASE_URL = 'http://localhost:3001/api';
+
+// Funciones de utilidad para llamadas a la API
+const fetchWithAuth = async (url, options = {}) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const headers = {
+    'Authorization': `Bearer ${token || ''}`,
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  const response = await fetch(url, { ...options, headers });
+  
+  if (response.status === 401) {
+    // Si hay un error de autenticación, redirigir al login
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+    throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Error en la petición: ${response.statusText}`);
+  }
+
+  return response.json();
+};
 
 const profesorVacio = () => ({
   id: null,
@@ -161,10 +189,11 @@ const ProfesoresPage = () => {
   const [profesorToEdit, setProfesorToEdit] = useState(null);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState(null);
+
   // Cargar profesores de la base de datos  
   const cargarProfesores = async () => {
     try {
-      const data = await apiGet('/profesores');
+      const data = await fetchWithAuth(`${API_BASE_URL}/profesores`);
       if (Array.isArray(data)) {
         setProfesores(data);
       } else {
@@ -181,21 +210,24 @@ const ProfesoresPage = () => {
   useEffect(() => {
     cargarProfesores();
   }, []);
+
   const handleProfesorAdded = async (nuevoProfesor) => {
-  try {
-    await apiPost('/profesores', {
-    name: nuevoProfesor.nombre,
-    email: nuevoProfesor.email,
-    phone: nuevoProfesor.telefono,
-    status: 'activo', // O el valor adecuado según tu estructura
-  });
+    try {
+      await fetchWithAuth(`${API_BASE_URL}/profesores`, {
+        method: 'POST',
+        body: JSON.stringify({
+          name: nuevoProfesor.nombre,
+          email: nuevoProfesor.email,
+          phone: nuevoProfesor.telefono,
+          subjects: nuevoProfesor.asignaturas
+        })
+      });
 
-
-    cargarProfesores(); // Recargar la lista de profesores
-  } catch (error) {
-    setError(error.message);
-  }
-};
+      cargarProfesores(); // Recargar la lista de profesores
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   const handleProfesorEdited = async (profesorEditado) => {
     if (!profesorEditado) {
@@ -204,28 +236,27 @@ const ProfesoresPage = () => {
     }
 
     try {
-  await apiPut(`/profesores/${profesorEditado.id}`, {
-    name: profesorEditado.nombre,
-    email: profesorEditado.email,
-    phone: profesorEditado.telefono,
-    subjects: profesorEditado.asignaturas
-  });
+      await fetchWithAuth(`${API_BASE_URL}/profesores/${profesorEditado.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: profesorEditado.nombre,
+          email: profesorEditado.email,
+          phone: profesorEditado.telefono,
+          subjects: profesorEditado.asignaturas
+        })
+      });
 
-  cargarProfesores(); // Recargar la lista de profesores
-} catch (error) {
-  setError(error.message);
-}
-};
+      cargarProfesores(); // Recargar la lista de profesores
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   const handleDeleteProfesor = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/profesores/${id}`, {
+      await fetchWithAuth(`${API_BASE_URL}/profesores/${id}`, {
         method: 'DELETE'
       });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar el profesor');
-      }
 
       cargarProfesores(); // Recargar la lista de profesores
     } catch (error) {
