@@ -67,58 +67,74 @@ export function GestionarMensajes({ onMensajeAdded, mensajeToEdit, onMensajeEdit
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-            <label>Alumno (remitente)</label>
-            <select
-              className="p-2 border rounded"
-              name="idcontact"
-              value={formData.idcontact}
-              onChange={(e) => setFormData({ ...formData, idcontact: e.target.value })}
-              required
-            >
-              <option value="">Selecciona alumno</option>
-              {contactos.map(contacto => (
-                <option key={contacto.idcontact} value={contacto.idcontact}>
-                  {contacto.name}
-                </option>
-              ))}
-            </select>
+            {/* Select de alumno */}
+            <div>
+              <label className="text-sm font-medium">Alumno (remitente)</label>
+              <select
+                className="p-2 border rounded w-full"
+                name="idcontact"
+                value={formData.idcontact}
+                onChange={(e) => setFormData({ ...formData, idcontact: e.target.value })}
+                required
+              >
+                <option value="">Selecciona alumno</option>
+                {Array.isArray(contactos) && contactos.map((contacto) => (
+                  <option key={contacto.idcontact} value={contacto.idcontact}>
+                    {contacto.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <label>Profesor</label>
-            <select
-              className="p-2 border rounded"
-              name="idteacher"
-              value={formData.idteacher}
-              onChange={(e) => setFormData({ ...formData, idteacher: e.target.value })}
-              required
-            >
-              <option value="">Selecciona profesor</option>
-              {profesores.map(profesor => (
-                <option key={profesor.idteacher} value={profesor.idteacher}>
-                  {profesor.name}
-                </option>
-              ))}
-            </select>
+            {/* Select de profesor */}
+            <div>
+              <label className="text-sm font-medium">Profesor</label>
+              <select
+                className="p-2 border rounded w-full"
+                name="idteacher"
+                value={formData.idteacher}
+                onChange={(e) => setFormData({ ...formData, idteacher: e.target.value })}
+                required
+              >
+                <option value="">Selecciona profesor</option>
+                {Array.isArray(profesores) && profesores.map((profesor) => (
+                  <option key={profesor.idteacher} value={profesor.idteacher}>
+                    {profesor.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <label>Mensaje</label>
-            <Input
-              name="message"
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              required
-            />
+            {/* Campo mensaje */}
+            <div>
+              <label className="text-sm font-medium">Mensaje</label>
+              <Input
+                name="message"
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                required
+              />
+            </div>
 
-            <label>Fecha</label>
-            <Input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              required
-            />
+            {/* Campo fecha */}
+            <div>
+              <label className="text-sm font-medium">Fecha</label>
+              <Input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                required
+              />
+            </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={handleClose} type="button">Cancelar</Button>
-              <Button type="submit">{mensajeToEdit ? 'Actualizar' : 'Guardar'}</Button>
+              <Button variant="outline" onClick={handleClose} type="button">
+                Cancelar
+              </Button>
+              <Button type="submit">
+                {mensajeToEdit ? 'Actualizar' : 'Guardar'}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
