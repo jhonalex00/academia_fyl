@@ -307,12 +307,12 @@ const ProfesoresPage = () => {
                   <div className="flex justify-center space-x-8">
                     <button className="cursor-pointer"
                       onClick={() => setProfesorToEdit({
-                        id: profesor.idteacher,
-                        nombre: profesor.name,
-                        email: profesor.email,
-                        telefono: profesor.phone,
-                        asignaturas: profesor.subjects || []
-                      })}
+                      id: profesor.idteacher, // Esto está bien
+                      nombre: profesor.name,
+                      email: profesor.email,
+                      telefono: profesor.phone,
+                      asignaturas: profesor.subjects || []
+                    })}
                     >
                       <FaEdit size={20} />
                     </button>
