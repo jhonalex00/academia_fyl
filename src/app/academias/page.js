@@ -20,46 +20,58 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdited }) {
+
+import { createAcademy } from '@/services/academias';
+
+
+export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
+  // Para el control de apertura y cierre del modal
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
-    nombre: '',
-    direccion: '',
-    telefono: '',
+    name: '',
+    adress: '',
+    phone: '',
   });
 
+  // Para el control de la edicion de datos de academias existentes
   useEffect(() => {
-    if (academiaToEdit) {
-      setFormData(academiaToEdit);
+    if (academyToEdit) {
+      setFormData(academyToEdit);
       setIsOpen(true);
     }
-  }, [academiaToEdit]);
+  }, [academyToEdit]);
 
+  // Para el control de la apertura del modal para añadir una nueva academia
   const handleAddClick = () => {
-    onAcademiaEdited(null);
+    onAcademyEdited(null);
     setFormData({
-      nombre: '',
-      direccion: '',
-      telefono: '',
+      name: '',
+      adress: '',
+      phone: '',
     });
     setIsOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  // Para el control del envio del formulario
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (academiaToEdit) {
-      onAcademiaEdited(formData);
-    } else {
-      onAcademiaAdded(formData);
+
+    try {
+      await createAcademy(formData);
+      // Aquí va el toast :)
+      setIsOpen(false);
+      setFormData({
+        name: '',
+        adress: '',
+        phone: '',
+      });
+    } catch (error) {
+      console.error("Error al crear la academia:", error);
+      // Aquí va el toast :(
     }
-    setIsOpen(false);
-    setFormData({
-      nombre: '',
-      direccion: '',
-      telefono: '',
-    });
   };
 
+  // Para el control de los cambios en los inputs del formulario
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -67,15 +79,17 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
     });
   };
 
+  // Para el control del cierre del modal
+  // y la limpieza de los datos del formulario
   const handleClose = () => {
     setIsOpen(false);
     setFormData({
-      nombre: '',
-      direccion: '',
-      telefono: '',
+      name: '',
+      adress: '',
+      phone: '',
     });
-    if (academiaToEdit) {
-      onAcademiaEdited(null);
+    if (academyToEdit) {
+      onAcademyEdited(null);
     }
   };
 
@@ -91,18 +105,18 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {academiaToEdit ? 'Editar Academia' : 'Nueva Academia'}
+              {academyToEdit ? 'Editar Academia' : 'Nueva Academia'}
             </DialogTitle>
           </DialogHeader>
           
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid w-full items-center gap-1.5">
-                <label htmlFor="nombre" className="text-sm font-medium">Nombre</label>
+                <label htmlFor="name" className="text-sm font-medium">Nombre</label>
                 <Input
-                  id="nombre"
-                  name="nombre"
-                  value={formData.nombre}
+                  id="name"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
                   className="col-span-3"
                   required
@@ -110,11 +124,11 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
               </div>
 
               <div className="grid w-full items-center gap-1.5">
-                <label htmlFor="direccion" className="text-sm font-medium">Dirección</label>
+                <label htmlFor="adress" className="text-sm font-medium">Dirección</label>
                 <Input
-                  id="direccion"
-                  name="direccion"
-                  value={formData.direccion}
+                  id="adress"
+                  name="adress"
+                  value={formData.adress}
                   onChange={handleChange}
                   className="col-span-3"
                   required
@@ -122,11 +136,11 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
               </div>
 
               <div className="grid w-full items-center gap-1.5">
-                <label htmlFor="telefono" className="text-sm font-medium">Teléfono</label>
+                <label htmlFor="phone" className="text-sm font-medium">Teléfono</label>
                 <Input
-                  id="telefono"
+                  id="phone"
                   type="tel"
-                  name="telefono"
+                  name="phone"
                   value={formData.telefono}
                   onChange={handleChange}
                   className="col-span-3"
@@ -140,7 +154,7 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
                 Cancelar
               </Button>
               <Button type="submit">
-                {academiaToEdit ? 'Actualizar' : 'Guardar'}
+                {academyToEdit ? 'Actualizar' : 'Guardar'}
               </Button>
             </DialogFooter>
           </form>
@@ -151,12 +165,12 @@ export function AñadirAcademia({ onAcademiaAdded, academiaToEdit, onAcademiaEdi
 }
 
 const AcademiasPage = () => {
-  const [academias, setAcademias] = useState([]);
-  const [academiaToEdit, setAcademiaToEdit] = useState(null);
+  const [academies, setAcademies] = useState([]);
+  const [academyToEdit, setAcademyToEdit] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const cargarAcademias = async () => {
+  const readAcademies = async () => {
     setIsLoading(true);
     try {
       const response = await fetch('http://localhost:3001/api/academias', {
@@ -167,7 +181,7 @@ const AcademiasPage = () => {
       }
       const data = await response.json();
       const academiasUnicas = Array.from(new Map(data.map(item => [item.idacademy, item])).values());
-      setAcademias(academiasUnicas);
+      setAcademies(academiasUnicas);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -175,7 +189,7 @@ const AcademiasPage = () => {
     }
   };
 
-  const handleAcademiaAdded = async (nuevaAcademia) => {
+  const handleAcademyAdded = async (newAcademy) => {
     try {
       const response = await fetch('http://localhost:3001/api/academias', {
         method: 'POST',
@@ -183,10 +197,9 @@ const AcademiasPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: nuevaAcademia.nombre,
-          adress: nuevaAcademia.direccion,
-          phone: nuevaAcademia.telefono,
-          numStudents: nuevaAcademia.numAlumnos
+          name: newAcademy.name,
+          adress: newAcademy.adress,
+          phone: newAcademy.phone,
         })
       });
 
@@ -194,13 +207,13 @@ const AcademiasPage = () => {
         throw new Error('Error al crear la academia');
       }
 
-      await cargarAcademias();
+      await readAcademies();
     } catch (error) {
       setError(error.message);
     }
   };
 
-  const handleDeleteAcademia = async (id) => {
+  const handleDeleteAcademy = async (id) => {
     try {
       const response = await fetch(`http://localhost:3001/api/academias/${id}`, {
         method: 'DELETE'
@@ -210,29 +223,29 @@ const AcademiasPage = () => {
         throw new Error('Error al eliminar la academia');
       }
 
-      cargarAcademias();
+      readAcademies();
     } catch (error) {
       setError(error.message);
     }
   };
 
-  const handleAcademiaEdited = async (academiaEditada) => {
-    if (!academiaEditada) {
-      setAcademiaToEdit(null);
+  const handleAcademyEdited = async (academyEdited) => {
+    if (!academyEdited) {
+      setAcademyToEdit(null);
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/academias/${academiaEditada.idacademy}`, {
+      const response = await fetch(`http://localhost:3001/api/academias/${academyEdited.idacademy}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: academiaEditada.nombre,
-          adress: academiaEditada.direccion,
-          phone: academiaEditada.telefono,
-          numStudents: academiaEditada.numAlumnos
+          name: academyEdited.nombre,
+          adress: academyEdited.direccion,
+          phone: academyEdited.telefono,
+
         })
       });
 
@@ -240,23 +253,23 @@ const AcademiasPage = () => {
         throw new Error('Error al actualizar la academia');
       }
 
-      await cargarAcademias();
-      setAcademiaToEdit(null);
+      await readAcademies();
+      setAcademyToEdit(null);
     } catch (error) {
       setError(error.message);
     }
   };
 
   useEffect(() => {
-    cargarAcademias();
+    readAcademies();
   }, []);
 
   return (
     <>
-      <AñadirAcademia 
-        onAcademiaAdded={handleAcademiaAdded}
-        academiaToEdit={academiaToEdit}
-        onAcademiaEdited={handleAcademiaEdited}
+      <AddAcademy 
+        onAcademyAdded={handleAcademyAdded}
+        academyToEdit={academyToEdit}
+        onAcademyEdited={handleAcademyEdited}
       />
       
       <div className="mt-10 flex justify-center">
@@ -271,29 +284,28 @@ const AcademiasPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {academias.map((academia) => (
-              <TableRow key={academia.idacademy}>
-                <TableCell>{academia.name}</TableCell>
-                <TableCell>{academia.adress}</TableCell>
-                <TableCell>{academia.phone}</TableCell>
-                <TableCell>{academia.numStudents}</TableCell>
+            {academies.map((academy) => (
+              <TableRow key={academy.idacademy}>
+                <TableCell>{academy.name}</TableCell>
+                <TableCell>{academy.adress}</TableCell>
+                <TableCell>{academy.phone}</TableCell>
+                <TableCell>{academy.numStudents}</TableCell>
                 <TableCell>
                   <div className="flex justify-center space-x-8">
                     <button 
                       className="cursor-pointer"
-                      onClick={() => setAcademiaToEdit({
-                        idacademy: academia.idacademy,
-                        nombre: academia.name,
-                        direccion: academia.adress,
-                        telefono: academia.phone,
-                        numAlumnos: academia.numStudents
+                      onClick={() => setAcademyToEdit({
+                        idacademy: academy.idacademy,
+                        name: academy.name,
+                        adress: academy.adress,
+                        phone: academy.phone,
                       })}
                     >
                       <FaEdit size={20} />
                     </button>
                     <button 
                       className="cursor-pointer"
-                      onClick={() => handleDeleteAcademia(academia.idacademy)}
+                      onClick={() => handleDeleteAcademy(academy.idacademy)}
                     >
                       <IoTrashBin size={20} />
                     </button>
