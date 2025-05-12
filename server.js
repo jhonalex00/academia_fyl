@@ -21,6 +21,7 @@ const PORT = process.env.PORT || 3001;
 
   // Rutas de la API
   server.use('/api', apiRoutes);
+  console.log("Rutas cargadas correctamente");
   // Si necesitas rutas separadas para academias:
   // server.use('/api/academias', academiasRoutes);
 

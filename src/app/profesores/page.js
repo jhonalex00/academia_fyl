@@ -182,23 +182,21 @@ const ProfesoresPage = () => {
     cargarProfesores();
   }, []);
   const handleProfesorAdded = async (nuevoProfesor) => {
-    try {
-      await apiPost('/profesores', {
-        name: nuevoProfesor.nombre,
-        email: nuevoProfesor.email,
-        phone: nuevoProfesor.telefono,
-        subjects: nuevoProfesor.asignaturas
-      });
+  try {
+    await apiPost('/profesores', {
+    name: nuevoProfesor.nombre,
+    email: nuevoProfesor.email,
+    phone: nuevoProfesor.telefono,
+    status: 'activo', // O el valor adecuado según tu estructura
+  });
 
-      if (!response.ok) {
-        throw new Error('Error al crear el profesor');
-      }
 
-      cargarProfesores(); // Recargar la lista de profesores
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+    cargarProfesores(); // Recargar la lista de profesores
+  } catch (error) {
+    setError(error.message);
+  }
+};
+
   const handleProfesorEdited = async (profesorEditado) => {
     if (!profesorEditado) {
       setProfesorToEdit(null);
@@ -206,22 +204,19 @@ const ProfesoresPage = () => {
     }
 
     try {
-      await apiPut(`/profesores/${profesorEditado.id}`, {
-        name: profesorEditado.nombre,
-        email: profesorEditado.email,
-        phone: profesorEditado.telefono,
-        subjects: profesorEditado.asignaturas
-      });
+  await apiPut(`/profesores/${profesorEditado.id}`, {
+    name: profesorEditado.nombre,
+    email: profesorEditado.email,
+    phone: profesorEditado.telefono,
+    subjects: profesorEditado.asignaturas
+  });
 
-      if (!response.ok) {
-        throw new Error('Error al actualizar el profesor');
-      }
+  cargarProfesores(); // Recargar la lista de profesores
+} catch (error) {
+  setError(error.message);
+}
+};
 
-      cargarProfesores(); // Recargar la lista de profesores
-    } catch (error) {
-      setError(error.message);
-    }
-  };
   const handleDeleteProfesor = async (id) => {
     try {
       const response = await fetch(`http://localhost:3001/api/profesores/${id}`, {
@@ -281,12 +276,12 @@ const ProfesoresPage = () => {
                   <div className="flex justify-center space-x-8">
                     <button className="cursor-pointer"
                       onClick={() => setProfesorToEdit({
-                        id: profesor.idteacher,
-                        nombre: profesor.name,
-                        email: profesor.email,
-                        telefono: profesor.phone,
-                        asignaturas: profesor.subjects || []
-                      })}
+                      id: profesor.idteacher, // Esto está bien
+                      nombre: profesor.name,
+                      email: profesor.email,
+                      telefono: profesor.phone,
+                      asignaturas: profesor.subjects || []
+                    })}
                     >
                       <FaEdit size={20} />
                     </button>
