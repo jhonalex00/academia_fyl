@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
-import { loginUser } from '@/api/controllers/authController';
+const { verifyToken } = require('@/api/controllers/authController');
 
 export async function POST(request) {
   try {
     // Crear un objeto req y res simulado compatible con Express
     const req = {
-      body: await request.json()
+      headers: {
+        authorization: request.headers.get('authorization')
+      }
     };
     
     // Objeto para capturar la respuesta
@@ -24,12 +26,12 @@ export async function POST(request) {
     };
     
     // Llamar al controlador
-    await loginUser(req, res);
+    verifyToken(req, res);
     
     // Devolver respuesta en formato NextResponse
     return NextResponse.json(responseBody, { status: statusCode });
   } catch (error) {
-    console.error('Error en la ruta de login de usuario:', error);
+    console.error('Error en la ruta de verificación de token:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

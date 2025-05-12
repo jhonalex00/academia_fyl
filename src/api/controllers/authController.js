@@ -1,21 +1,18 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const db = require('../../db/mysql');
+const { sequelize } = require('../../db/config');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'academia-fyl-secret-key';
 
 // Función para iniciar sesión como usuario (administrador)
-exports.loginUser = async (req, res) => {
-  try {
+const loginUser = async (req, res) => {  try {
     const { name, password } = req.body;
 
     if (!name || !password) {
       return res.status(400).json({ error: 'Se requieren nombre y contraseña' });
-    }
-
-    // Buscar usuario en base de datos
-    const [users] = await db.query('SELECT * FROM users WHERE name = ?', [name]);
-    const user = users[0];
+    }    // Buscar usuario en base de datos usando Sequelize
+    const Usuario = require('../../models/Usuario');
+    const user = await Usuario.findOne({ where: { nombre: name } });
 
     if (!user) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
@@ -33,20 +30,18 @@ exports.loginUser = async (req, res) => {
     const token = jwt.sign(
       { 
         id: user.iduser, 
-        name: user.name, 
+        name: user.nombre, 
         role: 'admin',
         academyId: user.idacademy
       },
       JWT_SECRET,
       { expiresIn: '24h' }
-    );
-
-    res.status(200).json({
+    );    res.status(200).json({
       message: 'Inicio de sesión exitoso',
       token,
       user: {
         id: user.iduser,
-        name: user.name,
+        name: user.nombre,
         role: 'admin',
         academyId: user.idacademy
       }
@@ -58,17 +53,16 @@ exports.loginUser = async (req, res) => {
 };
 
 // Función para iniciar sesión como profesor
-exports.loginTeacher = async (req, res) => {
-  try {
+const loginTeacher = async (req, res) => {  try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Se requieren email y contraseña' });
     }
 
-    // Buscar profesor en base de datos
-    const [teachers] = await db.query('SELECT * FROM teachers WHERE email = ?', [email]);
-    const teacher = teachers[0];
+    // Buscar profesor en base de datos usando Sequelize
+    const Profesor = require('../../models/Profesor');
+    const teacher = await Profesor.findOne({ where: { email } });
 
     if (!teacher) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
@@ -115,17 +109,16 @@ exports.loginTeacher = async (req, res) => {
 };
 
 // Función para iniciar sesión como contacto (padre/tutor)
-exports.loginContact = async (req, res) => {
-  try {
+const loginContact = async (req, res) => {  try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Se requieren email y contraseña' });
     }
 
-    // Buscar contacto en base de datos
-    const [contacts] = await db.query('SELECT * FROM contacts WHERE email = ?', [email]);
-    const contact = contacts[0];
+    // Buscar contacto en base de datos usando Sequelize
+    const Contacto = require('../../models/Contacto');
+    const contact = await Contacto.findOne({ where: { email } });
 
     if (!contact) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
@@ -167,7 +160,7 @@ exports.loginContact = async (req, res) => {
 };
 
 // Verificar token
-exports.verifyToken = (req, res) => {
+const verifyToken = (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   
   if (!token) {
@@ -186,6 +179,14 @@ exports.verifyToken = (req, res) => {
 };
 
 // Obtener información del usuario actual basado en su token
-exports.getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res) => {
   res.status(200).json({ user: req.user });
+};
+
+module.exports = {
+  loginUser,
+  loginTeacher,
+  loginContact,
+  verifyToken,
+  getCurrentUser
 };

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/api/controllers/authController';
-import { authenticate } from '@/middleware/auth';
+const { getCurrentUser } = require('@/api/controllers/authController');
+const { authenticate } = require('@/middleware/auth');
 
 // Función para manejar las solicitudes a la API
 export async function GET(request) {

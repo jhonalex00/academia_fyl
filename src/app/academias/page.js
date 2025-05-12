@@ -20,9 +20,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Constantes para la API
+const API_BASE_URL = 'http://localhost:3001/api';
 
-import { createAcademy } from '@/services/academias';
+// Funciones de utilidad para llamadas a la API
+const fetchWithAuth = async (url, options = {}) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const headers = {
+    'Authorization': `Bearer ${token || ''}`,
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
 
+  const response = await fetch(url, { ...options, headers });
+  
+  if (response.status === 401) {
+    // Si hay un error de autenticación, redirigir al login
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+    throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Error en la petición: ${response.statusText}`);
+  }
+
+  return response.json();
+};
 
 export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
   // Para el control de apertura y cierre del modal
@@ -57,8 +82,12 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
     e.preventDefault();
 
     try {
-      await createAcademy(formData);
-      // Aquí va el toast :)
+      await fetchWithAuth(`${API_BASE_URL}/academias`, {
+        method: 'POST',
+        body: JSON.stringify(formData)
+      });
+      
+      onAcademyAdded(formData);
       setIsOpen(false);
       setFormData({
         name: '',
@@ -173,13 +202,7 @@ const AcademiasPage = () => {
   const readAcademies = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/academias', {
-        cache: 'no-store'
-      });
-      if (!response.ok) {
-        throw new Error('Error al cargar las academias');
-      }
-      const data = await response.json();
+      const data = await fetchWithAuth(`${API_BASE_URL}/academias`);
       const academiasUnicas = Array.from(new Map(data.map(item => [item.idacademy, item])).values());
       setAcademies(academiasUnicas);
     } catch (error) {
@@ -191,21 +214,14 @@ const AcademiasPage = () => {
 
   const handleAcademyAdded = async (newAcademy) => {
     try {
-      const response = await fetch('http://localhost:3001/api/academias', {
+      await fetchWithAuth(`${API_BASE_URL}/academias`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           name: newAcademy.name,
           adress: newAcademy.adress,
           phone: newAcademy.phone,
         })
       });
-
-      if (!response.ok) {
-        throw new Error('Error al crear la academia');
-      }
 
       await readAcademies();
     } catch (error) {
@@ -215,13 +231,9 @@ const AcademiasPage = () => {
 
   const handleDeleteAcademy = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/academias/${id}`, {
+      await fetchWithAuth(`${API_BASE_URL}/academias/${id}`, {
         method: 'DELETE'
       });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar la academia');
-      }
 
       readAcademies();
     } catch (error) {
@@ -236,22 +248,14 @@ const AcademiasPage = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/academias/${academyEdited.idacademy}`, {
+      await fetchWithAuth(`${API_BASE_URL}/academias/${academyEdited.idacademy}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           name: academyEdited.nombre,
           adress: academyEdited.direccion,
           phone: academyEdited.telefono,
-
         })
       });
-
-      if (!response.ok) {
-        throw new Error('Error al actualizar la academia');
-      }
 
       await readAcademies();
       setAcademyToEdit(null);
