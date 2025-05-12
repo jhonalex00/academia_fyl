@@ -27,10 +27,12 @@ const getTeacherById = async (req, res) => {
 // Crear un nuevo profesor
 const createTeacher = async (req, res) => {
   try {
+    console.log('Datos recibidos:', req.body); // Añadir log para ver los datos
     const { name, phone, email, status } = req.body;
     const [result] = await sequelize.query('INSERT INTO teachers (name, phone, email, status) VALUES (?, ?, ?, ?)', [name, phone, email, status]);
     res.status(201).json({ id: result.insertId, name, phone, email, status });
   } catch (error) {
+    console.error('Error al crear el profesor:', error); // Mejorar el log de error
     res.status(500).json({ error: 'Error al crear el profesor' });
   }
 };
