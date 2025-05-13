@@ -1,11 +1,22 @@
 const { sequelize } = require('../../db/config');
 
-// Obtener todos los mensajes
+// Obtener todos los mensajes con JOIN (corregido)
 const getMessages = async (req, res) => {
   try {
-    const [rows] = await sequelize.query('SELECT * FROM messages');
+    const [rows] = await sequelize.query(`
+      SELECT 
+        m.idmessage AS id,
+        c.name AS remitente,
+        t.name AS asunto,
+        m.message AS mensaje,
+        m.date AS fecha
+      FROM messages m
+      JOIN contacts c ON m.idcontact = c.idcontact
+      JOIN teachers t ON m.idteacher = t.idteacher
+    `);
     res.status(200).json(rows);
   } catch (error) {
+    console.error('Error en getMessages:', error);
     res.status(500).json({ error: 'Error al obtener los mensajes' });
   }
 };
@@ -28,7 +39,10 @@ const getMessageById = async (req, res) => {
 const createMessage = async (req, res) => {
   try {
     const { message, date, idteacher, idcontact } = req.body;
-    const [result] = await sequelize.query('INSERT INTO messages (message, date, idteacher, idcontact) VALUES (?, ?, ?, ?)', [message, date, idteacher, idcontact]);
+    const [result] = await sequelize.query(
+      'INSERT INTO messages (message, date, idteacher, idcontact) VALUES (?, ?, ?, ?)',
+      [message, date, idteacher, idcontact]
+    );
     res.status(201).json({ id: result.insertId, message, date, idteacher, idcontact });
   } catch (error) {
     res.status(500).json({ error: 'Error al crear el mensaje' });
@@ -40,7 +54,10 @@ const updateMessage = async (req, res) => {
   try {
     const { id } = req.params;
     const { message, date, idteacher, idcontact } = req.body;
-    const [result] = await sequelize.query('UPDATE messages SET message = ?, date = ?, idteacher = ?, idcontact = ? WHERE idmessage = ?', [message, date, idteacher, idcontact, id]);
+    const [result] = await sequelize.query(
+      'UPDATE messages SET message = ?, date = ?, idteacher = ?, idcontact = ? WHERE idmessage = ?',
+      [message, date, idteacher, idcontact, id]
+    );
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Mensaje no encontrado' });
     }

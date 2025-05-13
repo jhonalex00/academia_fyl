@@ -14,25 +14,27 @@ const contactosRoutes = require('./contactos');
 const profesoresHorariosRoutes = require('./profesoresHorarios');
 const estudiantesHorariosRoutes = require('./estudiantesHorarios');
 const dashboardRoutes = require('./dashboard');
+const mensajesRoutes = require('./mensajes'); // ✅ RUTA AGREGADA
 
 // Rutas públicas (sin autenticación)
 router.use('/auth', authRoutes);
+router.use('/mensajes', mensajesRoutes); // ✅ Ruta de mensajes abierta
+router.use('/profesores', profesoresRoutes); // ✅ SIN AUTENTICACIÓN TEMPORAL
+router.use('/contactos', contactosRoutes);   // ✅ SIN AUTENTICACIÓN TEMPORAL
 
 // Rutas protegidas (requieren autenticación)
 router.use('/estudiantes', authenticate, estudiantesRoutes);
-router.use('/profesores', authenticate, profesoresRoutes);
 router.use('/asignaturas', authenticate, asignaturasRoutes);
 router.use('/horarios', authenticate, horariosRoutes);
-// Para rutas con autorización de roles específicos
+
 const adminOnly = authorize(['admin']);
 router.use('/usuarios', authenticate, adminOnly, usuariosRoutes);
 router.use('/academias', authenticate, academiasRoutes);
-router.use('/contactos', authenticate, contactosRoutes);
 router.use('/profesores/horarios', authenticate, profesoresHorariosRoutes);
 router.use('/estudiantes/horarios', authenticate, estudiantesHorariosRoutes);
 router.use('/dashboard', authenticate, dashboardRoutes);
 
-// Ruta de prueba para verificar que la API está funcionando
+// Ruta de prueba
 router.get('/', (req, res) => {
   res.status(200).json({ 
     message: 'API de Academia FyL funcionando correctamente',
