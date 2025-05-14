@@ -24,7 +24,14 @@ export function GestionarMensajes({ onMensajeAdded, mensajeToEdit, onMensajeEdit
 
   useEffect(() => {
     if (mensajeToEdit) {
-      setFormData(mensajeToEdit);
+      // Cargar datos del mensaje a editar
+      setFormData({
+        id: mensajeToEdit.id ?? mensajeToEdit.idmessage, // asegura que el ID esté
+        idcontact: mensajeToEdit.idcontact,
+        idteacher: mensajeToEdit.idteacher,
+        message: mensajeToEdit.message,
+        date: mensajeToEdit.date,
+      });
       setIsOpen(true);
     }
   }, [mensajeToEdit]);
@@ -37,11 +44,20 @@ export function GestionarMensajes({ onMensajeAdded, mensajeToEdit, onMensajeEdit
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (mensajeToEdit) {
-      onMensajeEdited(formData);
-    } else {
-      onMensajeAdded(formData);
+
+    if (!formData.idcontact || !formData.idteacher || !formData.message.trim() || !formData.date) {
+      alert('Por favor completa todos los campos antes de guardar.');
+      return;
     }
+
+    // Si hay un id, es edición
+    if (formData.id) {
+      onMensajeEdited(formData); // Actualiza
+    } else {
+      onMensajeAdded(formData); // Crea nuevo
+    }
+
+    // Limpia y cierra modal
     setIsOpen(false);
     setFormData(mensajeVacio());
   };
@@ -49,21 +65,24 @@ export function GestionarMensajes({ onMensajeAdded, mensajeToEdit, onMensajeEdit
   const handleClose = () => {
     setIsOpen(false);
     setFormData(mensajeVacio());
-    if (mensajeToEdit) onMensajeEdited(null);
+    onMensajeEdited(null);
   };
 
   return (
     <>
+        {/* Esto desactiva temporalmente ese fragmento del DOM
       <div className="flex justify-end mr-4 mt-2">
         <Button onClick={handleOpen}>
           Nuevo Mensaje
         </Button>
       </div>
+      */}
+
 
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
-            <DialogTitle>{mensajeToEdit ? 'Editar mensaje' : 'Nuevo mensaje'}</DialogTitle>
+            <DialogTitle>{formData.id ? 'Editar mensaje' : 'Nuevo mensaje'}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
@@ -133,7 +152,7 @@ export function GestionarMensajes({ onMensajeAdded, mensajeToEdit, onMensajeEdit
                 Cancelar
               </Button>
               <Button type="submit">
-                {mensajeToEdit ? 'Actualizar' : 'Guardar'}
+                {formData.id ? 'Actualizar' : 'Guardar'}
               </Button>
             </DialogFooter>
           </form>
