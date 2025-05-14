@@ -10,6 +10,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -106,6 +113,23 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
       setIsOpen(true);
     }
   }, [profesorToEdit]);
+  
+  const [asignaturasDisponibles, setAsignaturasDisponibles] = useState([]);
+
+useEffect(() => {
+  const cargarAsignaturas = async () => {
+    try {
+      const data = await fetchWithAuth(`${API_BASE_URL}/asignaturas`);
+      if (Array.isArray(data)) {
+        setAsignaturasDisponibles(data);
+      }
+    } catch (error) {
+      console.error("Error al cargar asignaturas:", error);
+    }
+  };
+
+  cargarAsignaturas();
+}, []);
 
   const handleAddClick = () => {
     onProfesorEdited(null);
@@ -200,14 +224,24 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
 
               <div className="grid w-full items-center gap-1.5">
                 <label htmlFor="asignaturas" className="text-sm font-medium">Asignaturas</label>
-                <Input
-                  id="asignaturas"
-                  name="asignaturas"
+                <Select
                   value={formData.asignaturas[0]}
-                  onChange={(e) => setFormData({...formData, asignaturas: [e.target.value]})}
-                  className="col-span-3"
-                  required
-                />
+                  onValueChange={(value) => setFormData({...formData, asignaturas: [value]})}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona una asignatura" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {asignaturasDisponibles.map((asignatura) => (
+                      <SelectItem 
+                        key={asignatura.id} 
+                        value={asignatura.name}
+                      >
+                        {asignatura.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
