@@ -4,7 +4,6 @@ import { FaEdit } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -13,12 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
 import { GestionarMensajes } from '@/components/GestionarMensajes';
 
 const MensajesPage = () => {
   const [mensajes, setMensajes] = useState([]);
   const [mensajeToEdit, setMensajeToEdit] = useState(null);
-  const [contactos, setContactos] = useState([]); // ✅ inicializado como array
+  const [contactos, setContactos] = useState([]);
   const [profesores, setProfesores] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState(null);
@@ -37,14 +37,8 @@ const MensajesPage = () => {
     try {
       const res = await fetch('http://localhost:3001/api/contactos');
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setContactos(data);
-      } else {
-        console.warn("Respuesta inesperada en contactos:", data);
-        setContactos([]);
-      }
+      setContactos(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Error al cargar contactos:', err);
       setContactos([]);
     }
   };
@@ -53,14 +47,8 @@ const MensajesPage = () => {
     try {
       const res = await fetch('http://localhost:3001/api/profesores');
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setProfesores(data);
-      } else {
-        console.warn("Respuesta inesperada en profesores:", data);
-        setProfesores([]);
-      }
+      setProfesores(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Error al cargar profesores:', err);
       setProfesores([]);
     }
   };
@@ -73,14 +61,19 @@ const MensajesPage = () => {
 
   const handleMensajeAdded = async (nuevo) => {
     try {
-      await fetch('http://localhost:3001/api/mensajes', {
+      const res = await fetch('http://localhost:3001/api/mensajes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevo),
       });
+
+      if (!res.ok) {
+        throw new Error('No se pudo guardar el mensaje');
+      }
+
       cargarMensajes();
     } catch (err) {
-      setError('Error al crear el mensaje');
+      setError(err.message);
     }
   };
 
@@ -91,26 +84,36 @@ const MensajesPage = () => {
     }
 
     try {
-      await fetch(`http://localhost:3001/api/mensajes/${editado.id}`, {
+      const res = await fetch(`http://localhost:3001/api/mensajes/${editado.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editado),
       });
+
+      if (!res.ok) {
+        throw new Error('No se pudo actualizar el mensaje');
+      }
+
       setMensajeToEdit(null);
       cargarMensajes();
     } catch (err) {
-      setError('Error al actualizar el mensaje');
+      setError(err.message);
     }
   };
 
   const handleDeleteMensaje = async (id) => {
     try {
-      await fetch(`http://localhost:3001/api/mensajes/${id}`, {
+      const res = await fetch(`http://localhost:3001/api/mensajes/${id}`, {
         method: 'DELETE',
       });
+
+      if (!res.ok) {
+        throw new Error('No se pudo eliminar el mensaje');
+      }
+
       cargarMensajes();
     } catch (err) {
-      setError('Error al eliminar el mensaje');
+      setError(err.message);
     }
   };
 
@@ -121,7 +124,7 @@ const MensajesPage = () => {
 
   return (
     <>
-      <div className="flex justify-between items-center mt-2">
+      <div className="flex justify-between items-center mt-4">
         <Input
           type="text"
           placeholder="Buscar mensaje..."
@@ -129,18 +132,11 @@ const MensajesPage = () => {
           onChange={(e) => setBusqueda(e.target.value)}
           className="max-w-xs"
         />
-        <GestionarMensajes
-          onMensajeAdded={handleMensajeAdded}
-          mensajeToEdit={mensajeToEdit}
-          onMensajeEdited={handleMensajeEdited}
-          contactos={Array.isArray(contactos) ? contactos : []} // ✅ protección adicional
-          profesores={Array.isArray(profesores) ? profesores : []}
-        />
       </div>
 
       {error && <p className="text-red-500 text-center mt-4">{error}</p>}
 
-      <div className="flex justify-center mt-10">
+      <div className="mt-10">
         <Table className="text-center">
           <TableHeader className="bg-neutral-100">
             <TableRow>
@@ -164,19 +160,21 @@ const MensajesPage = () => {
                       title="Editar"
                       onClick={() =>
                         setMensajeToEdit({
-                          id: mensaje.id,
+                          id: mensaje.id ?? mensaje.idmessage,
                           idcontact: mensaje.idcontact,
                           idteacher: mensaje.idteacher,
                           message: mensaje.mensaje,
-                          date: mensaje.fecha.split('T')[0],
+                          date: mensaje.fecha?.split('T')[0],
                         })
                       }
+                      className="cursor-pointer"
                     >
                       <FaEdit size={18} />
                     </button>
                     <button
                       title="Eliminar"
-                      onClick={() => handleDeleteMensaje(mensaje.id)}
+                      onClick={() => handleDeleteMensaje(mensaje.id ?? mensaje.idmessage)}
+                      className="cursor-pointer"
                     >
                       <IoTrashBin size={18} />
                     </button>
@@ -187,6 +185,15 @@ const MensajesPage = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Modal de edición/creación, pero sin botón de Nuevo Mensaje visible */}
+      <GestionarMensajes
+        onMensajeAdded={handleMensajeAdded}
+        mensajeToEdit={mensajeToEdit}
+        onMensajeEdited={handleMensajeEdited}
+        contactos={contactos}
+        profesores={profesores}
+      />
     </>
   );
 };
