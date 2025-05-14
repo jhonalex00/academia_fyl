@@ -35,37 +35,37 @@ const Navigation = () => {
       </div>
       <ul className="nav-links">
         <li>
-          <Link href="/dashboard" className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
+          <Link href="/admin/dashboard" className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
             <MdDashboard className="nav-icon" />
             <span>Dashboard</span>
           </Link>
         </li>
         <li>
-          <Link href="/academias" className={`nav-item ${isActive('/academias') ? 'active' : ''}`}>
+          <Link href="/admin/academias" className={`nav-item ${isActive('/academias') ? 'active' : ''}`}>
             <FaSchoolFlag className="nav-icon" />
             <span>Academias</span>
           </Link>
         </li>
         <li>
-          <Link href="/alumnos" className={`nav-item ${isActive('/alumnos') ? 'active' : ''}`}>
+          <Link href="/admin/alumnos" className={`nav-item ${isActive('/alumnos') ? 'active' : ''}`}>
             <PiStudentFill className="nav-icon" />
             <span>Alumnos</span>
           </Link>
         </li>
         <li>
-          <Link href="/profesores" className={`nav-item ${isActive('/profesores') ? 'active' : ''}`}>
+          <Link href="/admin/profesores" className={`nav-item ${isActive('/profesores') ? 'active' : ''}`}>
             <GiTeacher className="nav-icon" />
             <span>Profesores</span>
           </Link>
         </li>
         <li>
-          <Link href="/mensajes" className={`nav-item ${isActive('/mensajes') ? 'active' : ''}`}>
+          <Link href="/admin/mensajes" className={`nav-item ${isActive('/mensajes') ? 'active' : ''}`}>
             <MdMessage className="nav-icon" />
             <span>Mensajes</span>
           </Link>
         </li>
         <li>
-          <Link href="/horarios" className={`nav-item ${isActive('/horarios') ? 'active' : ''}`}>
+          <Link href="/admin/horarios" className={`nav-item ${isActive('/horarios') ? 'active' : ''}`}>
             <IoCalendarNumber className="nav-icon" />
             <span>Horarios</span>
           </Link>
@@ -73,7 +73,7 @@ const Navigation = () => {
       </ul>
       <div className="nav-footer">
         <div className="flex flex-col space-y-2">
-          <Link href="/configuracion" className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}>
+          <Link href="/admin/configuracion" className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}>
             <IoMdSettings className="nav-icon" />
             <span>Configuración</span>
           </Link>
