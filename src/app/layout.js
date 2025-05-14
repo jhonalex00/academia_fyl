@@ -15,61 +15,91 @@ import { useActiveRoute } from '../hooks/useActiveRoute';
 import { AuthProvider } from '@/context/AuthContext';
 import { useAuth } from '@/context/AuthContext';
 import ProtectedLayout from '@/components/auth/ProtectedLayout';
+import { FaUserClock, FaUserGraduate } from "react-icons/fa";
 
 const Navigation = () => {
   const { isActive } = useActiveRoute();
   const { user, logout } = useAuth();
 
   // Si no hay usuario autenticado, no mostrar la navegación
-  if (!user) return null;
+  if (!user || !user.role) return null;
 
   const handleLogout = () => {
     logout();
   };
+  
+  const isTeacher = user.role === 'teacher';
 
   return (
     <nav className="navigation">
       <div className="nav-header">
         <h1 className="nav-title">Academia FyL</h1>
-        <div className="text-sm text-gray-400 mt-1">{user?.name || 'Usuario'}</div>
+        <div className="text-sm text-gray-400 mt-1">{user?.name || 'Usuario'} ({isTeacher ? 'Profesor' : 'Admin'})</div>
       </div>
       <ul className="nav-links">
-        <li>
-          <Link href="/dashboard" className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
-            <MdDashboard className="nav-icon" />
-            <span>Dashboard</span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/academias" className={`nav-item ${isActive('/academias') ? 'active' : ''}`}>
-            <FaSchoolFlag className="nav-icon" />
-            <span>Academias</span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/alumnos" className={`nav-item ${isActive('/alumnos') ? 'active' : ''}`}>
-            <PiStudentFill className="nav-icon" />
-            <span>Alumnos</span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/profesores" className={`nav-item ${isActive('/profesores') ? 'active' : ''}`}>
-            <GiTeacher className="nav-icon" />
-            <span>Profesores</span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/mensajes" className={`nav-item ${isActive('/mensajes') ? 'active' : ''}`}>
-            <MdMessage className="nav-icon" />
-            <span>Mensajes</span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/horarios" className={`nav-item ${isActive('/horarios') ? 'active' : ''}`}>
-            <IoCalendarNumber className="nav-icon" />
-            <span>Horarios</span>
-          </Link>
-        </li>
+        {isTeacher ? (
+          // --- Menú Profesor ---
+          <>
+            <li>
+              <Link href="/teacher/schedule" className={`nav-item ${isActive('/teacher/schedule') ? 'active' : ''}`}>
+                <FaUserClock className="nav-icon" />
+                <span>Mi Horario</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/teacher/students" className={`nav-item ${isActive('/teacher/students') ? 'active' : ''}`}>
+                 <FaUserGraduate className="nav-icon" />
+                 <span>Mis Alumnos</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/mensajes" className={`nav-item ${isActive('/mensajes') ? 'active' : ''}`}>
+                 <MdMessage className="nav-icon" />
+                 <span>Mensajes</span>
+              </Link>
+            </li>
+          </>
+        ) : (
+          // --- Menú Admin/General ---
+          <>
+            <li>
+              <Link href="/dashboard" className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
+                <MdDashboard className="nav-icon" />
+                <span>Dashboard</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/academias" className={`nav-item ${isActive('/academias') ? 'active' : ''}`}>
+                <FaSchoolFlag className="nav-icon" />
+                <span>Academias</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/alumnos" className={`nav-item ${isActive('/alumnos') ? 'active' : ''}`}>
+                <PiStudentFill className="nav-icon" />
+                <span>Alumnos</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/profesores" className={`nav-item ${isActive('/profesores') ? 'active' : ''}`}>
+                <GiTeacher className="nav-icon" />
+                <span>Profesores</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/mensajes" className={`nav-item ${isActive('/mensajes') ? 'active' : ''}`}>
+                <MdMessage className="nav-icon" />
+                <span>Mensajes</span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/horarios" className={`nav-item ${isActive('/horarios') ? 'active' : ''}`}>
+                <IoCalendarNumber className="nav-icon" />
+                <span>Horarios</span>
+              </Link>
+            </li>
+          </>
+        )}
       </ul>
       <div className="nav-footer">
         <div className="flex flex-col space-y-2">
@@ -77,7 +107,7 @@ const Navigation = () => {
             <IoMdSettings className="nav-icon" />
             <span>Configuración</span>
           </Link>
-          <button onClick={handleLogout} className="nav-item text-red-500 hover:bg-red-50">
+          <button onClick={handleLogout} className="nav-item text-red-500 hover:bg-red-50 w-full">
             <FiLogOut className="nav-icon" />
             <span>Cerrar sesión</span>
           </button>
