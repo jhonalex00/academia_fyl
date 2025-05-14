@@ -43,19 +43,13 @@ const Navigation = () => {
             <li>
               <Link href="/teacher/schedule" className={`nav-item ${isActive('/teacher/schedule') ? 'active' : ''}`}>
                 <FaUserClock className="nav-icon" />
-                <span>Mi Horario</span>
+                <span>Mis clases</span>
               </Link>
             </li>
             <li>
               <Link href="/teacher/students" className={`nav-item ${isActive('/teacher/students') ? 'active' : ''}`}>
                  <FaUserGraduate className="nav-icon" />
                  <span>Mis Alumnos</span>
-              </Link>
-            </li>
-            <li>
-              <Link href="/mensajes" className={`nav-item ${isActive('/mensajes') ? 'active' : ''}`}>
-                 <MdMessage className="nav-icon" />
-                 <span>Mensajes</span>
               </Link>
             </li>
           </>
