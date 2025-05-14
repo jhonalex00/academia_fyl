@@ -39,7 +39,7 @@ const fetchWithAuth = async (url, options = {}) => {
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
-    throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');
+    throw new Error('Sesión expirada. Por favor, inicia sesión de nuevo.');                                            
   }
 
   if (!response.ok) {
