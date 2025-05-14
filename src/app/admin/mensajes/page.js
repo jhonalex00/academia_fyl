@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { FaEdit } from 'react-icons/fa';
 import { IoTrashBin } from 'react-icons/io5';
 
 import { Input } from '@/components/ui/input';
@@ -155,26 +154,11 @@ const MensajesPage = () => {
                 <TableCell>{mensaje.mensaje}</TableCell>
                 <TableCell>{new Date(mensaje.fecha).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  <div className="flex justify-center space-x-4">
-                    <button
-                      title="Editar"
-                      onClick={() =>
-                        setMensajeToEdit({
-                          id: mensaje.id ?? mensaje.idmessage,
-                          idcontact: mensaje.idcontact,
-                          idteacher: mensaje.idteacher,
-                          message: mensaje.mensaje,
-                          date: mensaje.fecha?.split('T')[0],
-                        })
-                      }
-                      className="cursor-pointer"
-                    >
-                      <FaEdit size={18} />
-                    </button>
+                  <div className="flex justify-center">
                     <button
                       title="Eliminar"
                       onClick={() => handleDeleteMensaje(mensaje.id ?? mensaje.idmessage)}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:text-red-500"
                     >
                       <IoTrashBin size={18} />
                     </button>
@@ -186,7 +170,7 @@ const MensajesPage = () => {
         </Table>
       </div>
 
-      {/* Modal de edición/creación, pero sin botón de Nuevo Mensaje visible */}
+      {/* Modal sigue funcionando solo para editar si se invoca desde código */}
       <GestionarMensajes
         onMensajeAdded={handleMensajeAdded}
         mensajeToEdit={mensajeToEdit}
