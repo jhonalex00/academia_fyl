@@ -8,7 +8,7 @@ import {
   TableRow, 
   TableCell 
 } from '@/components/ui/table';
-import styles from '@/app/dashboard/dashboard.module.css';
+import styles from '@/app/admin/dashboard/dashboard.module.css';
 
 const DataTable = ({ data, columns, title, className = '' }) => {
   return (

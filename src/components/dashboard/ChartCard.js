@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import styles from '@/app/dashboard/dashboard.module.css';
+import styles from '@/app/admin/dashboard/dashboard.module.css';
 
 const ChartCard = ({ title, children, className = '' }) => {
   const [showOptions, setShowOptions] = useState(false);

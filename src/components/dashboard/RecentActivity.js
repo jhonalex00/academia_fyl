@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import styles from '@/app/dashboard/dashboard.module.css';
+import styles from '@/app/admin/dashboard/dashboard.module.css';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const RecentActivity = ({ activities, title, className = '' }) => {

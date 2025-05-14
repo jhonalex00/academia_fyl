@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import styles from '@/app/dashboard/dashboard.module.css';
+import styles from '@/app/admin/dashboard/dashboard.module.css';
 
 const StatCard = ({ title, value, icon, increment, color = 'indigo' }) => {
   const colorClasses = {
