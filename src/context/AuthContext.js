@@ -76,7 +76,13 @@ export const AuthProvider = ({ children }) => {
     document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24}`; // 24 horas
     
     setUser(userData);
-    router.push('/dashboard');
+    
+    // Redirigir según el rol
+    if (userData.role === 'teacher') {
+      router.push('/teacher/schedule'); // Redirigir a la nueva página de horario
+    } else {
+      router.push('/dashboard'); // Redirigir al dashboard general para otros roles
+    }
   };
 
   const logout = () => {

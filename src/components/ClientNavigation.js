@@ -21,50 +21,50 @@ export default function ClientNavigation() {
       </div>
       <ul className="nav-links">
         <li>
-          <Link href="/dashboard" className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
+          <Link href="/admin/dashboard" className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}>
             <MdDashboard className="nav-icon" />
             <span>Dashboard</span>
           </Link>
         </li>
         <li>
-          <Link href="/academias" className={`nav-item ${isActive('/academias') ? 'active' : ''}`}>
+          <Link href="/admin/academias" className={`nav-item ${isActive('/academias') ? 'active' : ''}`}>
             <FaSchoolFlag className="nav-icon" />
             <span>Academias</span>
           </Link>
         </li>
         <li>
-          <Link href="/alumnos" className={`nav-item ${isActive('/alumnos') ? 'active' : ''}`}>
+          <Link href="/admin/alumnos" className={`nav-item ${isActive('/alumnos') ? 'active' : ''}`}>
             <PiStudentFill className="nav-icon" />
             <span>Alumnos</span>
           </Link>
         </li>
         <li>
-          <Link href="/profesores" className={`nav-item ${isActive('/profesores') ? 'active' : ''}`}>
+          <Link href="/admin/profesores" className={`nav-item ${isActive('/profesores') ? 'active' : ''}`}>
             <GiTeacher className="nav-icon" />
             <span>Profesores</span>
           </Link>
         </li>
         <li>
-          <Link href="/asignaturas" className={`nav-item ${isActive('/asignaturas') ? 'active' : ''}`}>
+          <Link href="/admin/asignaturas" className={`nav-item ${isActive('/asignaturas') ? 'active' : ''}`}>
             <IoBook className="nav-icon" />
             <span>Asignaturas</span>
           </Link>
         </li>
         <li>
-          <Link href="/contactos" className={`nav-item ${isActive('/contactos') ? 'active' : ''}`}>
+          <Link href="/admin/contactos" className={`nav-item ${isActive('/contactos') ? 'active' : ''}`}>
             <MdContactPhone className="nav-icon" />
             <span>Contactos</span>
           </Link>
         </li>
         <li>
-          <Link href="/horarios" className={`nav-item ${isActive('/horarios') ? 'active' : ''}`}>
+          <Link href="/admin/horarios" className={`nav-item ${isActive('/horarios') ? 'active' : ''}`}>
             <IoCalendarNumber className="nav-icon" />
             <span>Horarios</span>
           </Link>
         </li>
       </ul>
       <div className="nav-footer">
-        <Link href="/configuracion" className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}>
+        <Link href="/admin/configuracion" className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}>
           <IoMdSettings className="nav-icon" />
           <span>Configuración</span>
         </Link>
