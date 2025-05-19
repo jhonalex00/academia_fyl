@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -31,8 +29,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,7 +42,7 @@ const AlumnosPage = () => {
   const router = useRouter()
 
   const handleNuevoAlumno = () => {
-    router.push("/alumnos/nuevo")
+    router.push("alumnos/nuevo")
   }
 
   return (
