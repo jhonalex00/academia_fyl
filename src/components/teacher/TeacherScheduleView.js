@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction'; // Para interacciones futuras
 import esLocale from '@fullcalendar/core/locales/es';
+
+// Constantes para la API
+const API_BASE_URL = 'http://localhost:3001/api';
 
 // Función auxiliar para generar colores consistentes basados en ID
 const getRandomColor = (id) => {
@@ -36,7 +39,30 @@ const obtenerFechaBasePorDiaSemana = (diaSemana) => {
   return fecha;
 };
 
-const TeacherScheduleView = ({ schedule }) => {
+// Función auxiliar para obtener el nombre del día de la semana
+const obtenerNombreDia = (numeroDia) => {
+  const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  return dias[numeroDia];
+};
+
+const TeacherScheduleView = ({ schedule, academias, asignaturas, onScheduleUpdate }) => {
+  const calendarRef = useRef(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
+  const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
+  const [formularioHorario, setFormularioHorario] = useState({
+    fecha: '',
+    horaInicio: '',
+    horaFin: '',
+    diaSemana: '',
+    idacademies: '',
+    idsubject: '',
+    repetirSemanal: false,
+    semanas: 4
+  });
+
   if (!schedule) {
     return <div className="bg-white p-4 rounded shadow text-gray-500">Cargando horario...</div>;
   }
@@ -96,66 +122,269 @@ const TeacherScheduleView = ({ schedule }) => {
     };
   });
 
+  // Funciones de navegación del calendario
+  const irAHoy = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().today();
+    }
+  };
+
+  const semanaAnterior = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().prev();
+    }
+  };
+
+  const semanaSiguiente = () => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().next();
+    }
+  };
+
+  // Funciones para manejar eventos del calendario
+  const manejarArrastreEvento = async (info) => {
+    try {
+      setCargando(true);
+      const evento = info.event;
+      const idschedule = evento.extendedProps.idschedule;
+      const nuevaFecha = evento.start.toISOString().split('T')[0];
+      const nuevaHoraInicio = `${evento.start.getHours().toString().padStart(2, '0')}:${evento.start.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevaHoraFin = `${evento.end.getHours().toString().padStart(2, '0')}:${evento.end.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevoDiaSemana = obtenerNombreDia(evento.start.getDay());
+
+      await fetch(`${API_BASE_URL}/horarios/${idschedule}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          date: nuevaFecha,
+          weekDay: nuevoDiaSemana,
+          startHour: nuevaHoraInicio,
+          finishHour: nuevaHoraFin
+        })
+      });
+
+      if (onScheduleUpdate) {
+        onScheduleUpdate();
+      }
+    } catch (error) {
+      info.revert();
+      setError('Error al mover el horario: ' + error.message);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const manejarRedimensionamiento = async (info) => {
+    try {
+      setCargando(true);
+      const evento = info.event;
+      const idschedule = evento.extendedProps.idschedule;
+      const nuevaFecha = evento.start.toISOString().split('T')[0];
+      const nuevaHoraInicio = `${evento.start.getHours().toString().padStart(2, '0')}:${evento.start.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevaHoraFin = `${evento.end.getHours().toString().padStart(2, '0')}:${evento.end.getMinutes().toString().padStart(2, '0')}:00`;
+      const nuevoDiaSemana = obtenerNombreDia(evento.start.getDay());
+
+      await fetch(`${API_BASE_URL}/horarios/${idschedule}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          date: nuevaFecha,
+          weekDay: nuevoDiaSemana,
+          startHour: nuevaHoraInicio,
+          finishHour: nuevaHoraFin
+        })
+      });
+
+      if (onScheduleUpdate) {
+        onScheduleUpdate();
+      }
+    } catch (error) {
+      info.revert();
+      setError('Error al cambiar la duración del horario: ' + error.message);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // Funciones para el modal
+  const abrirModalEdicion = (evento) => {
+    setModoEdicion(true);
+    setEventoSeleccionado(evento);
+    setFormularioHorario({
+      fecha: evento.start.toISOString().split('T')[0],
+      horaInicio: evento.extendedProps.rawStartHour?.substring(0, 5) || '09:00',
+      horaFin: evento.extendedProps.rawEndHour?.substring(0, 5) || '10:00',
+      diaSemana: evento.extendedProps.weekDay || obtenerNombreDia(evento.start.getDay()),
+      idacademies: evento.extendedProps.idacademies || '',
+      idsubject: evento.extendedProps.idsubject || '',
+      repetirSemanal: false,
+      semanas: 4
+    });
+    setModalAbierto(true);
+  };
+
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setModoEdicion(false);
+    setEventoSeleccionado(null);
+    setError('');
+    setFormularioHorario({
+      fecha: '',
+      horaInicio: '',
+      horaFin: '',
+      diaSemana: '',
+      idacademies: '',
+      idsubject: '',
+      repetirSemanal: false,
+      semanas: 4
+    });
+  };
+
   return (
-    <div className="bg-white p-4 rounded shadow fullcalendar-container">
-       {/* Aplicar estilos globales o específicos si es necesario */}
-       <style jsx global>{`
-        .fc .fc-toolbar.fc-header-toolbar {
-          margin-bottom: 1.5em;
-          flex-wrap: wrap; /* Permitir que los elementos del toolbar se envuelvan */
-        }
-        .fc .fc-toolbar-title {
-          font-size: 1.5em; /* Ajustar tamaño del título */
-          margin: 0.5em 0; /* Espacio alrededor del título */
-        }
-        .fc-direction-ltr .fc-button-group > .fc-button:not(:first-child) {
-            margin-left: -1px; /* Solapamiento de botones */
-        }
-        .fc-direction-ltr .fc-toolbar > * > :not(:first-child) {
-            margin-left: .75em; /* Espacio entre grupos de botones */
-        }
-         .fc-event {
-            cursor: pointer; /* Indicar que los eventos son clickables */
-            padding: 4px 6px;
-            font-size: 0.85em;
-        }
-        .fc-timegrid-event .fc-event-time {
-            font-weight: bold;
-        }
-        /* Ajustes para responsividad si son necesarios */
-        @media (max-width: 600px) {
-          .fc .fc-toolbar.fc-header-toolbar {
-            flex-direction: column;
-            align-items: center;
-          }
-        }
-       `}</style>
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek" // Vista semanal por defecto
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay' // Opciones de vista
-        }}
-        events={events}
-        locale={esLocale} // Establecer idioma español
-        nowIndicator={true} // Muestra la hora actual
-        slotMinTime="08:00:00" // Hora de inicio visible
-        slotMaxTime="22:00:00" // Hora de fin visible
-        allDaySlot={false} // No mostrar la fila "todo el día"
-        height="auto" // Ajustar altura automáticamente
-        // eventClick={(clickInfo) => {
-        //   // Aquí puedes manejar el click en un evento (ej. mostrar detalles)
-        //   console.log('Evento clickeado:', clickInfo.event);
-        //   // abrirModalEdicion(clickInfo.event); // Si tuvieras un modal
-        // }}
-        // dateClick={(arg) => {
-        //   // Aquí puedes manejar el click en una fecha/hora (ej. crear nuevo evento)
-        //   console.log('Fecha clickeada:', arg.dateStr);
-        //   // abrirModalCreacion(arg.dateStr); // Si tuvieras un modal
-        // }}
-      />
+    <div className="bg-white p-4 rounded shadow">
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+
+      <div className="mb-4 flex justify-between items-center">
+        <div className="flex gap-2">
+          <button
+            onClick={semanaAnterior}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded"
+          >
+            &larr; Anterior
+          </button>
+          <button
+            onClick={irAHoy}
+            className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded"
+          >
+            Hoy
+          </button>
+          <button
+            onClick={semanaSiguiente}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded"
+          >
+            Siguiente &rarr;
+          </button>
+        </div>
+      </div>
+
+      <div className="fullcalendar-container">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="timeGridWeek" // Vista semanal por defecto
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay' // Opciones de vista
+          }}
+          events={events}
+          locale={esLocale} // Establecer idioma español
+          nowIndicator={true} // Muestra la hora actual
+          slotMinTime="08:00:00" // Hora de inicio visible
+          slotMaxTime="22:00:00" // Hora de fin visible
+          allDaySlot={false} // No mostrar la fila "todo el día"
+          height="auto" // Ajustar altura automáticamente
+          editable={true}
+          droppable={true}
+          eventDrop={manejarArrastreEvento}
+          eventResize={manejarRedimensionamiento}
+          eventResizableFromStart={true}
+          eventClick={abrirModalEdicion}
+        />
+      </div>
+
+      {/* Modal para editar horario */}
+      {modalAbierto && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">
+                {modoEdicion ? 'Editar Horario' : 'Nuevo Horario'}
+              </h2>
+              <button
+                onClick={cerrarModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Fecha</label>
+                <input
+                  type="date"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={formularioHorario.fecha}
+                  onChange={(e) => setFormularioHorario({...formularioHorario, fecha: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Día de la semana</label>
+                <select
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={formularioHorario.diaSemana}
+                  onChange={(e) => setFormularioHorario({...formularioHorario, diaSemana: e.target.value})}
+                >
+                  <option value="">Seleccione un día</option>
+                  {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map(dia => (
+                    <option key={dia} value={dia}>{dia}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Hora de inicio</label>
+                <input
+                  type="time"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={formularioHorario.horaInicio}
+                  onChange={(e) => setFormularioHorario({...formularioHorario, horaInicio: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Hora de fin</label>
+                <input
+                  type="time"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={formularioHorario.horaFin}
+                  onChange={(e) => setFormularioHorario({...formularioHorario, horaFin: e.target.value})}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <button
+                  onClick={cerrarModal}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    // Aquí iría la lógica para guardar los cambios
+                    cerrarModal();
+                  }}
+                  className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded"
+                >
+                  {modoEdicion ? 'Guardar Cambios' : 'Crear Horario'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

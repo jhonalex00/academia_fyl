@@ -18,6 +18,11 @@ const Profesor = sequelize.define('Profesor', {
     allowNull: true,
     field: 'email'
   },
+  phone: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    field: 'phone'
+  },
   password: {
     type: DataTypes.STRING(100),
     allowNull: true,
