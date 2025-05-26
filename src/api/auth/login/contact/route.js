@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-const { loginContact } = require('@/api/controllers/authController');
+import { loginContact } from '@/api/controllers/authController';
+
 
 export async function POST(request) {
   try {

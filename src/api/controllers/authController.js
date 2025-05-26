@@ -110,9 +110,11 @@ const loginTeacher = async (req, res) => {  try {
 
 // Función para iniciar sesión como contacto (padre/tutor)
 const loginContact = async (req, res) => {  try {
+   console.log('loginContact() fue llamado con:', req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
+       console.log('FALTAN DATOS');
       return res.status(400).json({ error: 'Se requieren email y contraseña' });
     }
 
@@ -121,13 +123,15 @@ const loginContact = async (req, res) => {  try {
     const contact = await Contacto.findOne({ where: { email } });
 
     if (!contact) {
+       console.log('NO ENCONTRADO');
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
-
+    console.log('Contacto encontrado:', contact.email);
     // En un sistema real, deberías tener las contraseñas hasheadas
     const passwordMatch = password === contact.password; // Idealmente: await bcrypt.compare(password, contact.password);
 
     if (!passwordMatch) {
+       console.log('CONTRASEÑA INCORRECTA');
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
@@ -135,9 +139,9 @@ const loginContact = async (req, res) => {  try {
     const token = jwt.sign(
       { 
         id: contact.idcontact, 
-        name: contact.name, 
+        name: contact.nameContact, 
         role: 'contact',
-        email: contact.email 
+        email: contact.emailContact
       },
       JWT_SECRET,
       { expiresIn: '24h' }
