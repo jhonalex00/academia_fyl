@@ -24,37 +24,35 @@ const MensajesPadrePage = () => {
   const [error, setError] = useState(null);
 
   const cargarMensajes = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No hay token');
-
-      const res = await fetch(`http://localhost:3001/api/padres/${user.id}/mensajes`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      setMensajes(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError('Error al cargar los mensajes');
-    }
+    // Datos de ejemplo para mensajes
+    const mensajesEjemplo = [
+      {
+        id: 1,
+        profesor: 'Prof. García',
+        asunto: 'Progreso en Matemáticas',
+        mensaje: 'Su hijo está mostrando excelente progreso en matemáticas.',
+        fecha: new Date().toISOString()
+      },
+      {
+        id: 2,
+        profesor: 'Prof. Martínez',
+        asunto: 'Tarea pendiente',
+        mensaje: 'Recordatorio sobre la tarea de lengua para mañana.',
+        fecha: new Date(Date.now() - 86400000).toISOString()
+      }
+    ];
+    setMensajes(mensajesEjemplo);
   };
 
   const cargarProfesores = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No hay token');
-
-      const res = await fetch('http://localhost:3001/api/profesores', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      setProfesores(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setProfesores([]);
-    }
+    // Datos de ejemplo para profesores
+    const profesoresEjemplo = [
+      { id: 1, name: 'Prof. García' },
+      { id: 2, name: 'Prof. Martínez' },
+      { id: 3, name: 'Prof. Smith' },
+      { id: 4, name: 'Prof. López' }
+    ];
+    setProfesores(profesoresEjemplo);
   };
 
   useEffect(() => {
@@ -65,55 +63,22 @@ const MensajesPadrePage = () => {
   }, [user]);
 
   const handleMensajeAdded = async (nuevo) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No hay token');
-
-      const mensajeConPadre = {
-        ...nuevo,
-        idPadre: user.id,
-        remitente: `${user.name} ${user.lastName}`
-      };
-
-      const res = await fetch('http://localhost:3001/api/mensajes', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(mensajeConPadre),
-      });
-
-      if (!res.ok) {
-        throw new Error('No se pudo enviar el mensaje');
-      }
-
-      cargarMensajes();
-    } catch (err) {
-      setError(err.message);
-    }
+    // Simular agregar mensaje
+    const profesorSeleccionado = profesores.find(p => p.id == nuevo.idProfesor);
+    const nuevoMensaje = {
+      id: Date.now(),
+      profesor: profesorSeleccionado?.name || 'Profesor',
+      asunto: nuevo.asunto,
+      mensaje: nuevo.mensaje,
+      fecha: new Date().toISOString()
+    };
+    
+    setMensajes(prev => [nuevoMensaje, ...prev]);
   };
 
   const handleDeleteMensaje = async (id) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('No hay token');
-
-      const res = await fetch(`http://localhost:3001/api/mensajes/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!res.ok) {
-        throw new Error('No se pudo eliminar el mensaje');
-      }
-
-      cargarMensajes();
-    } catch (err) {
-      setError(err.message);
-    }
+    // Simular eliminar mensaje
+    setMensajes(prev => prev.filter(m => m.id !== id));
   };
 
   const mensajesFiltrados = mensajes.filter((m) =>

@@ -77,8 +77,21 @@ export default function LoginForm() {
         description: `Bienvenido ${data.user.name}`,
       });
 
-      // Redirigir al dashboard
-      router.push('/dashboard');    } catch (error) {
+      // Redirigir según el rol del usuario
+      switch (data.user.role) {
+        case 'admin':
+          router.push('/admin/dashboard');
+          break;
+        case 'teacher':
+          router.push('/teacher/schedule');
+          break;
+        case 'parent':
+        case 'contact':
+          router.push('/father/horarios');
+          break;
+        default:
+          router.push('/login');
+      }    } catch (error) {
       console.error('Error de login:', error);
       toast.error("Error de inicio de sesión", {
         description: error.message,

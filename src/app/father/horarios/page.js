@@ -12,35 +12,30 @@ const FatherSchedulePage = () => {
 
   useEffect(() => {
     if (!authLoading && user && user.id) {
-      const fetchSchedule = async () => {
+      // Por ahora, usar datos de ejemplo hasta que se implemente el endpoint real
+      const loadExampleSchedule = () => {
         setLoadingData(true);
         setError(null);
-        try {
-          const token = localStorage.getItem('token');
-          if (!token) throw new Error("Token no encontrado");
-
-          // Cambio en la URL del endpoint para obtener horarios de los hijos
-          const scheduleRes = await fetch(`/api/padres/${user.id}/horarios-hijos`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+        
+        // Simular una pequeña carga
+        setTimeout(() => {
+          // Datos de ejemplo para mostrar el horario
+          const exampleSchedule = [
+            { day: 'Lunes', time: '09:00', subject: 'Matemáticas', teacher: 'Prof. García', room: 'Aula 101' },
+            { day: 'Lunes', time: '10:00', subject: 'Lengua', teacher: 'Prof. Martínez', room: 'Aula 102' },
+            { day: 'Martes', time: '09:00', subject: 'Inglés', teacher: 'Prof. Smith', room: 'Aula 103' },
+            { day: 'Martes', time: '11:00', subject: 'Ciencias', teacher: 'Prof. López', room: 'Lab 1' },
+            { day: 'Miércoles', time: '10:00', subject: 'Historia', teacher: 'Prof. Ruiz', room: 'Aula 104' },
+            { day: 'Jueves', time: '09:00', subject: 'Matemáticas', teacher: 'Prof. García', room: 'Aula 101' },
+            { day: 'Viernes', time: '11:00', subject: 'Educación Física', teacher: 'Prof. Sánchez', room: 'Gimnasio' }
+          ];
           
-          if (!scheduleRes.ok) {
-            const errorData = await scheduleRes.text();
-            throw new Error(`Error obteniendo horarios: ${scheduleRes.status} ${scheduleRes.statusText} - ${errorData}`);
-          }
-          
-          const studentSchedules = await scheduleRes.json();
-          setSchedule(studentSchedules);
-
-        } catch (error) {
-          console.error("Error al obtener horarios de los hijos:", error);
-          setError(error.message);
-          setSchedule([]);
-        } finally {
+          setSchedule(exampleSchedule);
           setLoadingData(false);
-        }
+        }, 1000);
       };
-      fetchSchedule();
+      
+      loadExampleSchedule();
     } else if (!authLoading) {
       setLoadingData(false);
       if (!user) setError("Usuario no autenticado.");
@@ -68,8 +63,8 @@ const FatherSchedulePage = () => {
     <ClientOnly>
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Horario</h1>
-          {user && <p className="text-gray-600">Horario {user.lastName || 'del alumno'}</p>}
+          <h1 className="text-2xl font-bold text-gray-800">Horario de Clases</h1>
+          {user && <p className="text-gray-600">Bienvenido/a {user.name} - Horario de su hijo/a</p>}
         </div>
         <FatherScheduleView schedule={schedule} />
       </div>

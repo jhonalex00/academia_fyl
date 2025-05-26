@@ -23,6 +23,9 @@ const Navigation = () => {
 
   // Si no hay usuario autenticado, no mostrar la navegación
   if (!user || !user.role) return null;
+  
+  // Si es padre, no mostrar esta navegación (usará su propio layout)
+  if (user.role === 'parent' || user.role === 'contact') return null;
 
   const handleLogout = () => {
     logout();
@@ -34,7 +37,9 @@ const Navigation = () => {
     <nav className="navigation">
       <div className="nav-header">
         <h1 className="nav-title">Academia FyL</h1>
-        <div className="text-sm text-gray-400 mt-1">{user?.name || 'Usuario'} ({isTeacher ? 'Profesor' : 'Admin'})</div>
+        <div className="text-sm text-gray-400 mt-1">
+          {user?.name || 'Usuario'} ({isTeacher ? 'Profesor' : 'Admin'})
+        </div>
       </div>
       <ul className="nav-links">
         {isTeacher ? (

@@ -7,11 +7,37 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirigir a la página de dashboard si el usuario está autenticado
+    // Redirigir según el tipo de usuario autenticado
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const userString = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
     
-    if (token) {
-      router.push('/dashboard');
+    if (token && userString) {
+      try {
+        const user = JSON.parse(userString);
+        
+        // Redirigir según el rol del usuario
+        switch (user.role) {
+          case 'admin':
+            router.push('/admin/dashboard');
+            break;
+          case 'teacher':
+            router.push('/teacher/schedule');
+            break;
+          case 'parent':
+          case 'contact':
+            router.push('/father/horarios');
+            break;
+          default:
+            // Si no tiene rol definido o es desconocido, ir a login
+            router.push('/login');
+        }
+      } catch (error) {
+        console.error('Error al parsear datos del usuario:', error);
+        // Si hay error al parsear, limpiar localStorage y ir a login
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        router.push('/login');
+      }
     } else {
       router.push('/login');
     }

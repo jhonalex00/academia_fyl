@@ -37,9 +37,22 @@ export const AuthProvider = ({ children }) => {
           const userData = await response.json();
           setUser(userData.user);
           
-          // Si estamos en la página de login y tenemos un usuario válido, redirigir al dashboard
+          // Si estamos en la página de login y tenemos un usuario válido, redirigir según el rol
           if (pathname === '/login') {
-            router.push('/dashboard');
+            switch (userData.user.role) {
+              case 'admin':
+                router.push('/admin/dashboard');
+                break;
+              case 'teacher':
+                router.push('/teacher/schedule');
+                break;
+              case 'parent':
+              case 'contact':
+                router.push('/father/horarios');
+                break;
+              default:
+                router.push('/login');
+            }
           }
         } else {
           // Token inválido, limpiar localStorage y redirigir a login
@@ -78,10 +91,19 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     
     // Redirigir según el rol
-    if (userData.role === 'teacher') {
-      router.push('/teacher/schedule'); // Redirigir a la nueva página de horario
-    } else {
-      router.push('/dashboard'); // Redirigir al dashboard general para otros roles
+    switch (userData.role) {
+      case 'admin':
+        router.push('/admin/dashboard');
+        break;
+      case 'teacher':
+        router.push('/teacher/schedule');
+        break;
+      case 'parent':
+      case 'contact':
+        router.push('/father/horarios');
+        break;
+      default:
+        router.push('/login');
     }
   };
 

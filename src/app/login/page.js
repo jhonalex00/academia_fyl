@@ -26,8 +26,31 @@ export default function LoginPage() {
           const data = await response.json();
           
           if (response.ok && data.valid) {
-            // Token válido, redirigir al dashboard
-            router.push('/dashboard');
+            // Token válido, redirigir según el rol del usuario
+            const userString = localStorage.getItem('user');
+            if (userString) {
+              try {
+                const user = JSON.parse(userString);
+                switch (user.role) {
+                  case 'admin':
+                    router.push('/admin/dashboard');
+                    break;
+                  case 'teacher':
+                    router.push('/teacher/schedule');
+                    break;
+                  case 'parent':
+                  case 'contact':
+                    router.push('/father/horarios');
+                    break;
+                  default:
+                    router.push('/login');
+                }
+              } catch (error) {
+                console.error('Error al parsear datos del usuario:', error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+              }
+            }
           } else {
             // Token inválido, limpiar localStorage
             localStorage.removeItem('token');

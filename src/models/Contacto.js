@@ -8,34 +8,25 @@ const Contacto = sequelize.define('Contacto', {
     autoIncrement: true,
     field: 'idcontact'
   },
-  numeroContacto: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    field: 'numberContact'
-  },
-  nombreContacto: {
+  phone: {
     type: DataTypes.STRING(50),
     allowNull: true,
-    field: 'nameContact'
+    field: 'phone'
+  },
+  name: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'name'
   },
   email: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING(50),
     allowNull: true,
     field: 'email'
   },
   password: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING(50),
     allowNull: true,
     field: 'password'
-  },
-  idEstudiante: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    field: 'idstudent',
-    references: {
-      model: 'students',
-      key: 'idstudent'
-    }
   }
 }, {
   tableName: 'contacts',
