@@ -91,70 +91,58 @@ const MensajesPadrePage = () => {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-6">Mis Mensajes</h1>
-      
-      <div className="flex justify-between items-center mt-4">
-        <Input
-          type="text"
-          placeholder="Buscar mensaje..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          className="max-w-xs"
-        />
-        <button
-          onClick={() => setMensajeToEdit({})}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Nuevo Mensaje
-        </button>
-      </div>
-
-      {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-
-      <div className="mt-10">
-        <Table className="text-center">
-          <TableHeader className="bg-neutral-100">
-            <TableRow>
-              <TableHead>Profesor</TableHead>
-              <TableHead>Asunto</TableHead>
-              <TableHead>Mensaje</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mensajesFiltrados.map((mensaje) => (
-              <TableRow key={mensaje.id}>
-                <TableCell>{mensaje.profesor}</TableCell>
-                <TableCell>{mensaje.asunto}</TableCell>
-                <TableCell>{mensaje.mensaje}</TableCell>
-                <TableCell>{new Date(mensaje.fecha).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <div className="flex justify-center">
-                    <button
-                      title="Eliminar"
-                      onClick={() => handleDeleteMensaje(mensaje.id ?? mensaje.idmessage)}
-                      className="cursor-pointer hover:text-red-500"
-                    >
-                      <IoTrashBin size={18} />
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <GestionarMensajesPadre
-        isOpen={!!mensajeToEdit}
-        onClose={() => setMensajeToEdit(null)}
-        onMensajeAdded={handleMensajeAdded}
-        profesores={profesores}
+  <>
+    <div className="flex justify-between items-center mt-4">
+      <Input
+        type="text"
+        placeholder="Buscar mensaje..."
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        className="max-w-xs"
       />
     </div>
-  );
+
+    {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+
+    <div className="mt-10">
+      <Table className="text-center">
+        <TableHeader className="bg-neutral-100">
+          <TableRow>
+            <TableHead>Alumno</TableHead>
+            <TableHead>Profesor</TableHead>
+            <TableHead>Asunto</TableHead>
+            <TableHead>Mensaje</TableHead>
+            <TableHead>Fecha</TableHead>
+            <TableHead>Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {mensajesFiltrados.map((mensaje) => (
+            <TableRow key={mensaje.id}>
+              <TableCell>{mensaje.alumno}</TableCell>
+              <TableCell>{mensaje.profesor}</TableCell>
+              <TableCell>{mensaje.asunto}</TableCell>
+              <TableCell>{mensaje.mensaje}</TableCell>
+              <TableCell>{new Date(mensaje.fecha).toLocaleDateString()}</TableCell>
+              <TableCell>
+                <div className="flex justify-center">
+                  <button
+                    title="Eliminar"
+                    onClick={() => handleDeleteMensaje(mensaje.id ?? mensaje.idmessage)}
+                    className="cursor-pointer hover:text-red-500"
+                  >
+                    <IoTrashBin size={18} />
+                  </button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  </>
+);
+
 };
 
 export default MensajesPadrePage;
