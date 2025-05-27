@@ -186,7 +186,7 @@ main {
 
 /* Sólo para tu layout “página con menú lateral” */
 .layout main {
-  margin-left: 15%;
+  margin-left: 12%;
   padding: 2rem;
   width: 100%;
   min-height: 100vh;

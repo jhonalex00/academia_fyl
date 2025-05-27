@@ -285,7 +285,7 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
                     [e.target.name]: e.target.value
                   })}
                   className="col-span-3"
-                  required
+                  // required
                   placeholder={profesorToEdit ? "Dejar vacío para mantener la actual" : "Ingresa una contraseña"}
                 />
               </div>

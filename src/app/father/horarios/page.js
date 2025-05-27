@@ -61,7 +61,7 @@ const FatherSchedulePage = () => {
 
   return (
     <ClientOnly>
-      <div className="p-8">
+      <div className="p-2">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-800">Horario de Clases</h1>
           {user && <p className="text-gray-600">Bienvenido/a {user.name} - Horario de su hijo/a</p>}

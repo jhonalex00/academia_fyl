@@ -102,12 +102,7 @@ const MensajesPadrePage = () => {
           onChange={(e) => setBusqueda(e.target.value)}
           className="max-w-xs"
         />
-        <button
-          onClick={() => setMensajeToEdit({})}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Nuevo Mensaje
-        </button>
+      
       </div>
 
       {error && <p className="text-red-500 text-center mt-4">{error}</p>}
