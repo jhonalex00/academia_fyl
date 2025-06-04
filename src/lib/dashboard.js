@@ -11,7 +11,7 @@ export const formatStudents = (students) => {
     name: `${student.name || ''} ${student.surname || ''}`.trim(),
     dni: student.dni || 'No disponible',
     birthDate: student.birthDate || null,
-    status: student.status || 'Activo',
+    status: student.status === 'true' ? 'Activo' : 'Inactivo',
     email: student.email || 'No disponible',
     phone: student.phone || 'No disponible'
   }));
@@ -28,7 +28,9 @@ export const formatTeachers = (teachers) => {
   return teachers.map(teacher => ({
     id: teacher.idteacher,
     name: teacher.name || 'Sin nombre',
-    subjects: teacher.subjects || []
+    email: teacher.email || 'No disponible',
+    phone: teacher.phone || 'No disponible',
+    status: teacher.status || 'active'
   }));
 };
 
@@ -42,9 +44,11 @@ export const formatSubjects = (subjects) => {
   
   return subjects.map(subject => ({
     id: subject.idsubject,
-    name: subject.name || 'Sin nombre',
-    course: subject.course || 'No especificado',
-    cycle: subject.cycle || 'No especificado'
+    name: `${subject.year}º ${subject.cycle}`,
+    course: subject.year || 'No especificado',
+    cycle: subject.cycle || 'No especificado',
+    year: subject.year,
+    fullName: `${subject.year}º de ${subject.cycle}`
   }));
 };
 

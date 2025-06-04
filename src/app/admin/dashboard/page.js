@@ -13,7 +13,7 @@ import DonutChart from '@/components/dashboard/DonutChart';
 import UpcomingEvents from '@/components/dashboard/UpcomingEvents';
 import MiniCalendar from '@/components/dashboard/MiniCalendar';
 import ClientOnly from '@/components/ClientOnly';
-// import { getStudents, getAcademies, getTeachers, getSubjects, getSchedules, getDashboardStats, getRecentActivities, getCalendarEvents, getSubjectStats, getStudentStats } from '@/lib/api';
+import { getStudents, getAcademies, getTeachers, getSubjects, getSchedules, getDashboardStats, getRecentActivities, getCalendarEvents, getSubjectStats, getStudentStats } from '@/lib/api';
 import { formatStudents, formatTeachers, formatSubjects, calculateStats } from '@/lib/dashboard';
 import styles from './dashboard.module.css';
 
@@ -37,16 +37,19 @@ const DashboardPage = () => {
   const [recentActivities, setRecentActivities] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [calendarEvents, setCalendarEvents] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-          // Obtener datos de las APIs incluyendo las nuevas del dashboard
+        
+        // Obtener datos de las APIs incluyendo las nuevas del dashboard
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
-          const [
+        
+        console.log('Iniciando carga de datos del dashboard...');
+        
+        const [
           studentsRaw, 
           teachersRaw, 
           subjectsRaw, 
@@ -58,18 +61,56 @@ const DashboardPage = () => {
           subjectStatsData,
           studentStatsData
         ] = await Promise.all([
-          getStudents(),
-          getTeachers(),
-          getSubjects(),
-          getAcademies(),
-          getSchedules(),
-          getDashboardStats().catch(() => null), // Si falla, continuamos con null
-          getRecentActivities().catch(() => []),  // Si falla, continuamos con array vacío
-          getCalendarEvents(currentMonth, currentYear).catch(() => []), // Si falla, continuamos con array vacío
-          getSubjectStats().catch(() => null), // Estadísticas detalladas de asignaturas
-          getStudentStats().catch(() => null) // Estadísticas detalladas de estudiantes
+          getStudents().catch(error => {
+            console.error('Error al obtener estudiantes:', error);
+            return [];
+          }),
+          getTeachers().catch(error => {
+            console.error('Error al obtener profesores:', error);
+            return [];
+          }),
+          getSubjects().catch(error => {
+            console.error('Error al obtener asignaturas:', error);
+            return [];
+          }),
+          getAcademies().catch(error => {
+            console.error('Error al obtener academias:', error);
+            return [];
+          }),
+          getSchedules().catch(error => {
+            console.error('Error al obtener horarios:', error);
+            return [];
+          }),
+          getDashboardStats().catch(error => {
+            console.error('Error al obtener estadísticas del dashboard:', error);
+            return null;
+          }),
+          getRecentActivities().catch(error => {
+            console.error('Error al obtener actividades recientes:', error);
+            return [];
+          }),
+          getCalendarEvents(currentMonth, currentYear).catch(error => {
+            console.error('Error al obtener eventos de calendario:', error);
+            return [];
+          }),
+          getSubjectStats().catch(error => {
+            console.error('Error al obtener estadísticas de asignaturas:', error);
+            return null;
+          }),
+          getStudentStats().catch(error => {
+            console.error('Error al obtener estadísticas de estudiantes:', error);
+            return null;
+          })
         ]);
-          // Formatear los datos
+        
+        console.log('Datos obtenidos:', {
+          estudiantes: studentsRaw?.length || 0,
+          profesores: teachersRaw?.length || 0,
+          asignaturas: subjectsRaw?.length || 0,
+          academias: academies?.length || 0
+        });
+        
+        // Formatear los datos
         const students = formatStudents(studentsRaw);
         const teachers = formatTeachers(teachersRaw);
         const subjects = formatSubjects(subjectsRaw);
@@ -93,9 +134,11 @@ const DashboardPage = () => {
         
         // Actualizar el estado de growthRates
         setGrowthRates(growthRatesData);
-          // Actualizar estadísticas
+        
+        // Actualizar estadísticas
         setStats(statsToUse);
-          // Actualizar datos de distribución por ciclo
+        
+        // Actualizar datos de distribución por ciclo
         if (subjectStatsData?.cycleDistribution) {
           // Mapeo de ciclos a colores
           const cycleColors = {
@@ -114,81 +157,109 @@ const DashboardPage = () => {
           
           if (cycleData.length > 0) {
             setStudentsByCycleData(cycleData);
-          } else if (dashboardStats?.cycleDistribution) {
-            // Usar los datos del dashboard general si no hay datos específicos
-            const fallbackCycleData = dashboardStats.cycleDistribution.map(item => ({
-              label: item.cycle || 'Sin ciclo',
-              value: parseInt(item.count) || 0,
-              color: cycleColors[item.cycle] || '#6b7280'
-            }));
-            
-            setStudentsByCycleData(fallbackCycleData);
           }
+        } else if (dashboardStats?.cycleDistribution) {
+          // Usar los datos del dashboard general si no hay datos específicos
+          const cycleColors = {
+            'Primaria': '#4f46e5',
+            'ESO': '#0ea5e9',
+            'Bachillerato': '#10b981',
+            'FP': '#f59e0b',
+            'Universidad': '#ef4444'
+          };
+          
+          const fallbackCycleData = dashboardStats.cycleDistribution.map(item => ({
+            label: item.cycle || 'Sin ciclo',
+            value: parseInt(item.count) || 0,
+            color: cycleColors[item.cycle] || '#6b7280'
+          }));
+          
+          setStudentsByCycleData(fallbackCycleData);
         }
-          // Actualizar distribución de asignaturas
+          // Actualizar distribución de asignaturas basada en los datos reales
         try {
-          // Si tenemos datos específicos de asignaturas, usarlos primero
-          if (subjectStatsData?.yearDistribution && subjectStatsData.yearDistribution.length > 0) {
-            // Mapeo de asignaturas a colores
-            const yearColors = {
-              1: 'bg-indigo-500',
-              2: 'bg-blue-500',
-              3: 'bg-green-500',
-              4: 'bg-yellow-500',
-              5: 'bg-red-500',
-              6: 'bg-purple-500'
+          console.log('Procesando distribución de asignaturas...', { subjects, subjectStatsData });
+          
+          if (subjectStatsData?.cycleDistribution && subjectStatsData.cycleDistribution.length > 0) {
+            // Usar datos de estadísticas específicas del backend
+            const cycleColors = {
+              'Primaria': 'bg-indigo-500',
+              'ESO': 'bg-blue-500', 
+              'Bachillerato': 'bg-green-500',
+              'FP': 'bg-yellow-500',
+              'Universidad': 'bg-red-500',
+              'Formación Profesional': 'bg-purple-500',
+              'Otros': 'bg-gray-500'
+            };
+            
+            const statsData = subjectStatsData.cycleDistribution.map(item => ({
+              label: item.cycle.substring(0, 3),  // Abreviatura de 3 letras
+              fullLabel: item.cycle,
+              value: parseInt(item.count) || 0,
+              color: cycleColors[item.cycle] || 'bg-gray-500'
+            })).slice(0, 5);
+            
+            console.log('Datos de distribución desde estadísticas:', statsData);
+            setSubjectDistributionData(statsData);
+            
+          } else if (subjects && subjects.length > 0) {
+            // Plan B: Usar los datos de subjects directamente
+            console.log('Usando datos directos de subjects:', subjects);
+            
+            // Contar por ciclo educativo
+            const cycleCount = {};
+            subjects.forEach(subject => {
+              const cycle = subject.cycle || 'Otros';
+              cycleCount[cycle] = (cycleCount[cycle] || 0) + 1;
+            });
+            
+            console.log('Conteo por ciclos:', cycleCount);
+            
+            // Mapeo de ciclos a colores
+            const cycleColors = {
+              'Primaria': 'bg-indigo-500',
+              'ESO': 'bg-blue-500', 
+              'Bachillerato': 'bg-green-500',
+              'FP': 'bg-yellow-500',
+              'Universidad': 'bg-red-500',
+              'Formación Profesional': 'bg-purple-500',
+              'Otros': 'bg-gray-500'
             };
             
             // Convertir a formato para gráficos
-            const yearData = subjectStatsData.yearDistribution.map(item => ({
-              label: `${item.year}º`,
-              fullLabel: `${item.year}º Año`,
-              value: parseInt(item.count) || 0,
-              color: yearColors[item.year] || 'bg-gray-500'
-            })).slice(0, 5); // Limitar a 5 años para el gráfico
+            const subjectData = Object.entries(cycleCount)
+              .map(([cycle, count]) => ({
+                label: cycle.substring(0, 3),  // Abreviatura de 3 letras
+                fullLabel: cycle,
+                value: count,
+                color: cycleColors[cycle] || 'bg-gray-500'
+              }))
+              .slice(0, 5); // Limitar a 5 ciclos para el gráfico
+              
+            console.log('Datos finales para el gráfico:', subjectData);
             
-            if (yearData.length > 0) {
-              setSubjectDistributionData(yearData);
-              // Salimos de la función si ya tenemos datos
-              return;
+            if (subjectData.length > 0) {
+              setSubjectDistributionData(subjectData);
+            } else {
+              console.log('No hay datos de asignaturas para mostrar');
+              // Establecer datos de ejemplo si no hay datos reales
+              setSubjectDistributionData([
+                { label: 'Sin', fullLabel: 'Sin datos', value: 0, color: 'bg-gray-300' }
+              ]);
             }
-          }
-          
-          // Plan B: Usar los datos de subjects si no hay estadísticas específicas
-          const subjectMap = {};
-          
-          subjects.forEach(subject => {
-            const mainSubject = subject.cycle?.split(' ')[0] || 'Otras';
-            subjectMap[mainSubject] = (subjectMap[mainSubject] || 0) + 1;
-          });
-          
-          // Mapeo de asignaturas a colores
-          const subjectColors = {
-            'Matemáticas': 'bg-indigo-500',
-            'Lengua': 'bg-blue-500',
-            'Inglés': 'bg-green-500',
-            'Física': 'bg-yellow-500',
-            'Química': 'bg-red-500',
-            'Historia': 'bg-purple-500',
-            'Biología': 'bg-pink-500',
-            'Otras': 'bg-gray-500'
-          };
-          
-          // Convertir a formato para gráficos
-          const subjectData = Object.entries(subjectMap)
-            .map(([label, value]) => ({
-              label: label.substring(0, 3),  // Abreviatura de 3 letras
-              fullLabel: label,
-              value,
-              color: subjectColors[label] || 'bg-gray-500'
-            }))
-            .slice(0, 5); // Limitar a 5 asignaturas para el gráfico
-            
-          if (subjectData.length > 0) {
-            setSubjectDistributionData(subjectData);
+          } else {
+            console.log('No hay asignaturas disponibles');
+            // Establecer datos de ejemplo si no hay datos
+            setSubjectDistributionData([
+              { label: 'Sin', fullLabel: 'Sin datos', value: 0, color: 'bg-gray-300' }
+            ]);
           }
         } catch (error) {
           console.error('Error al procesar distribución de asignaturas:', error);
+          // Establecer datos de ejemplo en caso de error
+          setSubjectDistributionData([
+            { label: 'Err', fullLabel: 'Error en datos', value: 0, color: 'bg-red-300' }
+          ]);
         }
         
         // Obtener los 5 estudiantes más recientes
@@ -197,7 +268,8 @@ const DashboardPage = () => {
         ).slice(0, 5);
         
         setRecentStudents(sortedStudents);
-          // Usar actividades recientes del backend
+        
+        // Usar actividades recientes del backend
         try {
           if (activities && activities.length > 0) {
             setRecentActivities(activities);
@@ -209,7 +281,8 @@ const DashboardPage = () => {
           console.error('Error al procesar actividades recientes:', error);
           setRecentActivities([]);
         }
-          // Generar eventos próximos basados en los datos de horarios
+        
+        // Generar eventos próximos basados en los datos de horarios
         try {
           // Filtrar los horarios de los próximos días
           const today = new Date();
@@ -278,7 +351,9 @@ const DashboardPage = () => {
         } catch (error) {
           console.error('Error al procesar eventos próximos:', error);
           setUpcomingEvents([]);
-        }// Usar eventos de calendario de la API
+        }
+        
+        // Usar eventos de calendario de la API
         try {
           if (calendarEventsData && calendarEventsData.length > 0) {
             // Asegurarse de que las fechas son objetos Date

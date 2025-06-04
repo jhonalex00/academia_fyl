@@ -1,15 +1,17 @@
 {
   "name": "academiafyl",
   "version": "0.1.0",
-  "private": true,
-  "scripts": {
+  "private": true,  "scripts": {
     "dev": "next dev --turbopack",
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "start-server": "nodemon server.js",
     "lint": "next lint",
-    "dev:all": "concurrently -n FRONTEND,BACKEND -c blue,green \"npm run dev\" \"npm run start-server\""
+    "dev:all": "concurrently -n FRONTEND,BACKEND -c blue,green \"npm run dev\" \"npm run start-server\"",
+    "test-db": "node test-db.js",
+    "populate-data": "node scripts/populate-sample-data.js",
+    "reset-db": "node scripts/reset-database.js"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.17",
