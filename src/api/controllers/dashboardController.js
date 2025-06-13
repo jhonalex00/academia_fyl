@@ -1,19 +1,27 @@
-const { sequelize } = require('../../db/config');
+const { sequelize } = require("../../db/config");
 
 // Obtener estadísticas del dashboard
 const getDashboardStats = async (req, res) => {
   try {
-    const [studentCount] = await sequelize.query('SELECT COUNT(*) as count FROM students');
-    const [teacherCount] = await sequelize.query('SELECT COUNT(*) as count FROM teachers');
-    const [subjectCount] = await sequelize.query('SELECT COUNT(*) as count FROM subjects');
-    const [academyCount] = await sequelize.query('SELECT COUNT(*) as count FROM academies');
+    const [studentCount] = await sequelize.query(
+      "SELECT COUNT(*) as count FROM students"
+    );
+    const [teacherCount] = await sequelize.query(
+      "SELECT COUNT(*) as count FROM teachers"
+    );
+    const [subjectCount] = await sequelize.query(
+      "SELECT COUNT(*) as count FROM subjects"
+    );
+    const [academyCount] = await sequelize.query(
+      "SELECT COUNT(*) as count FROM academies"
+    );
 
     // Corregido: usar "stage" en lugar de "cycle"
-    const [stageDistribution] = await sequelize.query(`
-      SELECT stage, COUNT(*) as count 
-      FROM subjects 
-      GROUP BY stage
-    `);
+    const [cycleDistribution] = await sequelize.query(`
+    SELECT stage AS cycle, COUNT(*) as count 
+    FROM subjects 
+    GROUP BY stage
+  `);
 
     const [newStudentsThisMonth] = await sequelize.query(`
       SELECT COUNT(*) as count 
@@ -29,43 +37,48 @@ const getDashboardStats = async (req, res) => {
 
     let studentGrowth = 0;
     if (studentsLastMonth[0]?.count > 0) {
-      studentGrowth = Math.round((newStudentsThisMonth[0]?.count / studentsLastMonth[0]?.count) * 100);
+      studentGrowth = Math.round(
+        (newStudentsThisMonth[0]?.count / studentsLastMonth[0]?.count) * 100
+      );
     }
 
     const [newTeachersThisMonth] = await sequelize.query(`
-      SELECT COUNT(*) as count 
-      FROM teachers
-      WHERE status = 'active' AND idteacher NOT IN (
-        SELECT idteacher FROM messages WHERE date < DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-      )
-    `);
-    
-    let teacherGrowth = Math.round((newTeachersThisMonth[0]?.count / (teacherCount[0]?.count || 1)) * 100);
-    
+    SELECT COUNT(*) as count 
+    FROM teachers
+    WHERE status = 'active' AND idteacher NOT IN (
+      SELECT idteacher FROM messages WHERE dateMessage < DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    )
+  `);
+
+    let teacherGrowth = Math.round(
+      (newTeachersThisMonth[0]?.count / (teacherCount[0]?.count || 1)) * 100
+    );
+
     // Para asignaturas y academias, podríamos no tener datos de crecimiento real,
     // así que estimamos basándonos en datos actuales
-    let subjectGrowth = 5;  // % estimado de crecimiento de asignaturas
-    let academyGrowth = 2;  // % estimado de crecimiento de academias
-    
+    let subjectGrowth = 5; // % estimado de crecimiento de asignaturas
+    let academyGrowth = 2; // % estimado de crecimiento de academias
+
     res.status(200).json({
       counts: {
         students: studentCount[0]?.count || 0,
         teachers: teacherCount[0]?.count || 0,
         subjects: subjectCount[0]?.count || 0,
-        academies: academyCount[0]?.count || 0
+        academies: academyCount[0]?.count || 0,
       },
       growth: {
         students: studentGrowth || 0,
         teachers: teacherGrowth || 0,
         subjects: subjectGrowth || 0,
-        academies: academyGrowth || 0
+        academies: academyGrowth || 0,
       },
-      cycleDistribution: cycleDistribution || []
+      cycleDistribution: cycleDistribution || [],
     });
-    
   } catch (error) {
-    console.error('Error al obtener estadísticas del dashboard:', error);
-    res.status(500).json({ error: 'Error al obtener estadísticas del dashboard' });
+    console.error("Error al obtener estadísticas del dashboard:", error);
+    res
+      .status(500)
+      .json({ error: "Error al obtener estadísticas del dashboard" });
   }
 };
 
@@ -92,7 +105,7 @@ const getRecentActivities = async (req, res) => {
         m.date DESC
       LIMIT 5
     `);
-    
+
     // Obtener estudiantes recientes
     const [newStudents] = await sequelize.query(`
       SELECT 
@@ -109,49 +122,62 @@ const getRecentActivities = async (req, res) => {
         s.idstudent DESC
       LIMIT 3
     `);
-    
+
     // Función para formatear el tiempo "hace cuánto"
     const formatTimeAgo = (date) => {
       const now = new Date();
       const activityDate = new Date(date);
       const diffInMinutes = Math.floor((now - activityDate) / (1000 * 60));
-      
+
       if (diffInMinutes < 60) {
         return `Hace ${diffInMinutes} minutos`;
       } else if (diffInMinutes < 1440) {
         const hours = Math.floor(diffInMinutes / 60);
-        return `Hace ${hours} ${hours > 1 ? 'horas' : 'hora'}`;
+        return `Hace ${hours} ${hours > 1 ? "horas" : "hora"}`;
       } else if (diffInMinutes < 2880) {
-        return 'Ayer';
+        return "Ayer";
       } else {
         const days = Math.floor(diffInMinutes / 1440);
         return `Hace ${days} días`;
       }
     };
-    
+
     // Transformar mensajes en actividades
-    const messageActivities = messages.map(msg => ({
-      initials: msg.teacherInitial + msg.contactInitial || 'NA',
-      title: `Mensaje de ${msg.teacherName || 'Profesor'} a ${msg.contactName || 'Contacto'}`,
-      description: msg.message.length > 40 ? `${msg.message.substring(0, 40)}...` : msg.message,
-      time: formatTimeAgo(msg.date)
+    const messageActivities = messages.map((msg) => ({
+      initials: msg.teacherInitial + msg.contactInitial || "NA",
+      title: `Mensaje de ${msg.teacherName || "Profesor"} a ${
+        msg.contactName || "Contacto"
+      }`,
+      description:
+        msg.message.length > 40
+          ? `${msg.message.substring(0, 40)}...`
+          : msg.message,
+      time: formatTimeAgo(msg.date),
     }));
-    
+
     // Transformar nuevos estudiantes en actividades
-    const studentActivities = newStudents.map(student => ({
-      initials: (student.name?.charAt(0) || '') + (student.surname?.charAt(0) || ''),
-      title: `${student.name || 'Estudiante'} ${student.surname || ''} se ha registrado`,
-      description: `Nuevo alumno en ${student.academyName || 'Academia'}`,
-      time: student.birthDate ? formatTimeAgo(student.birthDate) : 'Recientemente'
+    const studentActivities = newStudents.map((student) => ({
+      initials:
+        (student.name?.charAt(0) || "") + (student.surname?.charAt(0) || ""),
+      title: `${student.name || "Estudiante"} ${
+        student.surname || ""
+      } se ha registrado`,
+      description: `Nuevo alumno en ${student.academyName || "Academia"}`,
+      time: student.birthDate
+        ? formatTimeAgo(student.birthDate)
+        : "Recientemente",
     }));
-    
+
     // Combinar todas las actividades y ordenar por más recientes
-    const allActivities = [...messageActivities, ...studentActivities].slice(0, 5);
-    
+    const allActivities = [...messageActivities, ...studentActivities].slice(
+      0,
+      5
+    );
+
     res.status(200).json(allActivities);
   } catch (error) {
-    console.error('Error al obtener actividades recientes:', error);
-    res.status(500).json({ error: 'Error al obtener actividades recientes' });
+    console.error("Error al obtener actividades recientes:", error);
+    res.status(500).json({ error: "Error al obtener actividades recientes" });
   }
 };
 
@@ -159,21 +185,22 @@ const getRecentActivities = async (req, res) => {
 const getCalendarEvents = async (req, res) => {
   try {
     const { month, year } = req.query;
-    
+
     // Convertir los parámetros a números
     const monthNum = parseInt(month, 10);
     const yearNum = parseInt(year, 10);
-    
+
     // Validar los parámetros
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
-    
+
     const targetMonth = isNaN(monthNum) ? currentMonth : monthNum;
     const targetYear = isNaN(yearNum) ? currentYear : yearNum;
-    
+
     // Obtener eventos del horario desde la base de datos
-    const [scheduleEvents] = await sequelize.query(`
+    const [scheduleEvents] = await sequelize.query(
+      `
       SELECT 
         s.idschedule,
         s.date,
@@ -201,12 +228,15 @@ const getCalendarEvents = async (req, res) => {
         AND (YEAR(s.date) = ? OR s.date IS NULL)
       ORDER BY 
         s.date, s.startHour
-    `, {
-      replacements: [targetMonth + 1, targetYear] // +1 porque en JS los meses empiezan en 0
-    });
-    
+    `,
+      {
+        replacements: [targetMonth + 1, targetYear], // +1 porque en JS los meses empiezan en 0
+      }
+    );
+
     // Obtener eventos de estudiante-horario
-    const [studentEvents] = await sequelize.query(`
+    const [studentEvents] = await sequelize.query(
+      `
       SELECT 
         s.idschedule,
         s.date,
@@ -227,33 +257,41 @@ const getCalendarEvents = async (req, res) => {
         AND ss.status = 'active'
       ORDER BY 
         s.date, s.startHour
-    `, {
-      replacements: [targetMonth + 1, targetYear]
-    });
-    
+    `,
+      {
+        replacements: [targetMonth + 1, targetYear],
+      }
+    );
+
     // Transformar resultados a eventos de calendario
     const formatEvents = (schedules, isTeacherEvent = true) => {
-      return schedules.map(event => {
+      return schedules.map((event) => {
         // Determinar el título y descripción basado en si es evento de profesor o estudiante
         let title, teacher, subject, location;
-        
+
         if (isTeacherEvent) {
-          title = `${event.subjectCycle || ''} ${event.subjectYear || ''}`;
-          teacher = event.teacherName || 'Sin profesor asignado';
-          subject = `${event.subjectCycle || ''} ${event.subjectYear || ''}`;
-          location = event.academyName || 'Sede principal';
+          title = `${event.subjectCycle || ""} ${event.subjectYear || ""}`;
+          teacher = event.teacherName || "Sin profesor asignado";
+          subject = `${event.subjectCycle || ""} ${event.subjectYear || ""}`;
+          location = event.academyName || "Sede principal";
         } else {
-          title = `Clase de ${event.studentName || ''} ${event.studentSurname || ''}`;
-          teacher = '';
-          subject = event.weekDay || '';
-          location = '';
+          title = `Clase de ${event.studentName || ""} ${
+            event.studentSurname || ""
+          }`;
+          teacher = "";
+          subject = event.weekDay || "";
+          location = "";
         }
-        
+
         // Si la fecha está en el pasado o es nula, usar el día de la semana
-        const eventDate = event.date 
-          ? new Date(event.date) 
-          : new Date(targetYear, targetMonth, getNextWeekdayDate(event.weekDay, targetYear, targetMonth));
-        
+        const eventDate = event.date
+          ? new Date(event.date)
+          : new Date(
+              targetYear,
+              targetMonth,
+              getNextWeekdayDate(event.weekDay, targetYear, targetMonth)
+            );
+
         return {
           id: event.idschedule,
           title: title,
@@ -263,37 +301,45 @@ const getCalendarEvents = async (req, res) => {
           location: location,
           startHour: event.startHour,
           finishHour: event.finishHour,
-          weekDay: event.weekDay
+          weekDay: event.weekDay,
         };
       });
     };
-    
+
     // Función para obtener la próxima fecha para un día de la semana
     const getNextWeekdayDate = (weekday, year, month) => {
-      const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const days = [
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+      ];
       const dayIndex = days.indexOf(weekday);
-      
+
       if (dayIndex === -1) return 1; // Si el día no es válido, usar el primer día del mes
-      
+
       const firstDayOfMonth = new Date(year, month, 1);
       const firstDayIndex = firstDayOfMonth.getDay(); // 0 = Domingo, 1 = Lunes, etc.
-      
+
       let dayOfMonth = dayIndex - firstDayIndex + 1;
       if (dayOfMonth <= 0) dayOfMonth += 7;
-      
+
       return dayOfMonth;
     };
-    
+
     // Combinar y enviar eventos
     const allEvents = [
       ...formatEvents(scheduleEvents, true),
-      ...formatEvents(studentEvents, false)
+      ...formatEvents(studentEvents, false),
     ];
-    
+
     res.status(200).json(allEvents);
   } catch (error) {
-    console.error('Error al obtener eventos del calendario:', error);
-    res.status(500).json({ error: 'Error al obtener eventos del calendario' });
+    console.error("Error al obtener eventos del calendario:", error);
+    res.status(500).json({ error: "Error al obtener eventos del calendario" });
   }
 };
 
@@ -325,7 +371,7 @@ const getSubjectStats = async (req, res) => {
       ORDER BY 
         year ASC
     `);
-    
+
     // Obtener conteo de profesores por asignatura
     const [teachersBySubject] = await sequelize.query(`
       SELECT 
@@ -339,16 +385,17 @@ const getSubjectStats = async (req, res) => {
       GROUP BY 
         s.cycle, s.year
     `);
-    
+
     res.status(200).json({
       cycleDistribution,
       yearDistribution,
-      teachersBySubject
+      teachersBySubject,
     });
-    
   } catch (error) {
-    console.error('Error al obtener estadísticas de asignaturas:', error);
-    res.status(500).json({ error: 'Error al obtener estadísticas de asignaturas' });
+    console.error("Error al obtener estadísticas de asignaturas:", error);
+    res
+      .status(500)
+      .json({ error: "Error al obtener estadísticas de asignaturas" });
   }
 };
 
@@ -384,7 +431,7 @@ const getStudentStats = async (req, res) => {
       ORDER BY 
         age ASC
     `);
-    
+
     // Obtener alumnos activos vs inactivos
     const [statusDistribution] = await sequelize.query(`
       SELECT 
@@ -395,16 +442,15 @@ const getStudentStats = async (req, res) => {
       GROUP BY 
         status
     `);
-    
+
     res.status(200).json({
       studentsByAcademy,
       ageDistribution,
-      statusDistribution
+      statusDistribution,
     });
-    
   } catch (error) {
-    console.error('Error al obtener estadísticas de alumnos:', error);
-    res.status(500).json({ error: 'Error al obtener estadísticas de alumnos' });
+    console.error("Error al obtener estadísticas de alumnos:", error);
+    res.status(500).json({ error: "Error al obtener estadísticas de alumnos" });
   }
 };
 
@@ -413,5 +459,5 @@ module.exports = {
   getRecentActivities,
   getCalendarEvents,
   getSubjectStats,
-  getStudentStats
+  getStudentStats,
 };
