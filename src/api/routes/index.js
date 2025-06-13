@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../../middleware/auth');
+const testRoutes = require('./test'); //este lo agregue yo jhon
+
 
 // Importar todas las rutas
 const authRoutes = require('./auth');
@@ -44,6 +46,9 @@ router.use('/usuarios', usuariosRoutes);
 // router.use('/dashboard', authenticate, dashboardRoutes);
 router.use('/profesores/horarios', profesoresHorariosRoutes);
 router.use('/estudiantes/horarios', estudiantesHorariosRoutes);
+
+//nueva ruta de jhon
+router.use('/test', testRoutes);
 
 // Ruta de prueba
 router.get('/', (req, res) => {

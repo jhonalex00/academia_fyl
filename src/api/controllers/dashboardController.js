@@ -3,47 +3,35 @@ const { sequelize } = require('../../db/config');
 // Obtener estadísticas del dashboard
 const getDashboardStats = async (req, res) => {
   try {
-    // Obtener conteo de estudiantes
     const [studentCount] = await sequelize.query('SELECT COUNT(*) as count FROM students');
-    
-    // Obtener conteo de profesores
     const [teacherCount] = await sequelize.query('SELECT COUNT(*) as count FROM teachers');
-    
-    // Obtener conteo de asignaturas
     const [subjectCount] = await sequelize.query('SELECT COUNT(*) as count FROM subjects');
-    
-    // Obtener conteo de academias
     const [academyCount] = await sequelize.query('SELECT COUNT(*) as count FROM academies');
-    
-    // Obtener distribución por ciclo educativo
-    const [cycleDistribution] = await sequelize.query(`
-      SELECT cycle, COUNT(*) as count 
+
+    // Corregido: usar "stage" en lugar de "cycle"
+    const [stageDistribution] = await sequelize.query(`
+      SELECT stage, COUNT(*) as count 
       FROM subjects 
-      GROUP BY cycle
+      GROUP BY stage
     `);
-    
-    // Calcular crecimiento comparando con el mes anterior
-    // Estudiantes añadidos en el último mes
+
     const [newStudentsThisMonth] = await sequelize.query(`
       SELECT COUNT(*) as count 
       FROM students
       WHERE birthDate >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
     `);
-    
-    // Total de estudiantes hace un mes
+
     const [studentsLastMonth] = await sequelize.query(`
       SELECT COUNT(*) as count 
       FROM students
       WHERE birthDate < DATE_SUB(CURDATE(), INTERVAL 30 DAY)
     `);
-    
-    // Calcular porcentajes de crecimiento reales
+
     let studentGrowth = 0;
     if (studentsLastMonth[0]?.count > 0) {
       studentGrowth = Math.round((newStudentsThisMonth[0]?.count / studentsLastMonth[0]?.count) * 100);
     }
-    
-    // Hacemos lo mismo para profesores
+
     const [newTeachersThisMonth] = await sequelize.query(`
       SELECT COUNT(*) as count 
       FROM teachers
