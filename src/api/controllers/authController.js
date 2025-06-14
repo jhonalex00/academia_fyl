@@ -65,54 +65,56 @@ const loginTeacher = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: "Se requieren email y contraseña" });
+      return res.status(400).json({ error: 'Se requieren email y contraseña' });
     }
 
-    const Profesor = require("../../models/Profesor");
+    const Profesor = require('../../models/Profesor');
     const teacher = await Profesor.findOne({ where: { email } });
 
+    // 🔍 Agrega este console.log aquí:
+    console.log('teacher:', teacher);
+
     if (!teacher) {
-      return res.status(401).json({ error: "Credenciales incorrectas" });
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
     const passwordMatch = password === teacher.password;
 
     if (!passwordMatch) {
-      return res.status(401).json({ error: "Credenciales incorrectas" });
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    if (teacher.status !== "active") {
-      return res.status(403).json({
-        error: "Su cuenta está desactivada. Contacte a un administrador.",
-      });
+    if (teacher.status !== 'active') {
+      return res.status(403).json({ error: 'Su cuenta está desactivada. Contacte a un administrador.' });
     }
 
     const token = jwt.sign(
       {
         id: teacher.idteacher,
-        name: teacher.name,
-        role: "teacher",
-        email: teacher.email,
+        name: teacher.nombre, // ✅ Usa teacher.nombre, no teacher.name
+        role: 'teacher',
+        email: teacher.email
       },
       JWT_SECRET,
-      { expiresIn: "24h" }
+      { expiresIn: '24h' }
     );
 
     res.status(200).json({
-      message: "Inicio de sesión exitoso",
+      message: 'Inicio de sesión exitoso',
       token,
       user: {
         id: teacher.idteacher,
-        name: teacher.name,
-        role: "teacher",
-        email: teacher.email,
-      },
+        name: teacher.nombre,
+        role: 'teacher',
+        email: teacher.email
+      }
     });
   } catch (error) {
-    console.error("Error en login de profesor:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    console.error('Error en login de profesor:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
 
 // Función para iniciar sesión como contacto (padre/tutor)
 const loginContact = async (req, res) => {
