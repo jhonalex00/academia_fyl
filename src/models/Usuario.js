@@ -1,35 +1,26 @@
-const { DataTypes } = require("sequelize");
-const { sequelize } = require("../db/config");
-
-const Usuario = sequelize.define(
-  "Usuario",
-  {
-    iduser: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      field: "iduser",
-    },
-    nombre: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-      field: "name",
-    },
-    password: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-      field: "password",
-    },
-    idacademy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: "idacademy",
-    },
+const Usuario = sequelize.define('Usuario', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+    field: 'id' // ✅ Este es el nombre real de la columna
   },
-  {
-    tableName: "usuarios", // ✅ aquí está la corrección
-    timestamps: false,
+  nombre: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'nombre' // ✅ corregido anteriormente
+  },
+  password: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'password'
+  },
+  idacademy: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'idacademy'
   }
-);
-
-module.exports = Usuario;
+}, {
+  tableName: 'usuarios', // ✅ nombre correcto
+  timestamps: false
+});
