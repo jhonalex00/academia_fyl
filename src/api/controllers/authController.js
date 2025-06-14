@@ -17,6 +17,7 @@ const loginUser = async (req, res) => {
 
     // Buscar usuario en base de datos
     const Usuario = require("../../models/Usuario");
+
     const user = await Usuario.findOne({ where: { nombre: name } }); // nombre correcto
 
     if (!user) {
@@ -81,11 +82,9 @@ const loginTeacher = async (req, res) => {
     }
 
     if (teacher.status !== "active") {
-      return res
-        .status(403)
-        .json({
-          error: "Su cuenta está desactivada. Contacte a un administrador.",
-        });
+      return res.status(403).json({
+        error: "Su cuenta está desactivada. Contacte a un administrador.",
+      });
     }
 
     const token = jwt.sign(
