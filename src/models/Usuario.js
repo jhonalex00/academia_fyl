@@ -4,16 +4,17 @@ const { sequelize } = require("../db/config"); // ✅ esta línea es clave
 const Usuario = sequelize.define(
   "Usuario",
   {
-    id: {
+    iduser: {
+      // 👈 Esto debe mapearse al campo real "id"
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      field: "id", // ✅ Este es el nombre real de la columna
+      field: "id",
     },
     nombre: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      field: "nombre", // ✅ corregido anteriormente
+      field: "nombre",
     },
     password: {
       type: DataTypes.STRING(50),
@@ -25,9 +26,14 @@ const Usuario = sequelize.define(
       allowNull: true,
       field: "idacademy",
     },
+    rol: {
+      type: DataTypes.ENUM("admin", "profesor", "padre"),
+      allowNull: false,
+      field: "rol",
+    },
   },
   {
-    tableName: "usuarios", // ✅ nombre correcto
+    tableName: "usuarios",
     timestamps: false,
   }
 );
