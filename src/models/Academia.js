@@ -16,7 +16,7 @@ const Academia = sequelize.define('Academia', {
   direccion: {
     type: DataTypes.CHAR(50),
     allowNull: true,
-    field: 'adress' // Mantengo el nombre del campo como en la base de datos, aunque tenga un error ortográfico
+    field: 'address' // El error ortográfico lo he corregido jhon.
   },
   telefono: {
     type: DataTypes.BOOLEAN,
