@@ -32,7 +32,7 @@ return (
 
         {/* DATOS PERSONALES */}
         <h2 className="text-lg font-bold mb-2">Datos personales</h2>
-        <div className="grid grid-cols-2 grid-rows-3 gap-2 w-[700px]">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
             <div className="mb-2">
                 <FormField control={form.control} name="nombre"
                 rules={{ required: "*Campo obligatorio" }}
