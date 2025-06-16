@@ -15,6 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, } from
 const NuevoAlumnoPage = () => {
 const form = useForm()
 const [mensajeExito, setMensajeExito] = useState("");//agrgado por jhon
+const [alumnosGuardados, setAlumnosGuardados] = useState([]); // NUEVO estado para ver alumnos
+React.useEffect(() => {
+  const alumnos = JSON.parse(localStorage.getItem("matriculas")) || [];
+  setAlumnosGuardados(alumnos);
+}, []);
+
 
 // const [fechaNacimiento, setFechaNacimiento] = React.useState(null)
 const [haRepetido, setHaRepetido] = React.useState(null);
@@ -905,7 +911,7 @@ return (
     {mensajeExito}
     </div>
     )}
-    
+
         </form>
     </Form>
 </div>
