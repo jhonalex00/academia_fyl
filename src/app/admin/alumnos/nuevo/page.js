@@ -14,15 +14,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, } from
 
 const NuevoAlumnoPage = () => {
 const form = useForm()
+const [mensajeExito, setMensajeExito] = useState("");//agrgado por jhon
+
 // const [fechaNacimiento, setFechaNacimiento] = React.useState(null)
 const [haRepetido, setHaRepetido] = React.useState(null);
 const [conHermanos, setConHermanos] = React.useState(null);
 const [consienteFotos, setConsienteFotos] = React.useState(null);
 
-
+//esto es agregado por jhon
 const onSubmit = (data) => {
+  // 1. Obtener las matrículas guardadas (si hay)
+  const matrículasGuardadas = JSON.parse(localStorage.getItem("matriculas")) || [];
 
-}
+  // 2. Agregar la nueva matrícula al array
+  matrículasGuardadas.push(data);
+
+  // 3. Guardar el nuevo array en el localStorage
+  localStorage.setItem("matriculas", JSON.stringify(matrículasGuardadas));
+
+  // 4. Mostrar mensaje de éxito
+  setMensajeExito("Alumno guardado correctamente ✅");
+
+  // 5. Resetear el formulario
+  form.reset();
+};
 
 return (
 <div className="px-4 py-6 w-full max-w-6xl mx-auto overflow-y-auto">
@@ -885,6 +900,12 @@ return (
 
 
             <Button variant="secondary" type="submit">Guardar alumno</Button>
+            {mensajeExito && (
+    <p className="text-green-600 font-semibold mt-4">
+        {mensajeExito}
+    </p>
+    )}
+
         </form>
     </Form>
 </div>
