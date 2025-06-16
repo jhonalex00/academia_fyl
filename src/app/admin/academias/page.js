@@ -51,11 +51,12 @@ const fetchWithAuth = async (url, options = {}) => {
 
 export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    adress: '',
-    phone: '',
-  });
+ const [formData, setFormData] = useState({
+  name: '',
+  address: '',
+  phone: '',
+});
+
 
   // Maneja la edición de academias existentes
   useEffect(() => {
@@ -69,34 +70,45 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
   const handleAddClick = () => {
     onAcademyEdited(null);
     setFormData({
-      name: '',
-      adress: '',
-      phone: '',
-    });
+  name: '',
+  address: '',
+  phone: '',
+  });
     setIsOpen(true);
   };
 
   // Maneja el envío del formulario
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      await fetchWithAuth(`${API_BASE_URL}/academias`, {
-        method: 'POST',
-        body: JSON.stringify(formData)
-      });
-      
-      onAcademyAdded(formData);
-      setIsOpen(false);
-      setFormData({
-        name: '',
-        adress: '',
-        phone: '',
-      });
-    } catch (error) {
-      console.error("Error al crear la academia:", error);
+  const method = academyToEdit ? 'PUT' : 'POST';
+  const url = academyToEdit
+    ? `${API_BASE_URL}/academias/${academyToEdit.idacademy}`
+    : `${API_BASE_URL}/academias`;
+
+  try {
+    await fetchWithAuth(url, {
+      method,
+      body: JSON.stringify({
+        name: formData.name,
+        address: formData.address, // ⚠️ la base de datos usa 'address'
+        phone: formData.phone
+      })
+    });
+
+    if (academyToEdit) {
+      onAcademyEdited(null); // cerrar modo edición
+    } else {
+      onAcademyAdded(formData); // refrescar tabla
     }
-  };
+
+    setIsOpen(false);
+    setFormData({ name: '', adress: '', phone: '' });
+
+  } catch (error) {
+    console.error("Error al guardar la academia:", error);
+  }
+};
 
   // Maneja los cambios en los inputs del formulario
   const handleChange = (e) => {
@@ -109,14 +121,14 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
   // Cierra el modal y limpia los datos del formulario
   const handleClose = () => {
     setIsOpen(false);
-    setFormData({
-      name: '',
-      adress: '',
-      phone: '',
-    });
-    if (academyToEdit) {
-      onAcademyEdited(null);
-    }
+   setFormData({
+  name: '',
+  address: '',
+  phone: '',
+  });
+  if (academyToEdit) {
+  onAcademyEdited(null);
+  }
   };
 
   return (
@@ -150,11 +162,11 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
               </div>
 
               <div className="grid w-full items-center gap-1.5">
-                <label htmlFor="adress" className="text-sm font-medium">Dirección</label>
+                <label htmlFor="address" className="text-sm font-medium">Dirección</label>
                 <Input
-                  id="adress"
-                  name="adress"
-                  value={formData.adress}
+                  id="address"
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
                   className="col-span-3"
                   required
@@ -217,7 +229,7 @@ const AcademiasPage = () => {
         method: 'POST',
         body: JSON.stringify({
           name: newAcademy.name,
-          adress: newAcademy.adress,
+          address: newAcademy.address,
           phone: newAcademy.phone,
         })
       });
@@ -252,7 +264,7 @@ const AcademiasPage = () => {
         method: 'PUT',
         body: JSON.stringify({
           name: academyEdited.nombre,
-          adress: academyEdited.direccion,
+          address: academyEdited.direccion,
           phone: academyEdited.telefono,
         })
       });
@@ -290,7 +302,7 @@ const AcademiasPage = () => {
             {academies.map((academy) => (
               <TableRow key={academy.idacademy}>
                 <TableCell>{academy.name}</TableCell>
-                <TableCell>{academy.adress}</TableCell>
+                <TableCell>{academy.address}</TableCell>
                 <TableCell>{academy.phone}</TableCell>
                 <TableCell>
                   <div className="flex justify-center space-x-8">
