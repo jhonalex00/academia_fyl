@@ -25,7 +25,7 @@ const onSubmit = (data) => {
 }
 
 return (
-<div className="p-x-2">
+<div className="px-4 py-6 w-full max-w-6xl mx-auto overflow-y-auto">
     <h1 className="text-3xl font-bold mb-6">Nueva matrícula</h1>
     <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
