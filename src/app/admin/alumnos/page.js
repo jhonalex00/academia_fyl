@@ -30,9 +30,13 @@ const AlumnosPage = () => {
   const [search, setSearch] = useState("");
 
   // Datos de ejemplo (pueden venir de props, API, etc.)
-  const alumnos = [
-    { id: 1, nombre: "Manolito", curso: "1º", ciclo: "ESO", horas: 4 },
-  ];
+    const [alumnos, setAlumnos] = useState([]);// esto es agregado por jhon
+
+  React.useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("matriculas")) || [];
+    setAlumnos(data);
+  }, []);
+
 
   // Filtrado por nombre
   const alumnosFiltrados = alumnos.filter(alumno =>
@@ -83,10 +87,11 @@ const AlumnosPage = () => {
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                 </TableCell>
-                <TableCell>{alumno.nombre}</TableCell>
-                <TableCell>{alumno.curso}</TableCell>
-                <TableCell>{alumno.ciclo}</TableCell>
-                <TableCell>{alumno.horas}</TableCell>
+               <TableCell>{alumno.nombre}</TableCell>
+              <TableCell>{alumno.curso}</TableCell>
+              <TableCell>{alumno.ciclo}</TableCell>
+              <TableCell>—</TableCell> {/* Aquí puedes poner otra cosa si quieres horas */}
+
                 <TableCell>
                   <Dialog>
                     <DialogTrigger asChild>
