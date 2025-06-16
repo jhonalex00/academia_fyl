@@ -18,11 +18,12 @@ const Academia = sequelize.define('Academia', {
     allowNull: true,
     field: 'address' // El error ortográfico lo he corregido jhon.
   },
-  telefono: {
-    type: DataTypes.BOOLEAN,
-    allowNull: true,
-    field: 'phone'
-  }
+telefono: {
+  type: DataTypes.STRING(50), // ✅ CORRECTO: o VARCHAR
+  allowNull: true,
+  field: 'phone'
+}
+  
 }, {
   tableName: 'academies',
   timestamps: false
