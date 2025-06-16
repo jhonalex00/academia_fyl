@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -900,12 +900,12 @@ return (
 
 
             <Button variant="secondary" type="submit">Guardar alumno</Button>
-            {mensajeExito && (
-    <p className="text-green-600 font-semibold mt-4">
-        {mensajeExito}
-    </p>
+    {mensajeExito && (
+    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4">
+    {mensajeExito}
+    </div>
     )}
-
+    
         </form>
     </Form>
 </div>
