@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-undef */
 'use client';
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from 'react';
@@ -155,14 +156,16 @@ const AlumnosPage = () => {
               </TableCell>
 
 
-               <TableCell>
-                  <button
-                    className="text-red-500 hover:text-red-700 font-bold"
-                    onClick={() => handleEliminarAlumno(index)}
-                  >
-                    🗑️
-                  </button>
-                </TableCell>
+              <TableCell>
+                <button
+                  onClick={() => handleEliminarAlumno(index)}
+                  title="Eliminar alumno"
+                  className="text-red-500 hover:text-red-700 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                >
+                  <MdDelete size={20} />
+                </button>
+              </TableCell>
+
 
               </TableRow>
             ))}
