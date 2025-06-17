@@ -145,15 +145,17 @@ const AlumnosPage = () => {
                 </TableCell>
 
                 <TableCell>
-                  <button
-                    className="text-blue-600 hover:text-blue-800"
-                    onClick={() => handleEditarAlumno(alumno, index)}
-                  >
-                    📝
-                  </button>
-                </TableCell>
+                <button
+                  className="text-blue-600 hover:text-blue-800 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                  onClick={() => handleEditarAlumno(alumno, index)}
+                  title="Editar alumno"
+                >
+                  📝
+                </button>
+              </TableCell>
 
-                <TableCell>
+
+               <TableCell>
                   <button
                     className="text-red-500 hover:text-red-700 font-bold"
                     onClick={() => handleEliminarAlumno(index)}
@@ -161,6 +163,7 @@ const AlumnosPage = () => {
                     🗑️
                   </button>
                 </TableCell>
+
               </TableRow>
             ))}
           </TableBody>
