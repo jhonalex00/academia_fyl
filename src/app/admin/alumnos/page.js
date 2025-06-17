@@ -1,14 +1,24 @@
 'use client';
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from 'react';
-import { FaInfoCircle, FaEdit } from "react-icons/fa";
+import { FaInfoCircle } from "react-icons/fa";
 import { MdContactPhone } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -25,7 +35,7 @@ const AlumnosPage = () => {
     setAlumnos(data);
   }, []);
 
-  const alumnosFiltrados = alumnos.filter(alumno =>
+  const alumnosFiltrados = alumnos.filter((alumno) =>
     (alumno.nombre || "").toLowerCase().includes(search.toLowerCase())
   );
 
@@ -43,6 +53,14 @@ const AlumnosPage = () => {
   const handleEditarAlumno = (alumno, index) => {
     setAlumnoEditando({ ...alumno, index });
     setModalAbierto(true);
+  };
+
+  const handleGuardarCambios = () => {
+    const nuevosAlumnos = [...alumnos];
+    nuevosAlumnos[alumnoEditando.index] = { ...alumnoEditando };
+    setAlumnos(nuevosAlumnos);
+    localStorage.setItem("matriculas", JSON.stringify(nuevosAlumnos));
+    setModalAbierto(false);
   };
 
   return (
@@ -71,8 +89,8 @@ const AlumnosPage = () => {
               <TableHead>Horas</TableHead>
               <TableHead>Contacto</TableHead>
               <TableHead>Detalles</TableHead>
-              <TableHead>📝</TableHead>
-              <TableHead>🗑️</TableHead>
+              <TableHead>Editar</TableHead>
+              <TableHead>Eliminar</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -91,7 +109,6 @@ const AlumnosPage = () => {
                 <TableCell>{alumno.curso}</TableCell>
                 <TableCell>{alumno.ciclo}</TableCell>
                 <TableCell>—</TableCell>
-
                 <TableCell>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -110,7 +127,6 @@ const AlumnosPage = () => {
                     </DialogContent>
                   </Dialog>
                 </TableCell>
-
                 <TableCell>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -132,20 +148,18 @@ const AlumnosPage = () => {
                     </DialogContent>
                   </Dialog>
                 </TableCell>
-
                 <TableCell>
                   <button
-                    className="text-blue-500 hover:text-blue-700 font-bold"
                     onClick={() => handleEditarAlumno(alumno, index)}
+                    className="text-blue-500 hover:text-blue-700 font-bold"
                   >
                     📝
                   </button>
                 </TableCell>
-
                 <TableCell>
                   <button
-                    className="text-red-500 hover:text-red-700 font-bold"
                     onClick={() => handleEliminarAlumno(index)}
+                    className="text-red-500 hover:text-red-700 font-bold"
                   >
                     🗑️
                   </button>
@@ -156,22 +170,48 @@ const AlumnosPage = () => {
         </Table>
       </div>
 
-      {/* Modal TEMPORAL para mostrar datos del alumno a editar */}
-      {modalAbierto && alumnoEditando && (
-        <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Editar alumno</DialogTitle>
-              <DialogDescription>
-                <p><strong>Nombre:</strong> {alumnoEditando.nombre}</p>
-                <p><strong>Curso:</strong> {alumnoEditando.curso}</p>
-                <p><strong>Ciclo:</strong> {alumnoEditando.ciclo}</p>
-                {/* Puedes mostrar más campos si quieres */}
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Modal para editar alumno */}
+      <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Alumno</DialogTitle>
+            <DialogDescription>
+              <Input
+                value={alumnoEditando?.nombre || ""}
+                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, nombre: e.target.value })}
+                placeholder="Nombre"
+                className="mb-2"
+              />
+              <Input
+                value={alumnoEditando?.curso || ""}
+                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, curso: e.target.value })}
+                placeholder="Curso"
+                className="mb-2"
+              />
+              <Input
+                value={alumnoEditando?.ciclo || ""}
+                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, ciclo: e.target.value })}
+                placeholder="Ciclo"
+                className="mb-2"
+              />
+              <Input
+                value={alumnoEditando?.telefonoAlumno || ""}
+                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, telefonoAlumno: e.target.value })}
+                placeholder="Teléfono"
+                className="mb-2"
+              />
+              <Input
+                value={alumnoEditando?.emailAlumno || ""}
+                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, emailAlumno: e.target.value })}
+                placeholder="Email"
+              />
+              <div className="mt-4 text-right">
+                <Button onClick={handleGuardarCambios}>Guardar</Button>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
