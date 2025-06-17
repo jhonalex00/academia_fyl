@@ -89,7 +89,7 @@ const getRecentActivities = async (req, res) => {
     const [messages] = await sequelize.query(`
       SELECT 
         m.idmessage,
-        m.message,
+        m.content AS message, 
         m.date,
         t.name AS teacherName,
         c.name AS contactName,
@@ -348,13 +348,11 @@ const getSubjectStats = async (req, res) => {
   try {
     // Obtener distribución de asignaturas por ciclo educativo
     const [cycleDistribution] = await sequelize.query(`
-      SELECT 
-        cycle,
-        COUNT(*) as count
-      FROM 
-        subjects
-      GROUP BY 
-        cycle
+     SELECT
+      stage AS cycle,
+      COUNT(*) as count
+      FROM subjects
+      GROUP BY stage
       ORDER BY 
         count DESC
     `);
