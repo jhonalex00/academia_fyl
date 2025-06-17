@@ -6,7 +6,7 @@ const getTeachers = async (req, res) => {
     const [rows] = await sequelize.query(`
       SELECT 
         t.*,
-        GROUP_CONCAT(s.cycle) as subjects
+        GROUP_CONCAT(s.stage) as subjects
       FROM teachers t
       LEFT JOIN teachers_subjects ts ON t.idteacher = ts.idteacher
       LEFT JOIN subjects s ON ts.idsubject = s.idsubject
