@@ -85,12 +85,12 @@ const getDashboardStats = async (req, res) => {
 // Obtener actividades recientes
 const getRecentActivities = async (req, res) => {
   try {
-    
+    // Obtener mensajes recientes como actividades
     const [messages] = await sequelize.query(`
       SELECT 
         m.idmessage,
-        m.content AS message,
-        m.dateMessage AS date,
+        m.message,
+        m.date,
         t.name AS teacherName,
         c.name AS contactName,
         SUBSTRING(t.name, 1, 1) AS teacherInitial,
@@ -102,17 +102,9 @@ const getRecentActivities = async (req, res) => {
       LEFT JOIN 
         contacts c ON m.idcontact = c.idcontact
       ORDER BY 
-        m.dateMessage DESC
+        m.date DESC
       LIMIT 5
     `);
-
-    res.json(messages);
-  } catch (error) {
-    console.error("Error al obtener actividades recientes:", error);
-    res.status(500).json({ error: "Error al obtener actividades recientes" });
-  }
-};
-
 
     // Obtener estudiantes recientes
     const [newStudents] = await sequelize.query(`
