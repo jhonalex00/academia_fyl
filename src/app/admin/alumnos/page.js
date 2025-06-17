@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from "next/navigation"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaInfoCircle } from "react-icons/fa";
 import { MdContactPhone } from "react-icons/md";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ const AlumnosPage = () => {
   // Datos de ejemplo (pueden venir de props, API, etc.)
     const [alumnos, setAlumnos] = useState([]);// esto es agregado por jhon
 
-  React.useEffect(() => {
+  useEffect(() => {
     const data = JSON.parse(localStorage.getItem("matriculas")) || [];
     setAlumnos(data);
   }, []);
@@ -40,7 +40,7 @@ const AlumnosPage = () => {
 
   // Filtrado por nombre
   const alumnosFiltrados = alumnos.filter(alumno =>
-    alumno.nombre.toLowerCase().includes(search.toLowerCase())
+    (alumno.nombre || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const handleNuevoAlumno = () => {
@@ -102,9 +102,11 @@ const AlumnosPage = () => {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Contacto del alumno</DialogTitle>
-                        <DialogDescription>
-                          Aquí iría la información de contacto como teléfono o email.
-                        </DialogDescription>
+                       <DialogDescription>
+                        <p><strong>Teléfono:</strong> {alumno.telefonoAlumno}</p>
+                        <p><strong>Email:</strong> {alumno.emailAlumno}</p>
+                       </DialogDescription>
+
                       </DialogHeader>
                     </DialogContent>
                   </Dialog>
@@ -119,8 +121,12 @@ const AlumnosPage = () => {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Detalles del alumno</DialogTitle>
-                        <DialogDescription>
-                          Aquí puedes ver información adicional como dirección, notas o historial académico.
+                       <DialogDescription>
+                          <p><strong>Fecha de nacimiento:</strong> {alumno.fechaNacimiento}</p>
+                          <p><strong>Dirección:</strong> {alumno.direccion}</p>
+                          <p><strong>¿Ha repetido?:</strong> {alumno.haRepetido ? "Sí" : "No"}</p>
+                          <p><strong>¿Tiene hermanos?:</strong> {alumno.conHermanos ? "Sí" : "No"}</p>
+                          <p><strong>Consentimiento fotos:</strong> {alumno.consienteFotos ? "Sí" : "No"}</p>
                         </DialogDescription>
                       </DialogHeader>
                     </DialogContent>
