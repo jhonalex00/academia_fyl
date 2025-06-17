@@ -1,24 +1,16 @@
 'use client';
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from 'react';
-import { FaInfoCircle } from "react-icons/fa";
-import { MdContactPhone, MdDelete, MdEdit } from "react-icons/md";
+import { FaInfoCircle, FaEdit } from "react-icons/fa";
+import { MdContactPhone } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead,
+  TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
+  Dialog, DialogTrigger, DialogContent,
+  DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -56,6 +48,14 @@ const AlumnosPage = () => {
     setModalAbierto(true);
   };
 
+  const handleGuardarCambios = () => {
+    const actualizados = [...alumnos];
+    actualizados[alumnoEditando.index] = { ...alumnoEditando };
+    setAlumnos(actualizados);
+    localStorage.setItem("matriculas", JSON.stringify(actualizados));
+    setModalAbierto(false);
+  };
+
   return (
     <div>
       <div className="flex justify-between mr-4 mt-4">
@@ -82,13 +82,13 @@ const AlumnosPage = () => {
               <TableHead>Horas</TableHead>
               <TableHead>Contacto</TableHead>
               <TableHead>Detalles</TableHead>
-              <TableHead>Editar</TableHead>
-              <TableHead>Eliminar</TableHead>
+              <TableHead>📝</TableHead>
+              <TableHead>🗑️</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {alumnosFiltrados.map((alumno, index) => (
-              <TableRow key={alumno.id || index}>
+              <TableRow key={index}>
                 <TableCell className="flex justify-center">
                   <Avatar>
                     <AvatarImage
@@ -145,44 +145,125 @@ const AlumnosPage = () => {
                 </TableCell>
 
                 <TableCell>
+                <button
+                  className="text-blue-600 hover:text-blue-800 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                  onClick={() => handleEditarAlumno(alumno, index)}
+                  title="Editar alumno"
+                >
+                  📝
+                </button>
+              </TableCell>
+
+
+               <TableCell>
                   <button
-                    onClick={() => handleEditarAlumno(alumno, index)}
-                    title="Editar alumno"
-                    className="text-blue-500 hover:text-blue-700 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                    className="text-red-500 hover:text-red-700 font-bold"
+                    onClick={() => handleEliminarAlumno(index)}
                   >
-                    <MdEdit size={20} />
+                    🗑️
                   </button>
                 </TableCell>
 
-                <TableCell>
-                  <button
-                    onClick={() => handleEliminarAlumno(index)}
-                    title="Eliminar alumno"
-                    className="text-red-500 hover:text-red-700 hover:scale-110 transition-transform duration-200 cursor-pointer"
-                  >
-                    <MdDelete size={20} />
-                  </button>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
 
-      {/* Modal de edición temporal */}
-      {modalAbierto && alumnoEditando && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-4 rounded shadow-md w-[400px]">
-            <h2 className="text-xl font-bold mb-4">Editar alumno (demo)</h2>
-            <p><strong>Nombre:</strong> {alumnoEditando.nombre}</p>
-            <p><strong>Curso:</strong> {alumnoEditando.curso}</p>
-            <p><strong>Ciclo:</strong> {alumnoEditando.ciclo}</p>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setModalAbierto(false)}>Cancelar</Button>
-              <Button onClick={() => alert("Función de edición pendiente")}>Guardar cambios</Button>
+      {/* Modal de edición */}
+      {alumnoEditando && (
+        <Dialog open={modalAbierto} onOpenChange={() => setModalAbierto(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar alumno</DialogTitle>
+              <DialogDescription>Modifica los datos del alumno:</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Input
+                type="text"
+                value={alumnoEditando.nombre}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, nombre: e.target.value })
+                }
+                placeholder="Nombre"
+              />
+              <Input
+                type="text"
+                value={alumnoEditando.curso}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, curso: e.target.value })
+                }
+                placeholder="Curso"
+              />
+              <Input
+                type="text"
+                value={alumnoEditando.ciclo}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, ciclo: e.target.value })
+                }
+                placeholder="Ciclo"
+              />
+              <Input
+                type="text"
+                value={alumnoEditando.direccion || ""}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, direccion: e.target.value })
+                }
+                placeholder="Dirección"
+              />
+              <Input
+                type="date"
+                value={alumnoEditando.fechaNacimiento || ""}
+                onChange={(e) =>
+                  setAlumnoEditando({
+                    ...alumnoEditando,
+                    fechaNacimiento: e.target.value,
+                  })
+                }
+              />
+              <div className="flex gap-2 items-center">
+                <label>¿Ha repetido?</label>
+                <input
+                  type="checkbox"
+                  checked={alumnoEditando.haRepetido || false}
+                  onChange={(e) =>
+                    setAlumnoEditando({
+                      ...alumnoEditando,
+                      haRepetido: e.target.checked,
+                    })
+                  }
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <label>¿Tiene hermanos?</label>
+                <input
+                  type="checkbox"
+                  checked={alumnoEditando.conHermanos || false}
+                  onChange={(e) =>
+                    setAlumnoEditando({
+                      ...alumnoEditando,
+                      conHermanos: e.target.checked,
+                    })
+                  }
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <label>¿Consentimiento fotos?</label>
+                <input
+                  type="checkbox"
+                  checked={alumnoEditando.consienteFotos || false}
+                  onChange={(e) =>
+                    setAlumnoEditando({
+                      ...alumnoEditando,
+                      consienteFotos: e.target.checked,
+                    })
+                  }
+                />
+              </div>
+              <Button onClick={handleGuardarCambios}>Guardar cambios</Button>
             </div>
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
