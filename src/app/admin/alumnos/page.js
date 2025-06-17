@@ -1,30 +1,23 @@
 'use client';
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from 'react';
-import { FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaEdit } from "react-icons/fa";
 import { MdContactPhone } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead,
+  TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
+  Dialog, DialogTrigger, DialogContent,
+  DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 
 const AlumnosPage = () => {
   const router = useRouter();
+
   const [search, setSearch] = useState("");
   const [alumnos, setAlumnos] = useState([]);
   const [alumnoEditando, setAlumnoEditando] = useState(null);
@@ -35,7 +28,7 @@ const AlumnosPage = () => {
     setAlumnos(data);
   }, []);
 
-  const alumnosFiltrados = alumnos.filter((alumno) =>
+  const alumnosFiltrados = alumnos.filter(alumno =>
     (alumno.nombre || "").toLowerCase().includes(search.toLowerCase())
   );
 
@@ -56,10 +49,10 @@ const AlumnosPage = () => {
   };
 
   const handleGuardarCambios = () => {
-    const nuevosAlumnos = [...alumnos];
-    nuevosAlumnos[alumnoEditando.index] = { ...alumnoEditando };
-    setAlumnos(nuevosAlumnos);
-    localStorage.setItem("matriculas", JSON.stringify(nuevosAlumnos));
+    const actualizados = [...alumnos];
+    actualizados[alumnoEditando.index] = { ...alumnoEditando };
+    setAlumnos(actualizados);
+    localStorage.setItem("matriculas", JSON.stringify(actualizados));
     setModalAbierto(false);
   };
 
@@ -89,8 +82,8 @@ const AlumnosPage = () => {
               <TableHead>Horas</TableHead>
               <TableHead>Contacto</TableHead>
               <TableHead>Detalles</TableHead>
-              <TableHead>Editar</TableHead>
-              <TableHead>Eliminar</TableHead>
+              <TableHead>📝</TableHead>
+              <TableHead>🗑️</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,6 +102,7 @@ const AlumnosPage = () => {
                 <TableCell>{alumno.curso}</TableCell>
                 <TableCell>{alumno.ciclo}</TableCell>
                 <TableCell>—</TableCell>
+
                 <TableCell>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -127,6 +121,7 @@ const AlumnosPage = () => {
                     </DialogContent>
                   </Dialog>
                 </TableCell>
+
                 <TableCell>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -148,18 +143,20 @@ const AlumnosPage = () => {
                     </DialogContent>
                   </Dialog>
                 </TableCell>
+
                 <TableCell>
                   <button
+                    className="text-blue-600 hover:text-blue-800"
                     onClick={() => handleEditarAlumno(alumno, index)}
-                    className="text-blue-500 hover:text-blue-700 font-bold"
                   >
                     📝
                   </button>
                 </TableCell>
+
                 <TableCell>
                   <button
-                    onClick={() => handleEliminarAlumno(index)}
                     className="text-red-500 hover:text-red-700 font-bold"
+                    onClick={() => handleEliminarAlumno(index)}
                   >
                     🗑️
                   </button>
@@ -170,48 +167,101 @@ const AlumnosPage = () => {
         </Table>
       </div>
 
-      {/* Modal para editar alumno */}
-      <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Alumno</DialogTitle>
-            <DialogDescription>
+      {/* Modal de edición */}
+      {alumnoEditando && (
+        <Dialog open={modalAbierto} onOpenChange={() => setModalAbierto(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar alumno</DialogTitle>
+              <DialogDescription>Modifica los datos del alumno:</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
               <Input
-                value={alumnoEditando?.nombre || ""}
-                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, nombre: e.target.value })}
+                type="text"
+                value={alumnoEditando.nombre}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, nombre: e.target.value })
+                }
                 placeholder="Nombre"
-                className="mb-2"
               />
               <Input
-                value={alumnoEditando?.curso || ""}
-                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, curso: e.target.value })}
+                type="text"
+                value={alumnoEditando.curso}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, curso: e.target.value })
+                }
                 placeholder="Curso"
-                className="mb-2"
               />
               <Input
-                value={alumnoEditando?.ciclo || ""}
-                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, ciclo: e.target.value })}
+                type="text"
+                value={alumnoEditando.ciclo}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, ciclo: e.target.value })
+                }
                 placeholder="Ciclo"
-                className="mb-2"
               />
               <Input
-                value={alumnoEditando?.telefonoAlumno || ""}
-                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, telefonoAlumno: e.target.value })}
-                placeholder="Teléfono"
-                className="mb-2"
+                type="text"
+                value={alumnoEditando.direccion || ""}
+                onChange={(e) =>
+                  setAlumnoEditando({ ...alumnoEditando, direccion: e.target.value })
+                }
+                placeholder="Dirección"
               />
               <Input
-                value={alumnoEditando?.emailAlumno || ""}
-                onChange={(e) => setAlumnoEditando({ ...alumnoEditando, emailAlumno: e.target.value })}
-                placeholder="Email"
+                type="date"
+                value={alumnoEditando.fechaNacimiento || ""}
+                onChange={(e) =>
+                  setAlumnoEditando({
+                    ...alumnoEditando,
+                    fechaNacimiento: e.target.value,
+                  })
+                }
               />
-              <div className="mt-4 text-right">
-                <Button onClick={handleGuardarCambios}>Guardar</Button>
+              <div className="flex gap-2 items-center">
+                <label>¿Ha repetido?</label>
+                <input
+                  type="checkbox"
+                  checked={alumnoEditando.haRepetido || false}
+                  onChange={(e) =>
+                    setAlumnoEditando({
+                      ...alumnoEditando,
+                      haRepetido: e.target.checked,
+                    })
+                  }
+                />
               </div>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+              <div className="flex gap-2 items-center">
+                <label>¿Tiene hermanos?</label>
+                <input
+                  type="checkbox"
+                  checked={alumnoEditando.conHermanos || false}
+                  onChange={(e) =>
+                    setAlumnoEditando({
+                      ...alumnoEditando,
+                      conHermanos: e.target.checked,
+                    })
+                  }
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <label>¿Consentimiento fotos?</label>
+                <input
+                  type="checkbox"
+                  checked={alumnoEditando.consienteFotos || false}
+                  onChange={(e) =>
+                    setAlumnoEditando({
+                      ...alumnoEditando,
+                      consienteFotos: e.target.checked,
+                    })
+                  }
+                />
+              </div>
+              <Button onClick={handleGuardarCambios}>Guardar cambios</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
