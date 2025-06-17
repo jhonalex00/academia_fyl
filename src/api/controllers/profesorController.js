@@ -237,9 +237,13 @@ const updateTeacher = async (req, res) => {
     }
     
     console.log('Profesor actualizado exitosamente (filas coincidentes:', rowsMatched, ', filas cambiadas:', result.changedRows || result.affectedRows, ')');
-    res.status(200).json({ id, name, phone, email, status: status || 'active', subjects });
-    
-  } catch (error) {
+      res.status(200).json({
+      success: true,
+      message: "Profesor actualizado correctamente",
+      data: { id, name, phone, email, status: status || 'active', subjects }
+      });
+ 
+    } catch (error) {
     console.error('Error detallado al actualizar profesor:', {
       message: error.message,
       stack: error.stack,
