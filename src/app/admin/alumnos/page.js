@@ -46,6 +46,12 @@ const AlumnosPage = () => {
   const handleNuevoAlumno = () => {
     router.push("alumnos/nuevo");
   };
+  const handleEliminarAlumno = (index) => {
+  const nuevosAlumnos = [...alumnos];
+  nuevosAlumnos.splice(index, 1);
+  setAlumnos(nuevosAlumnos);
+  localStorage.setItem("matriculas", JSON.stringify(nuevosAlumnos));
+  };
 
   return (
     <div>
@@ -73,10 +79,11 @@ const AlumnosPage = () => {
               <TableHead>Horas</TableHead>
               <TableHead>Contacto</TableHead>
               <TableHead>Detalles</TableHead>
+              <TableHead>Eliminar</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {alumnosFiltrados.map((alumno) => (
+           {alumnosFiltrados.map((alumno, index) => (
               <TableRow key={alumno.id}>
                 <TableCell className="flex justify-center">
                   <Avatar>
@@ -127,12 +134,20 @@ const AlumnosPage = () => {
                           <p><strong>¿Ha repetido?:</strong> {alumno.haRepetido ? "Sí" : "No"}</p>
                           <p><strong>¿Tiene hermanos?:</strong> {alumno.conHermanos ? "Sí" : "No"}</p>
                           <p><strong>Consentimiento fotos:</strong> {alumno.consienteFotos ? "Sí" : "No"}</p>
-                        </DialogDescription>
-                      </DialogHeader>
-                    </DialogContent>
-                  </Dialog>
-                </TableCell>
-              </TableRow>
+                           </DialogDescription>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
+                     </TableCell>
+                  <TableCell>
+                 <button
+                  className="text-red-500 hover:text-red-700 font-bold"
+                 onClick={() => handleEliminarAlumno(index)}
+                 >
+                   🗑️
+                </button>
+                    </TableCell>
+                  </TableRow>
             ))}
           </TableBody>
         </Table>
