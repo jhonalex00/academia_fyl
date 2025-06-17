@@ -3,8 +3,8 @@ const { sequelize } = require('../../db/config');
 // Obtener todos los profesores
 const getTeachers = async (req, res) => {
   try {
-    const [rows] = await sequelize.query(`
-      SELECT 
+    const [teachers] = await sequelize.query(`
+      SELECT
         t.*,
         GROUP_CONCAT(s.stage) as subjects
       FROM teachers t
@@ -12,6 +12,7 @@ const getTeachers = async (req, res) => {
       LEFT JOIN subjects s ON ts.idsubject = s.idsubject
       GROUP BY t.idteacher
     `);
+
     
     // Procesar los resultados para convertir subjects en array
     const teachersWithSubjects = rows.map(teacher => ({
