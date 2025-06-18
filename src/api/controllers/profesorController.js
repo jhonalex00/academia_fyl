@@ -208,14 +208,15 @@ const updateTeacher = async (req, res) => {
       // Luego insertar las nuevas asignaturas
       for (const subjectName of subjects) {
         console.log('Procesando asignatura:', subjectName);
-        
-        // Buscar el ID de la asignatura por su nombre
+
         const [subjectRows] = await sequelize.query(
-          'SELECT idsubject FROM subjects WHERE cycle = ?',
-          {
-            replacements: [subjectName]
-          }
-        );
+        'SELECT idsubject FROM subjects WHERE stage = ?',
+        {
+          replacements: [subjectName]
+        }
+      );
+
+
         
         console.log('Resultado de búsqueda de asignatura:', subjectRows);
         
