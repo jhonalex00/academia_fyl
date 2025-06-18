@@ -370,18 +370,16 @@ const getSubjectStats = async (req, res) => {
     `);
 
     // Obtener conteo de profesores por asignatura
-    const [teachersBySubject] = await sequelize.query(`
-      SELECT 
-        s.cycle,
+      const [subjectTeacherCount] = await sequelize.query(`
+      SELECT
+        s.stage AS cycle,
         s.year,
         COUNT(DISTINCT ts.idteacher) as teacherCount
-      FROM 
-        subjects s
-      LEFT JOIN 
-        teachers_subjects ts ON s.idsubject = ts.idsubject
-      GROUP BY 
-        s.cycle, s.year
+      FROM subjects s
+      LEFT JOIN teachers_subjects ts ON s.idsubject = ts.idsubject
+      GROUP BY s.stage, s.year
     `);
+
 
     res.status(200).json({
       cycleDistribution,
