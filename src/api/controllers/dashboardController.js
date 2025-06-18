@@ -381,11 +381,12 @@ const getSubjectStats = async (req, res) => {
     `);
 
 
-    res.status(200).json({
+      res.status(200).json({
       cycleDistribution,
       yearDistribution,
-      teachersBySubject,
+      teachersBySubject: subjectTeacherCount,
     });
+
   } catch (error) {
     console.error("Error al obtener estadísticas de asignaturas:", error);
     res
