@@ -155,7 +155,14 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
         telefono: profesorToEdit.telefono || '',
         password: profesorToEdit.password || ''
       });
-      setAsignaturasSeleccionadas(profesorToEdit.asignaturas || []);
+      setAsignaturasSeleccionadas(
+        typeof profesorToEdit.asignaturas === 'string'
+        ? profesorToEdit.asignaturas.split(',').map(a => a.trim())
+        : Array.isArray(profesorToEdit.asignaturas)
+        ? profesorToEdit.asignaturas
+        : []
+    );
+
       setIsOpen(true);
     }
   }, [profesorToEdit]);
