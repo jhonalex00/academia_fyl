@@ -87,10 +87,10 @@ const getRecentActivities = async (req, res) => {
   try {
     // Obtener mensajes recientes como actividades
     const [messages] = await sequelize.query(`
-      SELECT 
+     SELECT 
         m.idmessage,
-        m.content AS message, 
-        m.date,
+        m.content AS message,
+        m.dateMessage,
         t.name AS teacherName,
         c.name AS contactName,
         SUBSTRING(t.name, 1, 1) AS teacherInitial,
@@ -101,8 +101,7 @@ const getRecentActivities = async (req, res) => {
         teachers t ON m.idteacher = t.idteacher
       LEFT JOIN 
         contacts c ON m.idcontact = c.idcontact
-      ORDER BY 
-        m.date DESC
+      ORDER BY m.dateMessage DESC
       LIMIT 5
     `);
 
