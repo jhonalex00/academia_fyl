@@ -306,15 +306,15 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
                         <input
                           type="checkbox"
                           id={`asignatura-${asignatura.id}`}
-                          checked={asignaturasSeleccionadas.includes(asignatura.name)}
-                          onChange={() => toggleAsignatura(asignatura.name)}
+                          checked={asignaturasSeleccionadas.includes(asignatura.id)}
+                          onChange={() => toggleAsignatura(asignatura.id)}
                           className="rounded"
                         />
                         <label 
                           htmlFor={`asignatura-${asignatura.id}`}
                           className="text-sm cursor-pointer"
                         >
-                          {asignatura.name}
+                         {asignatura.stage} - {asignatura.year}
                         </label>
                       </div>
                     ))
