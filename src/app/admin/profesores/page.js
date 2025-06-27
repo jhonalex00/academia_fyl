@@ -109,11 +109,13 @@ const fetchWithAuth = async (url, options = {}) => {
 const profesorVacio = () => ({
   id: null,
   nombre: '',
+  apellido: '',
   email: '',
   telefono: '',
   password: '',
   asignaturas: []
 });
+
 
 export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdited }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -144,28 +146,29 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
 
     cargarAsignaturas();
   }, []);
-
-  useEffect(() => {
-    if (profesorToEdit) {
-      setFormData({
-        ...profesorToEdit,
-        // Asegurar que todos los campos tengan valores string válidos
-        nombre: profesorToEdit.nombre || '',
-        email: profesorToEdit.email || '',
-        telefono: profesorToEdit.telefono || '',
-        password: profesorToEdit.password || ''
-      });
-      setAsignaturasSeleccionadas(
-        typeof profesorToEdit.asignaturas === 'string'
+useEffect(() => {
+  if (profesorToEdit) {
+    setFormData({
+      ...profesorToEdit,
+      nombre: profesorToEdit.nombre || '',
+      apellido: profesorToEdit.apellido || '',
+      email: profesorToEdit.email || '',
+      telefono: profesorToEdit.telefono || '',
+      password: profesorToEdit.password || '',
+      idacademy: profesorToEdit.idacademy || ''
+    });
+    setAsignaturasSeleccionadas(
+      typeof profesorToEdit.asignaturas === 'string'
         ? profesorToEdit.asignaturas.split(',').map(a => a.trim())
         : Array.isArray(profesorToEdit.asignaturas)
         ? profesorToEdit.asignaturas
         : []
     );
 
-      setIsOpen(true);
-    }
-  }, [profesorToEdit]);
+    setIsOpen(true);
+  }
+}, [profesorToEdit]);
+
 
   const handleAddClick = () => {
     onProfesorEdited(null);
@@ -297,6 +300,27 @@ export function AñadirProfesor({ onProfesorAdded, profesorToEdit, onProfesorEdi
                 />
               </div>
 
+
+              <div className="grid w-full items-center gap-1.5">
+                <label htmlFor="idacademy" className="text-sm font-medium">Academia</label>
+                <Select
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, idacademy: parseInt(value) })
+                  }
+                  value={formData.idacademy?.toString() || ""}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una academia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Academia 1</SelectItem>
+                    <SelectItem value="2">Academia 2</SelectItem>
+                    {/* Puedes agregar más academias aquí, o cargarlas dinámicamente */}
+                  </SelectContent>
+                </Select>
+              </div>
+
+
               <div className="grid w-full items-center gap-1.5">
                 <label htmlFor="asignaturas" className="text-sm font-medium">Asignaturas</label>
                 <div className="border rounded-md p-3 max-h-40 overflow-y-auto">
@@ -392,14 +416,17 @@ const ProfesoresPage = () => {
       }
 
       // Preparar datos exactamente como los espera el servidor
-      const profesorData = {
+     const profesorData = {
         name: (nuevoProfesor.nombre || '').trim(),
+        surname: (nuevoProfesor.apellido || '').trim(),
         email: (nuevoProfesor.email || '').trim(),
         phone: (nuevoProfesor.telefono || '').trim(),
         password: (nuevoProfesor.password || '').trim(),
+        idacademy: nuevoProfesor.idacademy || null,
         subjects: Array.isArray(nuevoProfesor.asignaturas) ? nuevoProfesor.asignaturas.filter(Boolean) : [],
         status: 'active'
       };
+
 
       // Validación adicional después de trim
       if (!profesorData.name || !profesorData.email || !profesorData.phone || !profesorData.password) {

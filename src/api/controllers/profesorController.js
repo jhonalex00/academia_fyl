@@ -59,9 +59,12 @@ const createTeacher = async (req, res) => {
 
     // Primero crear el profesor
     const [result] = await sequelize.query(
-      'INSERT INTO teachers (name, phone, email, password, status) VALUES (?, ?, ?, ?, ?)',
+      //'INSERT INTO teachers (name, phone, email, password, status) VALUES (?, ?, ?, ?, ?)', cambio prueba
+      'INSERT INTO teachers (name, surname, phone, email, password, status, idacademy) VALUES (?, ?, ?, ?, ?, ?, ?)',
+
       {
-        replacements: [name, phone, email, password, status || 'active']
+        //replacements: [name, phone, email, password, status || 'active']
+        replacements: [name, surname || null, phone, email, password, status || 'active', idacademy || null]       
       }
     );
 
@@ -78,7 +81,9 @@ const createTeacher = async (req, res) => {
           
           // Primero buscar el ID de la asignatura por su nombre
           const [subjectRows] = await sequelize.query(
-            'SELECT idsubject FROM subjects WHERE cycle = ?',
+           // 'SELECT idsubject FROM subjects WHERE cycle = ?', es un cambio de prueba
+            'SELECT idsubject FROM subjects WHERE stage = ?',
+
             {
               replacements: [subjectName]
             }

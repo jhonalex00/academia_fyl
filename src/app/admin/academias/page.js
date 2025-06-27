@@ -161,17 +161,21 @@ export function AddAcademy({ onAcademyAdded, academyToEdit, onAcademyEdited }) {
                 />
               </div>
 
-              <div className="grid w-full items-center gap-1.5">
-                <label htmlFor="address" className="text-sm font-medium">Dirección</label>
-                <Input
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="col-span-3"
-                  required
-                />
-              </div>
+             <div className="grid w-full items-center gap-1.5">
+              <label htmlFor="apellido" className="text-sm font-medium">Apellido</label>
+              <Input
+                id="apellido"
+                name="apellido"
+                value={formData.apellido}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  [e.target.name]: e.target.value
+                })}
+                className="col-span-3"
+                required
+              />
+            </div>
+
 
               <div className="grid w-full items-center gap-1.5">
                 <label htmlFor="phone" className="text-sm font-medium">Teléfono</label>
