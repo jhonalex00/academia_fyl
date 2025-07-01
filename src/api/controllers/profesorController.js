@@ -46,7 +46,9 @@ const createTeacher = async (req, res) => {
   try {
     console.log('Datos recibidos en el servidor:', JSON.stringify(req.body, null, 2));
     
-    const { name, phone, email, password, subjects, status } = req.body;
+    //const { name, phone, email, password, subjects, status } = req.body; cambio jhon 
+    const { name, surname, phone, email, password, subjects, idacademy, status } = req.body;
+
 
     // Validar datos requeridos
     if (!name || !email || !phone || !password) {
@@ -60,11 +62,14 @@ const createTeacher = async (req, res) => {
     // Primero crear el profesor
     const [result] = await sequelize.query(
       //'INSERT INTO teachers (name, phone, email, password, status) VALUES (?, ?, ?, ?, ?)', cambio prueba
-      'INSERT INTO teachers (name, surname, phone, email, password, status, idacademy) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      
+     'INSERT INTO teachers (name, surname, phone, email, password, idacademy, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+
 
       {
         //replacements: [name, phone, email, password, status || 'active']
-        replacements: [name, surname || null, phone, email, password, status || 'active', idacademy || null]       
+        replacements: [name, surname, phone, email, password, idacademy, status || 'active']
+     
       }
     );
 
